@@ -708,6 +708,12 @@ class _PartnerApplicationSubmittedScreenState
   bool _checking = false;
   bool _activating = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkStatus());
+  }
+
   String _normalizePhone(String value) {
     var phone = value.replaceAll(RegExp(r'\D'), '');
     if (phone.startsWith('20') && phone.length > 10) {
