@@ -3,6 +3,13 @@ class ProfileModel {
   String? name;
   String? email;
   String? accountType;
+  String? appScope;
+  bool? isGoPartner;
+  String? partnerProfessionKey;
+  String? partnerProfessionNameAr;
+  String? partnerProfessionNameEn;
+  int? partnerWorkRadiusKm;
+  String? partnerApplicationStatus;
   int? countryCode;
   String? mobile;
   String? fcmId;
@@ -57,6 +64,13 @@ class ProfileModel {
     this.name,
     this.email,
     this.accountType,
+    this.appScope,
+    this.isGoPartner,
+    this.partnerProfessionKey,
+    this.partnerProfessionNameAr,
+    this.partnerProfessionNameEn,
+    this.partnerWorkRadiusKm,
+    this.partnerApplicationStatus,
     this.countryCode,
     this.mobile,
     this.fcmId,
@@ -110,6 +124,13 @@ class ProfileModel {
     name = json['name'];
     email = json['email'];
     accountType = json['account_type'];
+    appScope = json['app_scope'];
+    isGoPartner = json['is_go_partner'];
+    partnerProfessionKey = json['partner_profession_key'];
+    partnerProfessionNameAr = json['partner_profession_name_ar'];
+    partnerProfessionNameEn = json['partner_profession_name_en'];
+    partnerWorkRadiusKm = json['partner_work_radius_km'];
+    partnerApplicationStatus = json['partner_application_status'];
     countryCode = json['country_code'];
     mobile = json['mobile'];
     fcmId = json['fcm_id'];
@@ -171,6 +192,13 @@ class ProfileModel {
     data['name'] = name;
     data['email'] = email;
     data['account_type'] = accountType;
+    data['app_scope'] = appScope;
+    data['is_go_partner'] = isGoPartner;
+    data['partner_profession_key'] = partnerProfessionKey;
+    data['partner_profession_name_ar'] = partnerProfessionNameAr;
+    data['partner_profession_name_en'] = partnerProfessionNameEn;
+    data['partner_work_radius_km'] = partnerWorkRadiusKm;
+    data['partner_application_status'] = partnerApplicationStatus;
     data['country_code'] = countryCode;
     data['mobile'] = mobile;
     data['fcm_id'] = fcmId;
