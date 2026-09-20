@@ -1,4 +1,4 @@
-name: Delegate GitHub Web View
+name: GO Partner Web View
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
       - name: Configure Flutter Web platform
         run: flutter create . --platforms web --no-pub
 
-      - name: Verify permanent HD Go Drive logo
+      - name: Verify permanent HD GO Partner logo
         shell: bash
         run: |
           set -euo pipefail
@@ -48,7 +48,7 @@ jobs:
           grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/partner_application_screen.dart
 
       - name: Build Flutter Web
-        run: flutter build web --release --base-href "/fasakhansta-driver/"
+        run: flutter build web --release --base-href "/go-partner/"
 
       - name: Verify built HD logo and force fresh preview
         shell: bash
@@ -66,7 +66,7 @@ jobs:
           logo = root / 'assets' / 'assets' / 'images' / 'go_drive_logo_hd.webp'
 
           if not logo.exists() or logo.stat().st_size != 67002:
-              raise SystemExit('Permanent HD Go Drive logo missing or invalid in web build')
+              raise SystemExit('Permanent HD GO Partner logo missing or invalid in web build')
 
           if main_js.exists() and bootstrap.exists():
               versioned_name = f'main.dart.{build}.js'
@@ -79,10 +79,10 @@ jobs:
           opening = f'''
           <style>
             html, body {{ margin: 0; width: 100%; height: 100%; background: #fff; }}
-            #go-drive-opening {{ position: fixed; inset: 0; z-index: 2147483647; background: #fff; display: flex; align-items: center; justify-content: center; }}
-            #go-drive-opening img {{ width: min(72vw, 360px); max-height: 48vh; object-fit: contain; display: block; }}
+            #go-partner-opening {{ position: fixed; inset: 0; z-index: 2147483647; background: #fff; display: flex; align-items: center; justify-content: center; }}
+            #go-partner-opening img {{ width: min(72vw, 360px); max-height: 48vh; object-fit: contain; display: block; }}
           </style>
-          <div id="go-drive-opening"><img src="assets/assets/images/go_drive_logo_hd.webp?build={build}" alt="Go Drive"></div>
+          <div id="go-partner-opening"><img src="assets/assets/images/go_drive_logo_hd.webp?build={build}" alt="GO Partner"></div>
           <script>
           (async function () {{
             try {{
@@ -99,7 +99,7 @@ jobs:
             script.src = 'flutter_bootstrap.js?build={build}';
             script.async = true;
             document.body.appendChild(script);
-            const removeOpening = () => {{ const el = document.getElementById('go-drive-opening'); if (el) el.remove(); }};
+            const removeOpening = () => {{ const el = document.getElementById('go-partner-opening'); if (el) el.remove(); }};
             window.addEventListener('flutter-first-frame', removeOpening, {{once: true}});
             setTimeout(removeOpening, 3000);
           }})();
