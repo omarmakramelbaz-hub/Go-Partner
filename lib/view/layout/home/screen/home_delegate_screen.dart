@@ -116,9 +116,17 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
       body: Consumer<HomeDelegateController>(
         builder: (context, controller, _) {
           final profile = context.watch<AuthController>().profile;
+          final isProfessionalPartner = profile?.isGoPartner == true &&
+              profile?.partnerProfessionKey != null &&
+              profile?.partnerProfessionKey != 'delivery_courier';
+          final professionName = _ar
+              ? (profile?.partnerProfessionNameAr ?? '')
+              : (profile?.partnerProfessionNameEn ?? '');
           final name = profile?.name?.trim().isNotEmpty == true
               ? profile!.name!.trim()
-              : _t('المندوب', 'Driver');
+              : (isProfessionalPartner
+                  ? _t('الشريك', 'Partner')
+                  : _t('المندوب', 'Driver'));
           final area = profile?.areaTitle?.trim().isNotEmpty == true
               ? profile!.areaTitle!.trim()
               : _t('موقعك الحالي', 'Current location');
@@ -137,22 +145,35 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               child: Column(
                 children: [
-                  _header(name, area),
+                  _header(
+                    name,
+                    area,
+                    isProfessionalPartner: isProfessionalPartner,
+                    professionName: professionName,
+                  ),
                   Transform.translate(
                     offset: const Offset(0, 0),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: Column(
                         children: [
-                          _currentOrderCard(currentOrder),
+                          if (isProfessionalPartner)
+                            _professionalPartnerHero(
+                              professionName: professionName,
+                              radiusKm: profile?.partnerWorkRadiusKm,
+                            )
+                          else
+                            _currentOrderCard(currentOrder),
                           const SizedBox(height: 14),
-                          _statsRow(
-                            total: totalCount,
-                            pending: pendingCount,
-                            current: currentCount,
-                            completed: 0,
-                          ),
-                          const SizedBox(height: 14),
+                          if (!isProfessionalPartner) ...[
+                            _statsRow(
+                              total: totalCount,
+                              pending: pendingCount,
+                              current: currentCount,
+                              completed: 0,
+                            ),
+                            const SizedBox(height: 14),
+                          ],
                           const MyCurrentBalanceWidget(),
                           const SizedBox(height: 14),
                           _professionalRequestsEntry(),
@@ -172,7 +193,12 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
     );
   }
 
-  Widget _header(String name, String area) {
+  Widget _header(
+    String name,
+    String area, {
+    required bool isProfessionalPartner,
+    required String professionName,
+  }) {
     return SizedBox(
       height: 162,
       child: Stack(
@@ -258,7 +284,11 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      _t('جاهز لرحلة جديدة؟', 'Ready for a new trip?'),
+                                      isProfessionalPartner
+                                          ? (professionName.isEmpty
+                                              ? _t('جاهز لاستقبال طلبات العملاء؟', 'Ready for customer requests?')
+                                              : professionName)
+                                          : _t('جاهز لرحلة جديدة؟', 'Ready for a new trip?'),
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(.86),
                                         fontSize: 10,
@@ -351,6 +381,170 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _professionalPartnerHero({
+    required String professionName,
+    required int? radiusKm,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(19),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [Color(0xff103752), Color(0xff071924)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.verified_user_rounded,
+                  color: _orange,
+                  size: 31,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _t('حساب شريك GO معتمد', 'Verified GO Partner'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      professionName.isEmpty
+                          ? _t('مقدم خدمة محترف', 'Professional service provider')
+                          : professionName,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(.78),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 17),
+          Row(
+            children: [
+              Expanded(
+                child: _partnerMetric(
+                  Icons.location_searching_rounded,
+                  _t('نطاق العمل', 'Work radius'),
+                  radiusKm == null ? '—' : '$radiusKm ${_t('كم', 'km')}',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _partnerMetric(
+                  Icons.notifications_active_outlined,
+                  _t('الطلبات', 'Requests'),
+                  _t('استقبال مباشر', 'Live'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const PartnerServiceRequestsScreen(),
+                ),
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: _orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(17),
+                ),
+              ),
+              icon: const Icon(Icons.handyman_rounded),
+              label: Text(
+                _t('عرض طلبات الخدمات', 'View service requests'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _partnerMetric(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(.07),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: Colors.white.withOpacity(.09)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: _orange, size: 21),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(.60),
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -675,7 +869,17 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
           children: [
             Container(width: 5, height: 24, decoration: BoxDecoration(color: _orange, borderRadius: BorderRadius.circular(6))),
             const SizedBox(width: 8),
-            Text(_t('أدوات المندوب', 'Driver tools'), style: const TextStyle(color: _ink, fontSize: 18, fontWeight: FontWeight.w900)),
+            Text(
+              context.watch<AuthController>().profile?.isGoPartner == true &&
+                      context.watch<AuthController>().profile?.partnerProfessionKey != 'delivery_courier'
+                  ? _t('أدوات الشريك', 'Partner tools')
+                  : _t('أدوات المندوب', 'Driver tools'),
+              style: const TextStyle(
+                color: _ink,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 11),
