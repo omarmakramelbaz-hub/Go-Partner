@@ -1,4 +1,4 @@
-name: Build Go Drive Driver Android Release
+name: Build GO Partner Android Release
 
 on:
   push:
@@ -84,7 +84,7 @@ jobs:
       - name: Verify mobile version
         run: |
           grep -q '^version: 1.0.23+24$' pubspec.yaml
-          grep -q 'android:label="Drivers"' android/app/src/main/AndroidManifest.xml
+          grep -q 'android:label="GO Partner"' android/app/src/main/AndroidManifest.xml
 
       - name: Build Release APK
         run: flutter build apk --release --android-skip-build-dependency-validation
@@ -106,7 +106,7 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drivers-1.0.23-build24-apk
+          name: go-partner-1.0.23-build24-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -114,7 +114,7 @@ jobs:
       - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drivers-1.0.23-build24-aab
+          name: go-partner-1.0.23-build24-aab
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
