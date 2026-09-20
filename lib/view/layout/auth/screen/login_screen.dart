@@ -17,7 +17,7 @@ import '../../../custom_widgets/validation/validation_mixin.dart';
 import '../../delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen.dart';
 import '../controller/auth_controller.dart';
 import 'forget_password_screen.dart';
-import 'regester_screen.dart';
+import 'partner_application_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -301,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                                       spacing: 1,
                                       children: [
                                         Text(
-                                          _isArabic ? 'ليس لديك حساب؟' : 'Don\'t have an account?',
+                                          _isArabic ? 'تريد الانضمام كشريك؟' : 'Want to join as a partner?',
                                           style: TextStyle(
                                             color: const Color(0xff646B75),
                                             fontSize: compact ? 14.5 : 15.5,
@@ -317,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                           ),
                                           child: Text(
-                                            _isArabic ? 'إنشاء حساب' : 'Create account',
+                                            _isArabic ? 'قدّم طلب انضمام' : 'Apply now',
                                             style: TextStyle(
                                               color: orange,
                                               fontSize: compact ? 15 : 16,
@@ -368,13 +368,9 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
   }
 
   void _openRegistration() {
-    NavigatorMethods.pushNamed(
-      context,
-      RegisterAsDeliveryScreen.routeName,
-      arguments: RegisterAsDeliveryScreenArgs(
-        onSuccess: () {
-          setState(() {});
-        },
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const PartnerApplicationScreen(),
       ),
     );
   }
