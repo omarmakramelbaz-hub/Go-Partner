@@ -43,9 +43,9 @@ jobs:
           file assets/images/go_drive_logo_hd.webp | grep -qi 'webp'
           test "$(stat -c%s assets/images/go_drive_logo_hd.webp)" -eq 67002
           grep -q 'assets/images/go_drive_logo_hd.webp' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'assets/images/go_drive_logo_hd.webp' lib/view/layout/auth/screen/regester_screen.dart
+          grep -q 'assets/images/go_drive_logo_hd.webp' lib/view/layout/auth/screen/partner_application_screen.dart
           grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/regester_screen.dart
+          grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/partner_application_screen.dart
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/fasakhansta-driver/"
