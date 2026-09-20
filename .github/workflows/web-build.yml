@@ -48,7 +48,7 @@ jobs:
           grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/partner_application_screen.dart
 
       - name: Build Flutter Web
-        run: flutter build web --release --base-href "/go-partner/"
+        run: flutter build web --release --base-href "/Go-Partner/"
 
       - name: Verify built HD logo and force fresh preview
         shell: bash
