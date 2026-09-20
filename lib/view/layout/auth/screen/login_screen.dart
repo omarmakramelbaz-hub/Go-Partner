@@ -104,8 +104,8 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                             SizedBox(height: veryCompact ? 4 : (compact ? 7 : 10)),
                             Text(
                               _isArabic
-                                  ? 'أهلاً بك! يرجى إدخال بيانات حسابك'
-                                  : 'Welcome! Please enter your account details',
+                                  ? 'أهلاً بك في GO Partner — أدخل بيانات حساب الشريك'
+                                  : 'Welcome to GO Partner — enter your partner account details',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: softText,
