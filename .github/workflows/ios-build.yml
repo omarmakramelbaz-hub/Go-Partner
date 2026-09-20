@@ -65,6 +65,8 @@ jobs:
                               'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
           text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Fasakhaninja Delegate";',
                               'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
+          text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Drivers";',
+                              'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
           pbx.write_text(text, encoding='utf-8')
 
           plist = Path('ios/Runner/Info.plist')
@@ -79,7 +81,7 @@ jobs:
           grep -q 'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";' ios/Runner.xcodeproj/project.pbxproj
           grep -q '<string>GO Partner</string>' ios/Runner/Info.plist
 
-      - name: Generate Go Drive iOS app icons
+      - name: Generate GO Partner iOS app icons
         shell: bash
         run: |
           set -euo pipefail
