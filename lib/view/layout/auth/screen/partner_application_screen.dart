@@ -690,29 +690,296 @@ class PartnerApplicationSubmittedScreen extends StatefulWidget {
 
 class _PartnerApplicationSubmittedScreenState
     extends State<PartnerApplicationSubmittedScreen> {
+  static const _orange = Color(0xFFFD7201);
+  static const _navy = Color(0xFF082A4D);
+  static const _muted = Color(0xFF7D8490);
+
   String _status = 'pending';
   String? _reason;
+  String? _professionName;
   bool _checking = false;
+  bool _activating = false;
+
+  String _normalizePhone(String value) {
+    var phone = value.replaceAll(RegExp(r'\D'), '');
+    if (phone.startsWith('20') && phone.length > 10) {
+      phone = phone.substring(2);
+    }
+    while (phone.startsWith('0')) {
+      phone = phone.substring(1);
+    }
+    return phone;
+  }
 
   Future<void> _checkStatus() async {
     setState(() => _checking = true);
     final response = await ApiHelper.instance.post(
       Urls.partnerApplicationStatus,
-      body: {'mobile': widget.mobile},
+      body: FormData.fromMap({'mobile': _normalizePhone(widget.mobile)}),
       hasToken: false,
     );
-    if (mounted) {
-      if (response.state == ResponseState.complete &&
-          response.data is Map &&
-          response.data['data'] is Map) {
-        final data = response.data['data'] as Map;
-        setState(() {
-          _status = data['status']?.toString() ?? 'pending';
-          _reason = data['decline_reason']?.toString();
-        });
-      }
-      setState(() => _checking = false);
+
+    if (!mounted) return;
+
+    if (response.state == ResponseState.complete &&
+        response.data is Map &&
+        response.data['data'] is Map) {
+      final data = response.data['data'] as Map;
+      final profession = data['profession'];
+      setState(() {
+        _status = data['status']?.toString() ?? 'pending';
+        _reason = data['decline_reason']?.toString();
+        _professionName = profession is Map
+            ? profession['ar']?.toString()
+            : null;
+      });
+    } else if (response.data is Map) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            response.data['message']?.toString() ??
+                'تعذر تحديث حالة الطلب.',
+          ),
+        ),
+      );
     }
+
+    if (mounted) setState(() => _checking = false);
+  }
+
+  Future<void> _activateAccount() async {
+    final formKey = GlobalKey<FormState>();
+    final password = TextEditingController();
+    final confirm = TextEditingController();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            Future<void> submit() async {
+              if (!formKey.currentState!.validate()) return;
+
+              setSheetState(() => _activating = true);
+              final response = await ApiHelper.instance.post(
+                Urls.partnerActivate,
+                body: FormData.fromMap({
+                  'mobile': _normalizePhone(widget.mobile),
+                  'password': password.text,
+                  'password_confirmation': confirm.text,
+                }),
+                hasToken: false,
+              );
+              if (!sheetContext.mounted) return;
+              setSheetState(() => _activating = false);
+
+              if (response.state == ResponseState.complete) {
+                Navigator.pop(sheetContext);
+                if (!mounted) return;
+                await showDialog<void>(
+                  context: context,
+                  builder: (dialogContext) => Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      icon: const Icon(
+                        Icons.verified_rounded,
+                        color: Colors.green,
+                        size: 48,
+                      ),
+                      title: const Text(
+                        'تم تفعيل حساب الشريك',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _navy,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      content: const Text(
+                        'يمكنك الآن العودة إلى شاشة تسجيل الدخول والدخول برقم الهاتف وكلمة المرور التي أنشأتها.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: _muted, height: 1.5),
+                      ),
+                      actionsAlignment: MainAxisAlignment.center,
+                      actions: [
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: _orange,
+                          ),
+                          onPressed: () => Navigator.pop(dialogContext),
+                          child: const Text('الذهاب لتسجيل الدخول'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+                if (mounted) Navigator.of(context).pop();
+              } else {
+                ScaffoldMessenger.of(sheetContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      response.data is Map
+                          ? (response.data['message']?.toString() ??
+                              'تعذر تفعيل الحساب.')
+                          : 'تعذر تفعيل الحساب.',
+                    ),
+                  ),
+                );
+              }
+            }
+
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(30),
+                    ),
+                  ),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 46,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD9DDE2),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        const Icon(
+                          Icons.verified_user_outlined,
+                          color: _orange,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'إنشاء حساب الشريك',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: _navy,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        if (_professionName?.isNotEmpty == true) ...[
+                          const SizedBox(height: 5),
+                          Text(
+                            _professionName!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: _orange,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                        const Text(
+                          'تمت الموافقة على طلبك. أنشئ كلمة مرور الآن لإتمام تفعيل الحساب.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: _muted, height: 1.5),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: password,
+                          obscureText: true,
+                          textDirection: TextDirection.ltr,
+                          decoration: InputDecoration(
+                            labelText: 'كلمة المرور',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline_rounded,
+                              color: _orange,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          validator: (value) =>
+                              (value ?? '').length < 6
+                                  ? 'كلمة المرور يجب ألا تقل عن 6 أحرف'
+                                  : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: confirm,
+                          obscureText: true,
+                          textDirection: TextDirection.ltr,
+                          decoration: InputDecoration(
+                            labelText: 'تأكيد كلمة المرور',
+                            prefixIcon: const Icon(
+                              Icons.lock_reset_rounded,
+                              color: _orange,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          validator: (value) =>
+                              value != password.text
+                                  ? 'كلمتا المرور غير متطابقتين'
+                                  : null,
+                        ),
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          height: 56,
+                          child: FilledButton.icon(
+                            onPressed: _activating ? null : submit,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _orange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                            icon: _activating
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.person_add_alt_1_rounded),
+                            label: Text(
+                              _activating
+                                  ? 'جاري التفعيل...'
+                                  : 'تفعيل حساب الشريك',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    password.dispose();
+    confirm.dispose();
   }
 
   @override
@@ -741,7 +1008,7 @@ class _PartnerApplicationSubmittedScreenState
                       ? const Color(0xFF1B9A55)
                       : declined
                           ? Colors.redAccent
-                          : const Color(0xFFFD7201),
+                          : _orange,
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -752,7 +1019,7 @@ class _PartnerApplicationSubmittedScreenState
                           : 'تم استلام طلبك بنجاح',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Color(0xFF082A4D),
+                    color: _navy,
                     fontSize: 25,
                     fontWeight: FontWeight.w900,
                   ),
@@ -760,41 +1027,69 @@ class _PartnerApplicationSubmittedScreenState
                 const SizedBox(height: 10),
                 Text(
                   accepted
-                      ? 'تمت الموافقة. بعد إنشاء حسابك من الإدارة يمكنك تسجيل الدخول من الشاشة الرئيسية.'
+                      ? 'يمكنك الآن إنشاء حساب الشريك. لن يكون إنشاء الحساب متاحًا قبل موافقة الإدارة.'
                       : declined
                           ? (_reason?.isNotEmpty == true
                               ? 'سبب الرفض: $_reason'
-                              : 'يمكنك التواصل مع الإدارة لمعرفة سبب الرفض.')
+                              : 'يمكنك تحديث بياناتك والتقديم مرة أخرى.')
                           : 'طلبك قيد المراجعة. لن يمكن إنشاء حساب شريك أو استقبال طلبات قبل موافقة الإدارة.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Color(0xFF7D8490),
+                    color: _muted,
                     height: 1.6,
                     fontSize: 15,
                   ),
                 ),
+                if (_professionName?.isNotEmpty == true) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'المهنة: $_professionName',
+                    style: const TextStyle(
+                      color: _orange,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 26),
+                if (accepted) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: FilledButton.icon(
+                      onPressed: _activateAccount,
+                      icon: const Icon(Icons.person_add_alt_1_rounded),
+                      label: const Text(
+                        'إنشاء وتفعيل حساب الشريك',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B9A55),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(17),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 SizedBox(
                   width: double.infinity,
                   height: 54,
-                  child: FilledButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: _checking ? null : _checkStatus,
                     icon: _checking
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.refresh_rounded),
                     label: const Text(
                       'تحديث حالة الطلب',
                       style: TextStyle(fontWeight: FontWeight.w900),
                     ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFFD7201),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _orange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(17),
                       ),
