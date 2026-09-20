@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../../helpers/networking/api_helper.dart';
@@ -35,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.white,
-      body: SizedBox.expand(child: _GoDriveOpening()),
+      body: SizedBox.expand(child: _GoPartnerOpening()),
     );
   }
 
@@ -115,8 +116,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-class _GoDriveOpening extends StatelessWidget {
-  const _GoDriveOpening();
+class _GoPartnerOpening extends StatelessWidget {
+  const _GoPartnerOpening();
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +128,10 @@ class _GoDriveOpening extends StatelessWidget {
         return ColoredBox(
           color: Colors.white,
           child: Center(
-            child: Image.asset(
-              'assets/images/go_drive_logo_hd.webp',
+            child: SvgPicture.asset(
+              'assets/svg/go_partner_logo.svg',
               width: logoWidth,
               fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-              gaplessPlayback: true,
-              isAntiAlias: true,
             ),
           ),
         );
