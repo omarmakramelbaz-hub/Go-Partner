@@ -22,6 +22,7 @@ import '../../../global/chat/screen/chat_screen.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../home/screen/home_delegate_screen.dart';
 import '../../home/screen/location_delegate.dart';
+import '../../home/screen/partner_service_requests_screen.dart';
 import '../../my_account/screen/my_account_delegate_screen.dart';
 import '../../notification/model/notfication_from_firebase_model.dart';
 import '../../notification/screen/notification_delegate_screen.dart';
@@ -89,9 +90,16 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
       create: (_) => DelegateBottomNavBarController(),
       child: Consumer<DelegateBottomNavBarController>(
         builder: (context, controller, _) {
+          final profile = context.watch<AuthController>().profile;
+          final isProfessionalPartner = profile?.isGoPartner == true &&
+              profile?.partnerProfessionKey != null &&
+              profile?.partnerProfessionKey != 'delivery_courier';
+
           final pages = <Widget>[
             const HomeDelegateScreen(),
-            const OrdersDelegateScreen(),
+            isProfessionalPartner
+                ? const PartnerServiceRequestsScreen()
+                : const OrdersDelegateScreen(),
             const NotificationsDelegateScreen(),
             const MyAccountDelegateScreen(),
           ];
@@ -228,7 +236,11 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
                         onTap: () => controller.updateIndex(0),
                       ),
                       _NavItem(
-                        label: AppLocaleKey.orders.tr(),
+                        label: isProfessionalPartner
+                            ? (context.locale.languageCode == 'ar'
+                                ? 'طلبات الخدمات'
+                                : 'Service requests')
+                            : AppLocaleKey.orders.tr(),
                         activeIcon: AppImages.orderFillIcon,
                         inactiveIcon: AppImages.ordersIcon,
                         selected: controller.screenIndex == 1,
@@ -313,6 +325,13 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
         break;
       case '3':
         NavigatorMethods.pushNamed(AppRouters.navigatorKey.currentContext ?? context, WalletScreen.routeName);
+        break;
+      case '7':
+        Navigator.of(AppRouters.navigatorKey.currentContext ?? context).push(
+          MaterialPageRoute(
+            builder: (_) => const PartnerServiceRequestsScreen(),
+          ),
+        );
         break;
       case '8':
         NavigatorMethods.pushNamed(
