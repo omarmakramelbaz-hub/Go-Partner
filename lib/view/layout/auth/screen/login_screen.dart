@@ -4,6 +4,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../helpers/extension/string_extension.dart';
@@ -93,12 +94,11 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                           children: [
                             SizedBox(height: veryCompact ? 4 : (compact ? 10 : 14)),
                             SizedBox(
-                              child: Image.asset(
-                                'assets/images/go_drive_logo_hd.webp',
-                                width: logoSize,
+                              child: SvgPicture.asset(
+                                'assets/svg/go_partner_logo.svg',
+                                width: logoSize * 1.9,
                                 height: logoSize,
                                 fit: BoxFit.contain,
-                                filterQuality: FilterQuality.high,
                               ),
                             ),
                             SizedBox(height: veryCompact ? 4 : (compact ? 7 : 10)),
