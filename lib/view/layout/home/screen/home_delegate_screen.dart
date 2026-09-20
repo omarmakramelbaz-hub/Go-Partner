@@ -18,6 +18,7 @@ import '../controller/delegate_home_controller.dart';
 import '../widget/delegate_status_widget.dart';
 import '../widget/my_current_balance_card.dart';
 import 'location_delegate.dart';
+import 'partner_service_requests_screen.dart';
 
 class HomeDelegateScreen extends StatefulWidget {
   static const String routeName = 'HomeDelegateScreen';
@@ -153,7 +154,9 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
                           ),
                           const SizedBox(height: 14),
                           const MyCurrentBalanceWidget(),
-                          const SizedBox(height: 48),
+                          const SizedBox(height: 14),
+                          _professionalRequestsEntry(),
+                          const SizedBox(height: 28),
                           _quickActions(),
                           const SizedBox(height: 74),
                         ],
@@ -566,6 +569,94 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
         const SizedBox(width: 7),
         Expanded(child: _MiniStat(value: completed, label: _t('مكتمل', 'Done'), icon: Icons.check_rounded, tint: const Color(0xff11A96C), soft: const Color(0xffE8F8F0))),
       ],
+    );
+  }
+
+  Widget _professionalRequestsEntry() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const PartnerServiceRequestsScreen(),
+          ),
+        ),
+        borderRadius: BorderRadius.circular(23),
+        child: Ink(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [Color(0xff103752), Color(0xff071924)],
+            ),
+            borderRadius: BorderRadius.circular(23),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x18000000),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(.10),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.handyman_rounded,
+                  color: _orange,
+                  size: 29,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _t('طلبات الخدمات والمهن', 'Professional service requests'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _t(
+                        'شاهد الطلبات المرسلة لك من العملاء حسب مهنتك ونطاق عملك',
+                        'View customer requests matched to your profession and work area',
+                      ),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(.72),
+                        fontSize: 10.5,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const CircleAvatar(
+                radius: 18,
+                backgroundColor: _orange,
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
