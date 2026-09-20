@@ -26,7 +26,7 @@
     </queries>
     <application
         android:enableOnBackInvokedCallback="true"
-        android:label="Drivers"
+        android:label="GO Partner"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme">
