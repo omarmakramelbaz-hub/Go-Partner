@@ -328,6 +328,30 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                                       ],
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  TextButton.icon(
+                                    onPressed: _trackApplication,
+                                    icon: const Icon(
+                                      Icons.manage_search_rounded,
+                                      size: 19,
+                                    ),
+                                    label: Text(
+                                      _isArabic
+                                          ? 'متابعة طلب الانضمام'
+                                          : 'Track application',
+                                      style: TextStyle(
+                                        fontSize: compact ? 13.5 : 14.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: navy,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -371,6 +395,28 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const PartnerApplicationScreen(),
+      ),
+    );
+  }
+
+  void _trackApplication() {
+    final mobile = _mobileEc.text.trim();
+    if (mobile.replaceAll(RegExp(r'\D'), '').length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isArabic
+                ? 'اكتب رقم الهاتف المستخدم في طلب الانضمام أولاً.'
+                : 'Enter the phone number used in your application first.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PartnerApplicationSubmittedScreen(mobile: mobile),
       ),
     );
   }
