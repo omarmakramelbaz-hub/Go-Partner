@@ -474,7 +474,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
           ),
           borderRadius: BorderRadius.circular(26),
         ),
-        child: const Row(
+        child: Row(
           children: [
             Container(
               width: 58,
