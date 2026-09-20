@@ -107,6 +107,7 @@ class Urls {
   static const String vendorSignUp = '${baseUrl}signup';
   static const String partnerApplications = '${baseUrl}partner-applications';
   static const String partnerApplicationStatus = '${baseUrl}partner-applications/status';
+  static const String partnerActivate = '${baseUrl}partner-applications/activate';
   static const String delegateServiceRequests = '${baseUrl}delegate/service-requests';
   static String updateDelegateServiceRequest(int id) => '${baseUrl}delegate/service-requests/$id/status';
   static const String professions = '${baseUrl}professions';
