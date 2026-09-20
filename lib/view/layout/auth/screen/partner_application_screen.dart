@@ -476,11 +476,19 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
         ),
         child: const Row(
           children: [
-            CircleAvatar(
-              radius: 27,
-              backgroundColor: Color(0x22FFFFFF),
-              child:
-                  Icon(Icons.groups_2_rounded, color: Colors.white, size: 30),
+            Container(
+              width: 58,
+              height: 58,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Image.asset(
+                'assets/images/go_drive_logo_hd.webp',
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
             ),
             SizedBox(width: 13),
             Expanded(
