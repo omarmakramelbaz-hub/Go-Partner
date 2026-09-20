@@ -1,11 +1,11 @@
-name: Install HD Go Drive Logo
+name: Install HD GO Partner Logo
 
 on:
   push:
     branches: [ "main" ]
     paths:
       - 'tool/go_drive_logo_hd_chunks/**'
-      - '.github/workflows/install-go-drive-logo.yml'
+      - '.github/workflows/install-go-partner-logo.yml'
   workflow_dispatch:
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Rebuild and wire HD Go Drive logo
+      - name: Rebuild and wire HD GO Partner logo
         shell: bash
         run: |
           set -euo pipefail
@@ -81,5 +81,5 @@ jobs:
             echo "HD logo already installed"
             exit 0
           fi
-          git commit -m "Show HD Go Drive logo without crop"
+          git commit -m "Show HD GO Partner logo without crop"
           git push
