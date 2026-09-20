@@ -35,17 +35,15 @@ jobs:
       - name: Configure Flutter Web platform
         run: flutter create . --platforms web --no-pub
 
-      - name: Verify permanent HD GO Partner logo
+      - name: Verify GO Partner brand assets
         shell: bash
         run: |
           set -euo pipefail
-          test -s assets/images/go_drive_logo_hd.webp
-          file assets/images/go_drive_logo_hd.webp | grep -qi 'webp'
-          test "$(stat -c%s assets/images/go_drive_logo_hd.webp)" -eq 67002
-          grep -q 'assets/images/go_drive_logo_hd.webp' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'assets/images/go_drive_logo_hd.webp' lib/view/layout/auth/screen/partner_application_screen.dart
-          grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'fit: BoxFit.contain' lib/view/layout/auth/screen/partner_application_screen.dart
+          test -s assets/svg/go_partner_logo.svg
+          grep -q 'GO' assets/svg/go_partner_logo.svg
+          grep -q 'Partner' assets/svg/go_partner_logo.svg
+          grep -q 'assets/svg/go_partner_logo.svg' lib/view/layout/auth/screen/login_screen.dart
+          grep -q 'assets/svg/go_partner_logo.svg' lib/view/layout/screen/splash_screen.dart
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/Go-Partner/"
@@ -63,10 +61,10 @@ jobs:
           index = root / 'index.html'
           bootstrap = root / 'flutter_bootstrap.js'
           main_js = root / 'main.dart.js'
-          logo = root / 'assets' / 'assets' / 'images' / 'go_drive_logo_hd.webp'
+          logo = root / 'assets' / 'assets' / 'svg' / 'go_partner_logo.svg'
 
-          if not logo.exists() or logo.stat().st_size != 67002:
-              raise SystemExit('Permanent HD GO Partner logo missing or invalid in web build')
+          if not logo.exists() or logo.stat().st_size == 0:
+              raise SystemExit('GO Partner logo missing or invalid in web build')
 
           if main_js.exists() and bootstrap.exists():
               versioned_name = f'main.dart.{build}.js'
@@ -82,7 +80,7 @@ jobs:
             #go-partner-opening {{ position: fixed; inset: 0; z-index: 2147483647; background: #fff; display: flex; align-items: center; justify-content: center; }}
             #go-partner-opening img {{ width: min(72vw, 360px); max-height: 48vh; object-fit: contain; display: block; }}
           </style>
-          <div id="go-partner-opening"><img src="assets/assets/images/go_drive_logo_hd.webp?build={build}" alt="GO Partner"></div>
+          <div id="go-partner-opening"><img src="assets/assets/svg/go_partner_logo.svg?build={build}" alt="GO Partner"></div>
           <script>
           (async function () {{
             try {{
