@@ -100,7 +100,7 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
             isProfessionalPartner
                 ? const PartnerServiceRequestsScreen()
                 : const OrdersDelegateScreen(),
-            const NotificationsDelegateScreen(),
+            const WalletScreen(),
             const MyAccountDelegateScreen(),
           ];
 
@@ -247,9 +247,9 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
                         onTap: () => controller.updateIndex(1),
                       ),
                       _NavItem(
-                        label: AppLocaleKey.notifications.tr(),
-                        activeIcon: AppImages.notificationFillIcon,
-                        inactiveIcon: AppImages.notificationsIcon,
+                        label: context.locale.languageCode == 'ar' ? 'المحفظة' : 'Wallet',
+                        activeIcon: AppImages.walletIcon,
+                        inactiveIcon: AppImages.walletIcon,
                         selected: controller.screenIndex == 2,
                         onTap: () => controller.updateIndex(2),
                       ),
