@@ -1,4 +1,4 @@
-name: Build Go Drive Driver iOS Release
+name: Build GO Partner iOS Release
 
 on:
   push:
@@ -62,22 +62,22 @@ jobs:
           text = text.replace('CURRENT_PROJECT_VERSION = 19;', 'CURRENT_PROJECT_VERSION = 24;')
           text = text.replace('MARKETING_VERSION = 1.0.21;', 'MARKETING_VERSION = 1.0.23;')
           text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Go Drive";',
-                              'INFOPLIST_KEY_CFBundleDisplayName = "Drivers";')
+                              'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
           text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Fasakhaninja Delegate";',
-                              'INFOPLIST_KEY_CFBundleDisplayName = "Drivers";')
+                              'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
           pbx.write_text(text, encoding='utf-8')
 
           plist = Path('ios/Runner/Info.plist')
           p = plist.read_text(encoding='utf-8')
-          p = p.replace('<string>Go Drive</string>', '<string>Drivers</string>')
-          p = p.replace('<string>Fasakhansta Delegate</string>', '<string>Drivers</string>')
+          p = p.replace('<string>Go Drive</string>', '<string>GO Partner</string>')
+          p = p.replace('<string>Fasakhansta Delegate</string>', '<string>GO Partner</string>')
           plist.write_text(p, encoding='utf-8')
           PY
 
           grep -q 'CURRENT_PROJECT_VERSION = 24;' ios/Runner.xcodeproj/project.pbxproj
           grep -q 'MARKETING_VERSION = 1.0.23;' ios/Runner.xcodeproj/project.pbxproj
-          grep -q 'INFOPLIST_KEY_CFBundleDisplayName = "Drivers";' ios/Runner.xcodeproj/project.pbxproj
-          grep -q '<string>Drivers</string>' ios/Runner/Info.plist
+          grep -q 'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";' ios/Runner.xcodeproj/project.pbxproj
+          grep -q '<string>GO Partner</string>' ios/Runner/Info.plist
 
       - name: Generate Go Drive iOS app icons
         shell: bash
@@ -142,17 +142,17 @@ jobs:
           PLIST="$APP/Info.plist"
           test -d "$APP"
           test -s "$PLIST"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST")" = "Drivers"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST")" = "GO Partner"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")" = "1.0.23"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")" = "24"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" drivers-1.0.23-build24-ios-unsigned.zip
-          shasum -a 256 drivers-1.0.23-build24-ios-unsigned.zip
+          ditto -c -k --sequesterRsrc --keepParent "$APP" go-partner-1.0.23-build24-ios-unsigned.zip
+          shasum -a 256 go-partner-1.0.23-build24-ios-unsigned.zip
 
       - name: Upload iOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drivers-1.0.23-build24-ios-unsigned
-          path: drivers-1.0.23-build24-ios-unsigned.zip
+          name: go-partner-1.0.23-build24-ios-unsigned
+          path: go-partner-1.0.23-build24-ios-unsigned.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -169,6 +169,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "iOS branding/version/icons already persisted."
           else
-            git commit -m "Sync Drivers iOS branding and release metadata [skip ci]"
+            git commit -m "Sync GO Partner iOS branding and release metadata [skip ci]"
             git push origin HEAD:main
           fi
