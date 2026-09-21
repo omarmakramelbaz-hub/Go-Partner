@@ -211,7 +211,7 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [_orange2, _orange, Color(0xffFF5E00)],
+                  colors: [Color(0xff24282E), Color(0xff171A1F), Color(0xff0F1114)],
                 ),
               ),
               child: Stack(
@@ -255,7 +255,7 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
                                   alignment: AlignmentDirectional.centerStart,
                                   child: _locationPill(area),
                                 ),
-                                const _GoDriveWordmark(),
+                                const _GoPartnerWordmark(),
                                 Align(
                                   alignment: AlignmentDirectional.centerEnd,
                                   child: _notificationButton(),
@@ -396,7 +396,7 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xff103752), Color(0xff071924)],
+          colors: [Color(0xff20242A), Color(0xff111419)],
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
@@ -782,7 +782,7 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
             gradient: const LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xff103752), Color(0xff071924)],
+              colors: [Color(0xff20242A), Color(0xff111419)],
             ),
             borderRadius: BorderRadius.circular(23),
             boxShadow: const [
@@ -896,8 +896,8 @@ class _HomeDelegateScreenState extends State<HomeDelegateScreen> {
   }
 }
 
-class _GoDriveWordmark extends StatelessWidget {
-  const _GoDriveWordmark();
+class _GoPartnerWordmark extends StatelessWidget {
+  const _GoPartnerWordmark();
 
   @override
   Widget build(BuildContext context) {
@@ -923,7 +923,7 @@ class _GoDriveWordmark extends StatelessWidget {
             ),
           ],
         ),
-        const Text('DRIVE', style: TextStyle(color: Colors.white, fontSize: 15, height: 1, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
+        const Text('Partner', style: TextStyle(color: Colors.white, fontSize: 15, height: 1, fontWeight: FontWeight.w900)),
       ],
     );
   }
