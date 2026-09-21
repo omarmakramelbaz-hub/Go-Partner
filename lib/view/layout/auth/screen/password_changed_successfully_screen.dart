@@ -13,7 +13,7 @@ class PasswordChangedSuccessfullyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
     const softText = Color(0xff7D8490);
     const orange = Color(0xffFD7201);
     final isArabic = context.locale.languageCode == 'ar';
@@ -183,7 +183,7 @@ class _SuccessIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const orange = Color(0xffFD7201);
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
     final size = compact ? 178.0 : 214.0;
 
     return Center(
