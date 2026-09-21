@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xff171A1F),
       body: SizedBox.expand(child: _GoPartnerOpening()),
     );
   }
@@ -123,16 +123,63 @@ class _GoPartnerOpening extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final logoWidth = (constraints.maxWidth * .72).clamp(240.0, 360.0);
+        final logoWidth = (constraints.maxWidth * .62).clamp(210.0, 320.0);
 
-        return ColoredBox(
-          color: Colors.white,
-          child: Center(
-            child: SvgPicture.asset(
-              'assets/svg/go_partner_logo.svg',
-              width: logoWidth,
-              fit: BoxFit.contain,
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xff24282E), Color(0xff171A1F), Color(0xff0F1114)],
             ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -90,
+                right: -70,
+                child: Container(
+                  width: 260,
+                  height: 260,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xffFD7201).withOpacity(.10),
+                  ),
+                ),
+              ),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x33000000), blurRadius: 34, offset: Offset(0, 16)),
+                    ],
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/svg/go_partner_logo.svg',
+                    width: logoWidth,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              const Positioned(
+                left: 0,
+                right: 0,
+                bottom: 54,
+                child: Text(
+                  'معًا نصنع الفرص',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: .2,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
