@@ -11,6 +11,7 @@ import '../../../helpers/hive/hive_methods.dart';
 import '../../../helpers/pusher_service/pusher_controller.dart';
 import '../auth/controller/auth_controller.dart';
 import '../auth/screen/login_screen.dart';
+import 'partner_onboarding_screen.dart';
 import '../delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -44,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await _waitForOpening();
     if (!mounted || _navigated) return;
     _navigated = true;
-    NavigatorMethods.pushNamedAndRemoveUntil(context, LoginScreen.routeName);
+    NavigatorMethods.pushNamedAndRemoveUntil(context, PartnerOnboardingScreen.routeName);
   }
 
   Future<void> _goHome() async {
