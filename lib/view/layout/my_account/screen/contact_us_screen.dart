@@ -35,7 +35,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> with ValidationMixin 
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
     const softText = Color(0xff7D8490);
 
     return ChangeNotifierProvider(
@@ -72,7 +72,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> with ValidationMixin 
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xff082A4D), Color(0xff143F69)],
+                            colors: [Color(0xff171A1F), Color(0xff292D33)],
                           ),
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
