@@ -12,6 +12,8 @@ class AppRouters {
         return MaterialPageRoute(builder: (_) => const SplashScreen());
       case LoginScreen.routeName:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
+      case PartnerOnboardingScreen.routeName:
+        return MaterialPageRoute(builder: (_) => const PartnerOnboardingScreen());
 
       case ForgetPasswordScreen.routeName:
         return MaterialPageRoute(builder: (_) => const ForgetPasswordScreen());
