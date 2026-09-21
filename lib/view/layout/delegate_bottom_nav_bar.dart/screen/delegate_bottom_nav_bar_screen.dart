@@ -84,7 +84,7 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
 
     return ChangeNotifierProvider(
       create: (_) => DelegateBottomNavBarController(),
@@ -429,7 +429,7 @@ class _NavItem extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: selected ? const Color(0xff082A4D) : const Color(0xff8B929D),
+                    color: selected ? const Color(0xff171A1F) : const Color(0xff8B929D),
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
                   ),
