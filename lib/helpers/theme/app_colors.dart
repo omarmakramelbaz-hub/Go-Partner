@@ -8,7 +8,7 @@ class AppColor {
   }
 
   static Color main2AppColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xffFF8A08), dark: const Color(0xffFF8A08), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color lightMainAppColor(BuildContext context, {bool listen = true}) {
@@ -16,11 +16,11 @@ class AppColor {
   }
 
   static Color lightDarkColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xff082A4D), dark: const Color(0xff082A4D), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color secondAppColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xff082A4D), dark: const Color(0xff082A4D), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color scaffoldColor(BuildContext context, {bool listen = true}) {
@@ -32,7 +32,7 @@ class AppColor {
   }
 
   static Color darkTextColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xff082A4D), dark: const Color(0xff082A4D), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color lightTextColor(BuildContext context, {bool listen = true}) {
@@ -68,11 +68,11 @@ class AppColor {
   }
 
   static Color appBarColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xffFF8A08), dark: const Color(0xffFF8A08), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color appBarColor2(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xffFF6500), dark: const Color(0xffFF6500), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color buttonTextColor(BuildContext context, {bool listen = true}) {
@@ -84,7 +84,7 @@ class AppColor {
   }
 
   static Color textFormColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xff082A4D), dark: const Color(0xff082A4D), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color popupColor(BuildContext context, {bool listen = true}) {
@@ -92,7 +92,7 @@ class AppColor {
   }
 
   static Color appBarTextColor(BuildContext context, {bool listen = true}) {
-    return AppTheme.getByTheme(context, light: const Color(0xff082A4D), dark: const Color(0xff082A4D), listen: listen);
+    return AppTheme.getByTheme(context, light: const Color(0xff171A1F), dark: const Color(0xff171A1F), listen: listen);
   }
 
   static Color borderColor(BuildContext context, {bool listen = true}) {
