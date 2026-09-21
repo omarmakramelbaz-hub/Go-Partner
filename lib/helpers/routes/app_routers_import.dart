@@ -28,6 +28,7 @@ import '../../view/layout/order/screen/current_orders_delegate_screen.dart';
 import '../../view/layout/order/screen/delivery_location_screen.dart';
 import '../../view/layout/order/screen/order_details_delegate_screen.dart';
 import '../../view/layout/screen/splash_screen.dart';
+import '../../view/layout/screen/partner_onboarding_screen.dart';
 import '../../view/layout/wallet/controller/wallet_controller.dart';
 import '../../view/layout/wallet/screen/wallet_screen.dart';
 
