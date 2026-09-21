@@ -53,7 +53,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen>
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
     const softText = Color(0xff7D8490);
     const orange = Color(0xffFD7201);
 
@@ -365,7 +365,7 @@ class _BackButton extends StatelessWidget {
             border: Border.all(color: const Color(0xffF0F1F3)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xff082A4D).withOpacity(.08),
+                color: const Color(0xff171A1F).withOpacity(.08),
                 blurRadius: 15,
                 offset: const Offset(0, 6),
               ),
@@ -390,7 +390,7 @@ class _CodeIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const orange = Color(0xffFD7201);
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
 
     return SizedBox(
       height: height,
