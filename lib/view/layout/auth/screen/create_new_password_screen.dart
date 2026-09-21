@@ -36,7 +36,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen>
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
     const softText = Color(0xff7D8490);
     const orange = Color(0xffFD7201);
 
@@ -307,7 +307,7 @@ class _FieldLabel extends StatelessWidget {
       text,
       textAlign: isArabic ? TextAlign.right : TextAlign.left,
       style: TextStyle(
-        color: const Color(0xff082A4D),
+        color: const Color(0xff171A1F),
         fontSize: compact ? 16 : 18,
         fontWeight: FontWeight.w700,
       ),
@@ -336,7 +336,7 @@ class _PremiumBackButton extends StatelessWidget {
             border: Border.all(color: const Color(0xffF0F1F3)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xff082A4D).withOpacity(.08),
+                color: const Color(0xff171A1F).withOpacity(.08),
                 blurRadius: 15,
                 offset: const Offset(0, 6),
               ),
@@ -361,7 +361,7 @@ class _PasswordIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const orange = Color(0xffFD7201);
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xff171A1F);
 
     return SizedBox(
       height: height,
