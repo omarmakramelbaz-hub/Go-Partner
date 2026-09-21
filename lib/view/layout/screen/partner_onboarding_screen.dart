@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../helpers/utils/navigator_methods.dart';
-import '../../auth/screen/login_screen.dart';
+import '../auth/screen/login_screen.dart';
 
 class PartnerOnboardingScreen extends StatelessWidget {
   const PartnerOnboardingScreen({super.key});
