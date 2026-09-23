@@ -56,14 +56,13 @@ class _PartnerOrdersBoardState extends State<PartnerOrdersBoard> {
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: _t(context, 'تحديث الطلبات', 'Refresh requests'),
-                onPressed: orders.loading ? null : orders.refresh,
-                icon: const Icon(Icons.refresh_rounded, color: _orange),
+              Text(
+                _t(context, 'تحديث تلقائي', 'Auto-updates'),
+                style: const TextStyle(fontSize: 11, color: _muted),
               ),
             ],
           ),
-        if (orders.loading)
+        if (orders.loading && !orders.initialized)
           const Padding(
             padding: EdgeInsets.only(bottom: 12),
             child: LinearProgressIndicator(color: _orange, minHeight: 2),
@@ -82,8 +81,8 @@ class _PartnerOrdersBoardState extends State<PartnerOrdersBoard> {
                 Text(
                   _t(
                     context,
-                    'تعذر تحديث بعض الطلبات. البيانات الظاهرة قد تكون غير محدثة.',
-                    'Some requests could not be refreshed. Displayed information may be out of date.',
+                    'تعذر تحديث بعض الطلبات. سنعيد المحاولة تلقائيًا؛ البيانات الظاهرة قد تكون غير محدثة.',
+                    'Some requests could not be refreshed. Retrying automatically; displayed information may be out of date.',
                   ),
                   style: const TextStyle(fontSize: 13, color: _ink),
                 ),

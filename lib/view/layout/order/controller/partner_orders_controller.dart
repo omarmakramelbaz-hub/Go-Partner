@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../model/partner_order.dart';
@@ -24,6 +26,11 @@ class PartnerOrdersController extends ChangeNotifier {
   final Map<PartnerOrderFeed, String?> errors = {};
   final Set<PartnerOrderFeed> loadingFeeds = {};
   final Set<String> _busy = {};
+  static const liveRefreshInterval = Duration(seconds: 10);
+  Timer? _liveTimer;
+  bool _liveUpdatesEnabled = false;
+  bool _refreshing = false;
+  bool _refreshQueued = false;
   bool _disposed = false;
   bool _historyRequested = false;
   bool get loading => loadingFeeds.isNotEmpty;
@@ -123,8 +130,52 @@ class PartnerOrdersController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    if (_busy.isNotEmpty) return;
-    await _refreshFeeds();
+    if (_disposed) return;
+    if (_busy.isNotEmpty || loading || _refreshing) {
+      // An event may arrive after an in-flight read took its snapshot. Fetch
+      // again when that read/write finishes instead of dropping the event.
+      _refreshQueued = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshQueued = false;
+        await _refreshFeeds();
+      } while (!_disposed && _refreshQueued);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  void startLiveUpdates() {
+    if (_disposed || _liveUpdatesEnabled) return;
+    _liveUpdatesEnabled = true;
+    unawaited(refresh());
+    // Notifications trigger immediate reads. This also covers missed messages
+    // and web sessions where push notifications are unavailable.
+    _liveTimer = Timer.periodic(liveRefreshInterval, (_) {
+      // Slow requests must not accumulate a queue of polling requests.
+      if (!_refreshing && !loading && _busy.isEmpty) {
+        unawaited(refresh());
+      }
+    });
+  }
+
+  void pauseLiveUpdates() {
+    _liveUpdatesEnabled = false;
+    _liveTimer?.cancel();
+    _liveTimer = null;
+  }
+
+  void requestLiveRefresh() {
+    if (_liveUpdatesEnabled && !_disposed) unawaited(refresh());
+  }
+
+  Future<void> _drainQueuedRefresh() async {
+    if (_refreshQueued && !_refreshing && !loading && _busy.isEmpty) {
+      await refresh();
+    }
   }
 
   Future<void> _refreshFeeds() => Future.wait([
@@ -134,10 +185,11 @@ class PartnerOrdersController extends ChangeNotifier {
     if (_historyRequested) _loadHistoryFeeds(),
   ]);
 
-  Future<void> loadHistory() {
-    if (_busy.isNotEmpty) return Future.value();
+  Future<void> loadHistory() async {
+    if (_disposed || _busy.isNotEmpty) return;
     _historyRequested = true;
-    return _loadHistoryFeeds();
+    await _loadHistoryFeeds();
+    await _drainQueuedRefresh();
   }
 
   Future<void> _loadHistoryFeeds() => Future.wait([
@@ -145,8 +197,11 @@ class PartnerOrdersController extends ChangeNotifier {
     _load(PartnerOrderFeed.serviceHistory),
   ]);
 
-  Future<void> loadMore(PartnerOrderFeed feed) =>
-      _busy.isNotEmpty ? Future.value() : _load(feed, more: true);
+  Future<void> loadMore(PartnerOrderFeed feed) async {
+    if (_disposed || _busy.isNotEmpty) return;
+    await _load(feed, more: true);
+    await _drainQueuedRefresh();
+  }
 
   /// Keep a successful write separate from a failed subsequent refresh.
   /// A delivery acceptance may still await customer confirmation, so never
@@ -154,6 +209,7 @@ class PartnerOrdersController extends ChangeNotifier {
   Future<bool> act(PartnerOrder order, PartnerOrderAction action) async {
     if (_disposed ||
         _busy.isNotEmpty ||
+        _refreshing ||
         loading ||
         stale(order) ||
         !order.allows(action)) {
@@ -175,6 +231,7 @@ class PartnerOrdersController extends ChangeNotifier {
     } finally {
       _busy.remove(order.key);
       _notify();
+      await _drainQueuedRefresh();
     }
   }
 
@@ -185,6 +242,7 @@ class PartnerOrdersController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    pauseLiveUpdates();
     super.dispose();
   }
 }

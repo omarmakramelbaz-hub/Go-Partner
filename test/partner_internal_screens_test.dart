@@ -506,11 +506,27 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+        expect(find.text('تحديث تلقائي'), findsOneWidget);
         expect(tester.takeException(), isNull);
         await capture(
           tester,
           professional ? 'unified-service' : 'unified-delivery',
         );
+        controller.startLiveUpdates();
+        await tester.pumpAndSettle();
+        repository.items.add(
+          professional
+              ? serviceOrder(122, 'pending')
+              : deliveryOrder(122, 'pending'),
+        );
+        await tester.pump(PartnerOrdersController.liveRefreshInterval);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(ValueKey('order-${professional ? 'service' : 'delivery'}:122')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
         controller.dispose();
       }

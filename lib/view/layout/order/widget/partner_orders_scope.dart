@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
@@ -39,8 +42,9 @@ class _OrderUpdatesState extends State<_OrderUpdates>
     with WidgetsBindingObserver {
   late final PartnerOrdersController _orders;
   late final PusherController _pusher;
-  Timer? _timer;
-  bool _foreground = true;
+  StreamSubscription<RemoteMessage>? _messages;
+  StreamSubscription<RemoteMessage>? _openedMessages;
+  StreamSubscription<List<ConnectivityResult>>? _connectivity;
 
   @override
   void initState() {
@@ -48,27 +52,51 @@ class _OrderUpdatesState extends State<_OrderUpdates>
     _orders = context.read<PartnerOrdersController>();
     _pusher = context.read<PusherController>();
     _pusher.addEventListener('delegate.updated', _onOrder);
+    if (!kIsWeb) {
+      _messages = FirebaseMessaging.onMessage.listen(_onMessage);
+      _openedMessages = FirebaseMessaging.onMessageOpenedApp.listen(_onMessage);
+    }
+    _connectivity = Connectivity().onConnectivityChanged.listen(
+      (connections) {
+        if (connections.any((value) => value != ConnectivityResult.none)) {
+          _orders.requestLiveRefresh();
+        }
+      },
+      // Polling remains available if the platform cannot report connectivity.
+      onError: (Object error) {
+        debugPrint('Order connectivity updates unavailable: $error');
+      },
+    );
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _orders.refresh();
-    });
-    // Service requests currently arrive through notifications rather than
-    // delegate.updated. Poll while foregrounded so the shared inbox stays fresh.
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (_foreground) _orders.refresh();
+      final state = WidgetsBinding.instance.lifecycleState;
+      if (mounted && (state == null || state == AppLifecycleState.resumed)) {
+        _orders.startLiveUpdates();
+      }
     });
   }
 
-  void _onOrder(PusherEvent event) => _orders.refresh();
+  void _onOrder(PusherEvent event) => _orders.requestLiveRefresh();
+
+  // Fetch the authenticated inbox instead of trusting notification payloads
+  // as order data. This includes service requests, not just delivery events.
+  void _onMessage(RemoteMessage message) => _orders.requestLiveRefresh();
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _foreground = state == AppLifecycleState.resumed;
-    if (_foreground) _orders.refresh();
+    if (state == AppLifecycleState.resumed) {
+      _orders.startLiveUpdates();
+    } else {
+      _orders.pauseLiveUpdates();
+    }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _orders.pauseLiveUpdates();
+    _messages?.cancel();
+    _openedMessages?.cancel();
+    _connectivity?.cancel();
     _pusher.removeEventListener('delegate.updated', _onOrder);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
