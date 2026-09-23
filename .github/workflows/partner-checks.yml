@@ -1,8 +1,7 @@
 name: GO Partner verification checks
 on:
-  push:
-    branches: ['codex/go-partner-brand-email']
   pull_request:
+  workflow_dispatch:
 jobs:
   verify:
     runs-on: ubuntu-latest

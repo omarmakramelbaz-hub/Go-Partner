@@ -146,7 +146,7 @@ jobs:
           test -s "$PLIST"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST")" = "GO Partner"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")" = "1.0.24"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")" = "24"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")" = "25"
           ditto -c -k --sequesterRsrc --keepParent "$APP" go-partner-1.0.24-build25-ios-unsigned.zip
           shasum -a 256 go-partner-1.0.24-build25-ios-unsigned.zip
 
