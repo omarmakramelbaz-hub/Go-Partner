@@ -18,26 +18,29 @@ enum DelegateStatus { active, inactive }
 
 class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
   DelegateStatus? selectedStatus;
+  late final AuthController _authController;
 
   @override
   void initState() {
     super.initState();
-    final authController = context.read<AuthController>();
-    authController.addListener(_syncStatus);
+    _authController = context.read<AuthController>();
+    _authController.addListener(_syncStatus);
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncStatus());
   }
 
   void _syncStatus() {
     if (!mounted) return;
-    final status = context.read<AuthController>().profile?.delegateStatus;
+    final status = _authController.profile?.delegateStatus;
     if (status == null) return;
-    final next = status == 'active' ? DelegateStatus.active : DelegateStatus.inactive;
+    final next = status == 'active'
+        ? DelegateStatus.active
+        : DelegateStatus.inactive;
     if (next != selectedStatus) setState(() => selectedStatus = next);
   }
 
   @override
   void dispose() {
-    context.read<AuthController>().removeListener(_syncStatus);
+    _authController.removeListener(_syncStatus);
     super.dispose();
   }
 
@@ -52,15 +55,24 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _changeStatus(active ? DelegateStatus.inactive : DelegateStatus.active, controller),
+              onTap: () => _changeStatus(
+                active ? DelegateStatus.inactive : DelegateStatus.active,
+                controller,
+              ),
               borderRadius: BorderRadius.circular(24),
               child: Ink(
                 height: 46,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: active ? const Color(0xffECF9F0) : const Color(0xffF4F5F6),
+                  color: active
+                      ? const Color(0xffECF9F0)
+                      : const Color(0xffF4F5F6),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: active ? const Color(0xff85CEA0) : const Color(0xffE6E8EC)),
+                  border: Border.all(
+                    color: active
+                        ? const Color(0xff85CEA0)
+                        : const Color(0xffE6E8EC),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -68,7 +80,9 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: active ? const Color(0xff12AE69) : const Color(0xffA9AFB6),
+                        color: active
+                            ? const Color(0xff12AE69)
+                            : const Color(0xffA9AFB6),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -80,8 +94,12 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                         children: [
                           Text(
                             active
-                                ? (context.locale.languageCode == 'ar' ? 'متصل الآن' : 'Online now')
-                                : (context.locale.languageCode == 'ar' ? 'غير متصل' : 'Offline'),
+                                ? (context.locale.languageCode == 'ar'
+                                      ? 'متصل الآن'
+                                      : 'Online now')
+                                : (context.locale.languageCode == 'ar'
+                                      ? 'غير متصل'
+                                      : 'Offline'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -91,10 +109,16 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                             ),
                           ),
                           Text(
-                            active ? AppLocaleKey.active.tr() : AppLocaleKey.inactive.tr(),
+                            active
+                                ? AppLocaleKey.active.tr()
+                                : AppLocaleKey.inactive.tr(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Color(0xff7A7F87), fontSize: 8, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              color: Color(0xff7A7F87),
+                              fontSize: 8,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -106,17 +130,24 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                       height: 24,
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: active ? const Color(0xff16B66D) : const Color(0xffD9DDE2),
+                        color: active
+                            ? const Color(0xff16B66D)
+                            : const Color(0xffD9DDE2),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: AnimatedAlign(
                         duration: const Duration(milliseconds: 220),
                         curve: Curves.easeOutCubic,
-                        alignment: active ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment: active
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: Container(
                           width: 18,
                           height: 18,
-                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ),
@@ -130,7 +161,10 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
     );
   }
 
-  void _changeStatus(DelegateStatus status, DelegateBottomNavBarController controller) {
+  void _changeStatus(
+    DelegateStatus status,
+    DelegateBottomNavBarController controller,
+  ) {
     setState(() => selectedStatus = status);
     SoundNotification.instance.stopSound();
     controller.changeStatusOnline(
