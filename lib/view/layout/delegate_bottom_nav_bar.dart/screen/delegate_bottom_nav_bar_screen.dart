@@ -23,7 +23,8 @@ import '../../home/screen/location_delegate.dart';
 import '../../home/screen/partner_service_requests_screen.dart';
 import '../../my_account/screen/my_account_delegate_screen.dart';
 import '../../notification/model/notfication_from_firebase_model.dart';
-import '../../order/screen/order_delegate_screen.dart';
+import '../../order/screen/partner_orders_screen.dart';
+import '../../order/widget/partner_orders_scope.dart';
 import '../../order/screen/order_details_delegate_screen.dart';
 import '../../wallet/screen/wallet_screen.dart';
 import '../controller/delegate_bottom_nav_bar_controller.dart';
@@ -33,10 +34,12 @@ class DelegateBottomNavBarScreen extends StatefulWidget {
   const DelegateBottomNavBarScreen({super.key});
 
   @override
-  State<DelegateBottomNavBarScreen> createState() => _DelegateBottomNavBarScreenState();
+  State<DelegateBottomNavBarScreen> createState() =>
+      _DelegateBottomNavBarScreenState();
 }
 
-class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen> {
+class _DelegateBottomNavBarScreenState
+    extends State<DelegateBottomNavBarScreen> {
   PusherController? _pusherController;
   FirebaseMessaging? _messaging;
   NotificationHelper? _notificationHelper;
@@ -49,7 +52,10 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
       _notificationHelper = NotificationHelper();
       _initialNotification();
       _pusherController = context.read<PusherController>();
-      _pusherController!.addEventListener('delegate.updated', _handleDelegateUpdated);
+      _pusherController!.addEventListener(
+        'delegate.updated',
+        _handleDelegateUpdated,
+      );
     }
   }
 
@@ -62,9 +68,13 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
         log(jsonData.toString());
         if (status == 'pending') {
           SoundNotification.instance.playLongSound();
-          CommonMethods.showToast(message: '${AppLocaleKey.thereIsANewOrder.tr()} $orderNo');
+          CommonMethods.showToast(
+            message: '${AppLocaleKey.thereIsANewOrder.tr()} $orderNo',
+          );
         } else {
-          CommonMethods.showToast(message: '${AppLocaleKey.thereIsANewOrderWithStatus.tr()} $orderNo');
+          CommonMethods.showToast(
+            message: '${AppLocaleKey.thereIsANewOrderWithStatus.tr()} $orderNo',
+          );
         }
       }
     } catch (e, stackTrace) {
@@ -75,108 +85,112 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
 
   @override
   void dispose() {
-    _pusherController?.removeEventListener('delegate.updated', _handleDelegateUpdated);
+    _pusherController?.removeEventListener(
+      'delegate.updated',
+      _handleDelegateUpdated,
+    );
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DelegateBottomNavBarController(),
-      child: Consumer<DelegateBottomNavBarController>(
-        builder: (context, controller, _) {
-          final profile = context.watch<AuthController>().profile;
-          final isProfessionalPartner =
-              profile?.isGoPartner == true &&
-              profile?.partnerProfessionKey != null &&
-              profile?.partnerProfessionKey != 'delivery_courier';
+    return PartnerOrdersScope(
+      child: ChangeNotifierProvider(
+        create: (_) => DelegateBottomNavBarController(),
+        child: Consumer<DelegateBottomNavBarController>(
+          builder: (context, controller, _) {
+            final profile = context.watch<AuthController>().profile;
+            final pages = <Widget>[
+              const HomeDelegateScreen(),
+              const PartnerOrdersScreen(),
+              const WalletScreen(embedded: true),
+              const MyAccountDelegateScreen(),
+            ];
 
-          final pages = <Widget>[
-            const HomeDelegateScreen(),
-            isProfessionalPartner ? const PartnerServiceRequestsScreen(embedded: true) : const OrdersDelegateScreen(),
-            const WalletScreen(embedded: true),
-            const MyAccountDelegateScreen(),
-          ];
-
-          return PopScope(
-            canPop: controller.screenIndex == 0,
-            onPopInvoked: controller.onWillPop,
-            child: Scaffold(
-              backgroundColor: PartnerIdentity.ink,
-              extendBody: false,
-              resizeToAvoidBottomInset: false,
-              appBar: controller.screenIndex == 0
-                  ? null
-                  : PartnerTabHeader(
-                      title: controller.screenIndex == 1
-                          ? (isProfessionalPartner
-                                ? (context.locale.languageCode == 'ar' ? 'طلبات الخدمات' : 'Service requests')
-                                : AppLocaleKey.orders.tr())
-                          : controller.screenIndex == 2
-                          ? AppLocaleKey.wallet.tr()
-                          : AppLocaleKey.myAccount.tr(),
-                      location: profile?.areaTitle ?? '',
-                      onLocationTap: () => NavigatorMethods.pushNamed(context, DelegateLocationScreen.routeName),
-                      onBack: () => controller.updateIndex(0),
-                    ),
-              body: IndexedStack(
-                index: controller.screenIndex,
-                children: [
-                  pages.first,
-                  for (final page in pages.skip(1)) PartnerSurface(child: page),
-                ],
-              ),
-              bottomNavigationBar: ColoredBox(
-                color: Colors.white,
-                child: SafeArea(
-                  minimum: const EdgeInsets.only(bottom: 8),
-                  child: Container(
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.zero,
-                      border: const Border(top: BorderSide(color: PartnerIdentity.border)),
-                    ),
-                    child: Row(
-                      children: [
-                        _NavItem(
-                          label: AppLocaleKey.home.tr(),
-                          activeIcon: Icons.home_rounded,
-                          inactiveIcon: Icons.home_outlined,
-                          selected: controller.screenIndex == 0,
-                          onTap: () => controller.updateIndex(0),
+            return PopScope(
+              canPop: controller.screenIndex == 0,
+              onPopInvoked: controller.onWillPop,
+              child: Scaffold(
+                backgroundColor: PartnerIdentity.ink,
+                extendBody: false,
+                resizeToAvoidBottomInset: false,
+                appBar: controller.screenIndex == 0
+                    ? null
+                    : PartnerTabHeader(
+                        title: controller.screenIndex == 1
+                            ? AppLocaleKey.orders.tr()
+                            : controller.screenIndex == 2
+                            ? AppLocaleKey.wallet.tr()
+                            : AppLocaleKey.myAccount.tr(),
+                        location: profile?.areaTitle ?? '',
+                        onLocationTap: () => NavigatorMethods.pushNamed(
+                          context,
+                          DelegateLocationScreen.routeName,
                         ),
-                        _NavItem(
-                          label: isProfessionalPartner
-                              ? (context.locale.languageCode == 'ar' ? 'طلبات الخدمات' : 'Service requests')
-                              : AppLocaleKey.orders.tr(),
-                          activeIcon: Icons.assignment_rounded,
-                          inactiveIcon: Icons.assignment_outlined,
-                          selected: controller.screenIndex == 1,
-                          onTap: () => controller.updateIndex(1),
+                        onBack: () => controller.updateIndex(0),
+                      ),
+                body: IndexedStack(
+                  index: controller.screenIndex,
+                  children: [
+                    pages.first,
+                    for (final page in pages.skip(1))
+                      PartnerSurface(child: page),
+                  ],
+                ),
+                bottomNavigationBar: ColoredBox(
+                  color: Colors.white,
+                  child: SafeArea(
+                    minimum: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.zero,
+                        border: const Border(
+                          top: BorderSide(color: PartnerIdentity.border),
                         ),
-                        _NavItem(
-                          label: context.locale.languageCode == 'ar' ? 'المحفظة' : 'Wallet',
-                          activeIcon: Icons.account_balance_wallet_outlined,
-                          inactiveIcon: Icons.account_balance_wallet_outlined,
-                          selected: controller.screenIndex == 2,
-                          onTap: () => controller.updateIndex(2),
-                        ),
-                        _NavItem(
-                          label: AppLocaleKey.myAccount.tr(),
-                          activeIcon: Icons.person_rounded,
-                          inactiveIcon: Icons.person_outline_rounded,
-                          selected: controller.screenIndex == 3,
-                          onTap: () => controller.updateIndex(3),
-                        ),
-                      ],
+                      ),
+                      child: Row(
+                        children: [
+                          _NavItem(
+                            label: AppLocaleKey.home.tr(),
+                            activeIcon: Icons.home_rounded,
+                            inactiveIcon: Icons.home_outlined,
+                            selected: controller.screenIndex == 0,
+                            onTap: () => controller.updateIndex(0),
+                          ),
+                          _NavItem(
+                            label: AppLocaleKey.orders.tr(),
+                            activeIcon: Icons.assignment_rounded,
+                            inactiveIcon: Icons.assignment_outlined,
+                            selected: controller.screenIndex == 1,
+                            onTap: () => controller.updateIndex(1),
+                          ),
+                          _NavItem(
+                            label: context.locale.languageCode == 'ar'
+                                ? 'المحفظة'
+                                : 'Wallet',
+                            activeIcon: Icons.account_balance_wallet_outlined,
+                            inactiveIcon: Icons.account_balance_wallet_outlined,
+                            selected: controller.screenIndex == 2,
+                            onTap: () => controller.updateIndex(2),
+                          ),
+                          _NavItem(
+                            label: AppLocaleKey.myAccount.tr(),
+                            activeIcon: Icons.person_rounded,
+                            inactiveIcon: Icons.person_outline_rounded,
+                            selected: controller.screenIndex == 3,
+                            onTap: () => controller.updateIndex(3),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -230,15 +244,24 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
         NavigatorMethods.pushNamed(
           AppRouters.navigatorKey.currentContext ?? context,
           OrderDetailsDelegateScreen.routeName,
-          arguments: OrderDetailsDelegateScreenArgs(fromHome: false, orderId: int.parse(data.orderId.toString())),
+          arguments: OrderDetailsDelegateScreenArgs(
+            fromHome: false,
+            orderId: int.parse(data.orderId.toString()),
+          ),
         );
         break;
       case '3':
-        NavigatorMethods.pushNamed(AppRouters.navigatorKey.currentContext ?? context, WalletScreen.routeName);
+        NavigatorMethods.pushNamed(
+          AppRouters.navigatorKey.currentContext ?? context,
+          WalletScreen.routeName,
+        );
         break;
       case '7':
-        Navigator.of(AppRouters.navigatorKey.currentContext ?? context)
-            .push(MaterialPageRoute(builder: (_) => const PartnerServiceRequestsScreen(embedded: true)));
+        Navigator.of(AppRouters.navigatorKey.currentContext ?? context).push(
+          MaterialPageRoute(
+            builder: (_) => const PartnerServiceRequestsScreen(),
+          ),
+        );
         break;
       case '8':
         NavigatorMethods.pushNamed(
@@ -317,13 +340,17 @@ class _NavItem extends StatelessWidget {
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: selected ? const Color(0xffFFF0E3) : Colors.transparent,
+                    color: selected
+                        ? const Color(0xffFFF0E3)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     selected ? activeIcon : inactiveIcon,
                     size: 23,
-                    color: selected ? PartnerIdentity.orange : PartnerIdentity.ink,
+                    color: selected
+                        ? PartnerIdentity.orange
+                        : PartnerIdentity.ink,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -332,7 +359,9 @@ class _NavItem extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: selected ? PartnerIdentity.orange : PartnerIdentity.muted,
+                    color: selected
+                        ? PartnerIdentity.orange
+                        : PartnerIdentity.muted,
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
                   ),
@@ -342,7 +371,10 @@ class _NavItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 210),
                   width: selected ? 30 : 0,
                   height: 3,
-                  decoration: BoxDecoration(color: const Color(0xffFD7201), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffFD7201),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ],
             ),
