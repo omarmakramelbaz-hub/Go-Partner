@@ -52,9 +52,10 @@ class _CurrentOrdersDelegateScreenState extends State<CurrentOrdersDelegateScree
             appBar: CustomAppBar(
               context,
               height: 86,
+            appBarColor: const Color(0xff171A1F),
               title: Text(
                 AppLocaleKey.currentOrders.tr(),
-                style: const TextStyle(color: navy, fontSize: 21, fontWeight: FontWeight.w900),
+                style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900),
               ),
             ),
             body: NotificationListener<ScrollNotification>(

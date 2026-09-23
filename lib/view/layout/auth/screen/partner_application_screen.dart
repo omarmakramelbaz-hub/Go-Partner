@@ -757,6 +757,8 @@ class _PartnerApplicationSubmittedScreenState
   String? _professionName;
   bool _checking = false;
   bool _activating = false;
+  bool _accountActive = false;
+  bool _emailRequired = false;
 
   @override
   void initState() {
@@ -792,6 +794,8 @@ class _PartnerApplicationSubmittedScreenState
       final profession = data['profession'];
       setState(() {
         _status = data['status']?.toString() ?? 'pending';
+        _accountActive = data['account_active'] == true;
+        _emailRequired = data['email_required'] == true;
         _reason = data['decline_reason']?.toString();
         _professionName = profession is Map
             ? profession['ar']?.toString()
@@ -888,7 +892,11 @@ class _PartnerApplicationSubmittedScreenState
                 const SizedBox(height: 10),
                 Text(
                   accepted
-                      ? 'يمكنك الآن إنشاء حساب الشريك. لن يكون إنشاء الحساب متاحًا قبل موافقة الإدارة.'
+                      ? (_accountActive
+                            ? 'حسابك مفعل بالفعل. سجل الدخول برقم الهاتف وكلمة المرور.'
+                            : _emailRequired
+                            ? 'طلبك قديم ولم يُسجل له بريد مؤكد. تواصل مع الدعم لتحديث بياناتك قبل التفعيل.'
+                            : 'تمت الموافقة على طلبك. أكّد بريدك المسجل ثم أنشئ كلمة المرور لتفعيل الحساب.')
                       : declined
                       ? (_reason?.isNotEmpty == true
                             ? 'سبب الرفض: $_reason'
@@ -912,7 +920,7 @@ class _PartnerApplicationSubmittedScreenState
                   ),
                 ],
                 const SizedBox(height: 26),
-                if (accepted) ...[
+                if (accepted && !_accountActive && !_emailRequired) ...[
                   SizedBox(
                     width: double.infinity,
                     height: 56,
