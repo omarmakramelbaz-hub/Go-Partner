@@ -61,8 +61,9 @@ class WebPackagingTests(unittest.TestCase):
         self.assertIn('href="/Go-Partner/icons/go-partner.png"', root)
         self.assertNotIn('href="icons/Icon-192.png"', root)
         manifest = json.loads((pages / 'manifest.json').read_text())
-        for key in ('id', 'start_url', 'scope'):
+        for key in ('id', 'scope'):
             self.assertEqual(manifest[key], '/Go-Partner/')
+        self.assertEqual(manifest['start_url'], '/Go-Partner/?launch=home')
         self.assertEqual(manifest['name'], 'GO Partner')
         self.assertTrue((pages / 'icons/go-partner.png').is_file())
         self.assertTrue((pages / 'partner-logo.svg').is_file())

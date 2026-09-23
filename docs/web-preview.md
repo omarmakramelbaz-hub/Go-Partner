@@ -1,10 +1,12 @@
 # GO Partner web preview
 
-Share and save this stable URL: https://omarmakramelbaz-hub.github.io/Go-Partner/
+Share and save this stable URL: https://omarmakramelbaz-hub.github.io/Go-Partner/?launch=home
 
-The manifest uses `/Go-Partner/` for its identity, scope and Home Screen start
-URL. The manifest and Apple touch icon are available at the root, even when the
-page was opened through a release URL.
+The manifest uses `/Go-Partner/` for its identity and scope. Its stable Home
+Screen start URL adds `?launch=home` to bypass older cached root HTML on the
+first launch; this value does not change between releases. The manifest and
+Apple touch icon are available at the root, even when the page was opened
+through a release URL.
 
 Before starting Flutter, the entry page requests `version.json` without using
 the HTTP cache and with a timestamp in the URL. It loads the selected release's

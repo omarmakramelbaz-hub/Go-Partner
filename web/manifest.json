@@ -2,7 +2,7 @@
   "id": "/Go-Partner/",
   "name": "GO Partner",
   "short_name": "GO Partner",
-  "start_url": "/Go-Partner/",
+  "start_url": "/Go-Partner/?launch=home",
   "scope": "/Go-Partner/",
   "display": "standalone",
   "background_color": "#171a1f",

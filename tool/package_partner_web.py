@@ -12,6 +12,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 APP_ROOT = '/Go-Partner/'
+APP_START = APP_ROOT + '?launch=home'
 
 
 def package_web():
@@ -73,7 +74,8 @@ def package_web():
   <link rel="icon" type="image/png" href="{APP_ROOT}icons/go-partner.png">
 </head>''')
     manifest = json.loads((source / 'manifest.json').read_text())
-    if any(manifest.get(key) != APP_ROOT for key in ('id', 'start_url', 'scope')):
+    if (any(manifest.get(key) != APP_ROOT for key in ('id', 'scope'))
+            or manifest.get('start_url') != APP_START):
         raise SystemExit('Home Screen identity and start URL must use the stable app root')
     if destination.exists():
         shutil.rmtree(destination)
