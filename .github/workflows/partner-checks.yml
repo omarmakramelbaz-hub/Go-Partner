@@ -9,6 +9,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify packaged app identity
         run: python3 tool/verify_partner_identity.py
+      - name: Verify stable web launch and updates
+        run: |
+          python3 -m unittest discover -s tool -p test_package_partner_web.py
+          node --test tool/test_web_bootstrap.cjs
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.0'
