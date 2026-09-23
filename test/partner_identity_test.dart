@@ -85,35 +85,38 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: PartnerWordmark())),
-    );
-    await tester.pumpAndSettle();
-    var logo = tester.widget<SvgPicture>(find.byType(SvgPicture));
-    expect(logo.bytesLoader, isA<SvgAssetLoader>());
-    expect(
-      (logo.bytesLoader as SvgAssetLoader).assetName,
-      PartnerAppIdentity.lightLogoAsset,
-    );
-    expect(find.bySemanticsLabel('GO Partner'), findsOneWidget);
+    try {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: PartnerWordmark())),
+      );
+      await tester.pumpAndSettle();
+      var logo = tester.widget<SvgPicture>(find.byType(SvgPicture));
+      expect(logo.bytesLoader, isA<SvgAssetLoader>());
+      expect(
+        (logo.bytesLoader as SvgAssetLoader).assetName,
+        PartnerAppIdentity.lightLogoAsset,
+      );
+      expect(find.bySemanticsLabel('GO Partner'), findsOneWidget);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PartnerAuthScaffold(
-          title: 'Partner',
-          description: 'Sign in',
-          children: [],
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: PartnerAuthScaffold(
+            title: 'Partner',
+            description: 'Sign in',
+            children: [],
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    logo = tester.widget<SvgPicture>(find.byType(SvgPicture));
-    expect(logo.bytesLoader, isA<SvgAssetLoader>());
-    expect(
-      (logo.bytesLoader as SvgAssetLoader).assetName,
-      PartnerAppIdentity.logoAsset,
-    );
-    expect(tester.takeException(), isNull);
+      );
+      await tester.pumpAndSettle();
+      logo = tester.widget<SvgPicture>(find.byType(SvgPicture));
+      expect(logo.bytesLoader, isA<SvgAssetLoader>());
+      expect(
+        (logo.bytesLoader as SvgAssetLoader).assetName,
+        PartnerAppIdentity.logoAsset,
+      );
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 }
