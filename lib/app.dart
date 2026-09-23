@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'helpers/identity/partner_app_identity.dart';
 import 'helpers/networking/notification_helper.dart';
 import 'helpers/pusher_service/pusher_controller.dart';
 import 'helpers/routes/app_routers_import.dart';
@@ -49,7 +50,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           SoundNotification.instance.stopSound();
         },
         child: MaterialApp(
-          title: 'GO Partner',
+          title: PartnerAppIdentity.displayName,
           localizationsDelegates: [...context.localizationDelegates, CountryLocalizations.delegate],
           supportedLocales: context.supportedLocales,
           locale: context.locale,

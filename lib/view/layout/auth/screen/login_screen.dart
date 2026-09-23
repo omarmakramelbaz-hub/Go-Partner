@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../helpers/extension/string_extension.dart';
+import '../../../../helpers/identity/partner_app_identity.dart';
 import '../../../../helpers/pusher_service/pusher_controller.dart';
 import '../../../../helpers/utils/country_code_methods.dart';
 import '../../../../helpers/utils/navigator_methods.dart';
@@ -77,10 +78,10 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                       children: [
                         Center(
                           child: SvgPicture.asset(
-                            'assets/svg/go_partner_logo.svg',
+                            PartnerAppIdentity.logoAsset,
                             width: compact ? 154 : 184,
                             height: compact ? 118 : 141,
-                            semanticsLabel: 'GO Partner',
+                            semanticsLabel: PartnerAppIdentity.displayName,
                           ),
                         ),
                         const SizedBox(height: 10),

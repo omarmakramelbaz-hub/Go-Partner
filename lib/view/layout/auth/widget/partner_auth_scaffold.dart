@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../helpers/identity/partner_app_identity.dart';
+
 class PartnerAuthScaffold extends StatelessWidget {
   const PartnerAuthScaffold({
     super.key,
@@ -33,7 +35,7 @@ class PartnerAuthScaffold extends StatelessWidget {
                 children: [
                   Center(
                     child: SvgPicture.asset(
-                      'assets/svg/go_partner_logo.svg',
+                      PartnerAppIdentity.logoAsset,
                       width: 170,
                       height: 130,
                     ),

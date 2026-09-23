@@ -7,6 +7,7 @@ import 'partner_email_verification_screen.dart';
 import 'partner_password_screen.dart';
 
 import '../../../../helpers/networking/api_helper.dart';
+import '../../../../helpers/identity/partner_app_identity.dart';
 import '../../../../helpers/networking/urls.dart';
 
 class PartnerApplicationScreen extends StatefulWidget {
@@ -543,7 +544,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
             borderRadius: BorderRadius.circular(18),
           ),
           child: SvgPicture.asset(
-            'assets/svg/go_partner_logo.svg',
+            PartnerAppIdentity.logoAsset,
             fit: BoxFit.contain,
           ),
         ),

@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../helpers/networking/api_helper.dart';
-import '../../../../../../helpers/utils/navigator_methods.dart';
 import '../../../helpers/hive/hive_methods.dart';
+import '../../../helpers/identity/partner_app_identity.dart';
+import '../../../helpers/networking/api_helper.dart';
 import '../../../helpers/pusher_service/pusher_controller.dart';
+import '../../../helpers/utils/navigator_methods.dart';
 import '../auth/controller/auth_controller.dart';
 import 'partner_onboarding_screen.dart';
 import '../delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen.dart';
@@ -125,7 +126,7 @@ class _GoPartnerOpening extends StatelessWidget {
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
     children: [
-      Image.asset('assets/brand/partner_splash.webp', fit: BoxFit.cover),
+      Image.asset(PartnerAppIdentity.splashBackgroundAsset, fit: BoxFit.cover),
       SafeArea(
         child: Align(
           alignment: const Alignment(0, -.52),
@@ -133,7 +134,7 @@ class _GoPartnerOpening extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.asset(
-                'assets/svg/go_partner_logo_light.svg',
+                PartnerAppIdentity.lightLogoAsset,
                 width: 210,
                 height: 168,
               ),

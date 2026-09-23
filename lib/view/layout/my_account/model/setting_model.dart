@@ -1,11 +1,11 @@
+/// Operational settings only. App identity belongs to PartnerAppIdentity.
+/// Remote branding fields must not be parsed, stored, or serialized here.
 class SettingModel {
   String? email;
   String? mobile;
   String? address;
   int? adminId;
   int? kmPrice;
-  String? logo;
-  String? favicon;
   String? twitterLink;
   String? facebookLink;
   String? instagramLink;
@@ -25,8 +25,6 @@ class SettingModel {
     this.address,
     this.adminId,
     this.kmPrice,
-    this.logo,
-    this.favicon,
     this.twitterLink,
     this.facebookLink,
     this.instagramLink,
@@ -47,8 +45,6 @@ class SettingModel {
     address = json['address'];
     adminId = json['admin_id'];
     kmPrice = json['km_price'];
-    logo = json['logo'];
-    favicon = json['favicon'];
     twitterLink = json['twitter_link'];
     facebookLink = json['facebook_link'];
     instagramLink = json['instagram_link'];
@@ -70,8 +66,6 @@ class SettingModel {
     data['address'] = address;
     data['admin_id'] = adminId;
     data['km_price'] = kmPrice;
-    data['logo'] = logo;
-    data['favicon'] = favicon;
     data['twitter_link'] = twitterLink;
     data['facebook_link'] = facebookLink;
     data['instagram_link'] = instagramLink;
