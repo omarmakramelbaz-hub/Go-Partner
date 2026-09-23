@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GO Partner</title>
+  <style>body { background: #171a1f; color: white; font: 18px sans-serif; text-align: center; padding: 25vh 24px; } a { color: #ff7900; }</style>
+</head>
+<body>
+  <p>افتح النسخة الحالية من GO Partner</p>
+  <a href="/Go-Partner/">فتح التطبيق</a>
+  <script>
+    // Retired release bookmarks should recover. Missing assets and unrelated
+    // paths stay 404s rather than creating redirect loops.
+    if (/^\/Go-Partner\/releases\/[A-Za-z0-9_-]+(?:\/(?:index\.html)?)?$/.test(location.pathname)) {
+      const target = new URL('/Go-Partner/', location.origin);
+      target.search = location.search;
+      target.searchParams.set('launch', String(Date.now()));
+      target.hash = location.hash;
+      location.replace(target.href);
+    }
+  </script>
+</body>
+</html>

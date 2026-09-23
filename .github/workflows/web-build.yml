@@ -22,6 +22,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Verify stable web launch and updates
+        run: |
+          python3 -m unittest discover -s tool -p test_package_partner_web.py
+          node --test tool/test_web_bootstrap.cjs
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
