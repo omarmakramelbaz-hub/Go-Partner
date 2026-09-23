@@ -15,4 +15,5 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - run: flutter test test/partner_email_auth_test.dart
+      - run: flutter create . --platforms web --no-pub
       - run: flutter build web --release --base-href /Go-Partner/
