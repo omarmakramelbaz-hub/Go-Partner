@@ -32,11 +32,11 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Verify Go Drive launcher assets
+      - name: Verify GO Partner launcher assets
         shell: bash
         run: |
           set -euo pipefail
-          test -s assets/images/go_drive_app_icon.png
+          test -s assets/images/go_partner_app_icon.png
           test -s android/app/src/main/res/mipmap-mdpi/ic_launcher.png
           test -s android/app/src/main/res/mipmap-hdpi/ic_launcher.png
           test -s android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
@@ -83,7 +83,7 @@ jobs:
 
       - name: Verify mobile version
         run: |
-          grep -q '^version: 1.0.23+24$' pubspec.yaml
+          grep -q '^version: 1.0.24+25$' pubspec.yaml
           grep -q 'android:label="GO Partner"' android/app/src/main/AndroidManifest.xml
 
       - name: Build Release APK
@@ -106,7 +106,7 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: go-partner-1.0.23-build24-apk
+          name: go-partner-1.0.24-build25-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -114,7 +114,7 @@ jobs:
       - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: go-partner-1.0.23-build24-aab
+          name: go-partner-1.0.24-build25-aab
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14

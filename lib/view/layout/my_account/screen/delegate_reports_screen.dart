@@ -27,7 +27,7 @@ class _DelegateReportsScreenState extends State<DelegateReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const softText = Color(0xff7D8490);
 
     return ChangeNotifierProvider(
@@ -261,7 +261,7 @@ class _DelegateReportsScreenState extends State<DelegateReportsScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                       decoration: BoxDecoration(
-                        color: const Color(0xff082A4D),
+                        color: const Color(0xFF171A1F),
                         borderRadius: BorderRadius.circular(18),
                       ),
                       child: Row(
@@ -314,7 +314,7 @@ class _StatCard extends StatelessWidget {
         border: Border.all(color: const Color(0xffECEEF1)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xff082A4D).withOpacity(.045),
+            color: const Color(0xFF171A1F).withOpacity(.045),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -347,7 +347,7 @@ class _StatCard extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Color(0xff082A4D), fontSize: 14.5, fontWeight: FontWeight.w900),
+            style: const TextStyle(color: Color(0xFF171A1F), fontSize: 14.5, fontWeight: FontWeight.w900),
           ),
         ],
       ),

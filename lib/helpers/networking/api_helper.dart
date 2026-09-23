@@ -50,12 +50,12 @@ class ApiHelper {
       kDebugMode
           ? [
               PrettyDioLogger(
-                requestHeader: true,
-                requestBody: true,
-                responseBody: true,
+                requestHeader: false,
+                requestBody: false,
+                responseBody: false,
                 responseHeader: false,
                 compact: false,
-                error: true,
+                error: false,
                 request: true,
               ),
             ]

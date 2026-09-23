@@ -2,7 +2,7 @@ name: go_partner
 description: "GO Partner — partner, courier and professional service app."
 publish_to: 'none'
 
-version: 1.0.23+24
+version: 1.0.24+25
 
 environment:
   sdk: ^3.9.2
@@ -84,6 +84,7 @@ flutter:
   uses-material-design: true
   assets:
     - i18n/
+    - assets/brand/
     - assets/images/
     - assets/svg/
     - assets/global_icon/
@@ -114,24 +115,24 @@ flutter:
 
 
 flutter_native_splash:
-  color: "#FFFFFF"
-  image: assets/images/go_drive_splash_native.png
+  color: "#171A1F"
+  image: assets/images/go_partner_splash_native.png
   android: true
   ios: true
   web: false
   android_12:
-    color: "#FFFFFF"
-    image: assets/images/go_drive_splash_native.png
-    icon_background_color: "#FFFFFF"
+    color: "#171A1F"
+    image: assets/images/go_partner_splash_native.png
+    icon_background_color: "#171A1F"
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/images/go_drive_app_icon.png
+  image_path: assets/images/go_partner_app_icon.png
   min_sdk_android: 21
   remove_alpha_ios: true
   web:
     generate: true
-    image_path: assets/images/go_drive_app_icon.png
-    background_color: "#FFFFFF"
+    image_path: assets/images/go_partner_app_icon.png
+    background_color: "#171A1F"
     theme_color: "#FD7201"

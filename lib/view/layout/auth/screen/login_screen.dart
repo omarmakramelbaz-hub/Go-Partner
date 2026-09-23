@@ -19,6 +19,7 @@ import '../../delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen
 import '../controller/auth_controller.dart';
 import 'forget_password_screen.dart';
 import 'partner_application_screen.dart';
+import 'partner_type_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -394,7 +395,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
   void _openRegistration() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => const PartnerApplicationScreen(),
+        builder: (_) => const PartnerTypeScreen(),
       ),
     );
   }

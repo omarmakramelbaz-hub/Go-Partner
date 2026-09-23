@@ -29,7 +29,7 @@ class CustomElevatedButton extends StatelessWidget {
               border: Border.all(color: const Color(0xffFFE0C5)),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xff082A4D).withOpacity(.06),
+                  color: const Color(0xFF171A1F).withOpacity(.06),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

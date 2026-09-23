@@ -39,7 +39,7 @@ class DeliveryLocationScreen extends StatefulWidget {
 
 class _DeliveryLocationScreenState extends State<DeliveryLocationScreen> {
   static const _orange = Color(0xffFD7201);
-  static const _navy = Color(0xff082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _softText = Color(0xff7D8490);
   static const _tileUrl =
       'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png';

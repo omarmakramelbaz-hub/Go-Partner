@@ -14,7 +14,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const softText = Color(0xff7D8490);
 
     return Scaffold(

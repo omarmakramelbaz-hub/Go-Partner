@@ -45,7 +45,7 @@ class CustomAppBar extends PreferredSize {
             surfaceTintColor: Colors.transparent,
             toolbarHeight: height,
             automaticallyImplyLeading: false,
-            shadowColor: shadowColor ?? const Color(0xff082A4D).withOpacity(.08),
+            shadowColor: shadowColor ?? const Color(0xFF171A1F).withOpacity(.08),
             centerTitle: centerTitle ?? false,
             titleSpacing: 14,
             title: Padding(
@@ -79,7 +79,7 @@ class CustomAppBar extends PreferredSize {
                       : null,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xff082A4D).withOpacity(.045),
+                      color: const Color(0xFF171A1F).withOpacity(.045),
                       blurRadius: 18,
                       offset: const Offset(0, 7),
                     ),
@@ -114,7 +114,7 @@ class _PremiumBackButton extends StatelessWidget {
             border: Border.all(color: const Color(0xffECEEF1)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xff082A4D).withOpacity(.07),
+                color: const Color(0xFF171A1F).withOpacity(.07),
                 blurRadius: 12,
                 offset: const Offset(0, 5),
               ),

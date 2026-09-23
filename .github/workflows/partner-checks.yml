@@ -1,0 +1,19 @@
+name: GO Partner verification checks
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.0'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test test/partner_email_auth_test.dart
+      - run: flutter create . --platforms web --no-pub
+      - run: flutter build web --release --base-href /Go-Partner/
