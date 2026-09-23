@@ -48,11 +48,11 @@ class _CurrentOrdersDelegateScreenState extends State<CurrentOrdersDelegateScree
             if (didPop) widget.args.onPop();
           },
           child: Scaffold(
-            backgroundColor: const Color(0xffF8F9FB),
+            backgroundColor: Colors.white,
             appBar: CustomAppBar(
               context,
               height: 86,
-            appBarColor: const Color(0xff171A1F),
+              appBarColor: const Color(0xff171A1F),
               title: Text(
                 AppLocaleKey.currentOrders.tr(),
                 style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w900),
@@ -85,11 +85,7 @@ class _CurrentOrdersDelegateScreenState extends State<CurrentOrdersDelegateScree
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(color: const Color(0xffECEEF1)),
                           boxShadow: [
-                            BoxShadow(
-                              color: navy.withOpacity(.055),
-                              blurRadius: 18,
-                              offset: const Offset(0, 8),
-                            ),
+                            BoxShadow(color: navy.withOpacity(.055), blurRadius: 18, offset: const Offset(0, 8)),
                           ],
                         ),
                         child: Row(
@@ -117,7 +113,11 @@ class _CurrentOrdersDelegateScreenState extends State<CurrentOrdersDelegateScree
                                     context.locale.languageCode == 'ar'
                                         ? 'الطلبات التي تعمل عليها الآن'
                                         : 'Orders you are currently working on',
-                                    style: const TextStyle(color: softText, fontSize: 12.5, fontWeight: FontWeight.w500),
+                                    style: const TextStyle(
+                                      color: softText,
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),

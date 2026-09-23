@@ -29,9 +29,13 @@ class _OrdersDelegateScreenState extends State<OrdersDelegateScreen> with Single
   void initState() {
     super.initState();
     _pusherController = context.read<PusherController>();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this)..addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
     _pusherController.addEventListener('delegate.updated', _handleDelegateUpdated);
+  }
+
+  void _onTabChanged() {
+    if (mounted) setState(() {});
   }
 
   void _handleDelegateUpdated(PusherEvent event) {
@@ -49,6 +53,7 @@ class _OrdersDelegateScreenState extends State<OrdersDelegateScreen> with Single
   }
 
   void _loadData() {
+    if (!mounted) return;
     final controller = context.read<DelegateOrdersController>();
     controller.initialDelegateCompletedOrders();
     controller.initialDelegateOngoingOrders();
@@ -63,6 +68,7 @@ class _OrdersDelegateScreenState extends State<OrdersDelegateScreen> with Single
   @override
   void dispose() {
     _pusherController.removeEventListener('delegate.updated', _handleDelegateUpdated);
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -73,7 +79,7 @@ class _OrdersDelegateScreenState extends State<OrdersDelegateScreen> with Single
     const softText = Color(0xff7D8490);
 
     return Scaffold(
-      backgroundColor: const Color(0xffF8F9FB),
+      backgroundColor: Colors.white,
       body: Consumer<DelegateOrdersController>(
         builder: (context, controller, _) {
           return Padding(
@@ -81,73 +87,20 @@ class _OrdersDelegateScreenState extends State<OrdersDelegateScreen> with Single
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xffFF8A08), Color(0xffFF6500)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFD7201).withOpacity(.20),
-                            blurRadius: 15,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 25),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocaleKey.orders.tr(),
-                            style: const TextStyle(color: navy, fontSize: 25, fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            context.locale.languageCode == 'ar'
-                                ? 'تابع الطلبات حسب حالتها'
-                                : 'Track orders by their status',
-                            style: const TextStyle(color: softText, fontSize: 13, fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
                 Container(
-                  height: 58,
+                  height: 50,
                   padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffEEF0F3),
-                    borderRadius: BorderRadius.circular(19),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xffEEF0F3), borderRadius: BorderRadius.circular(12)),
                   child: TabBar(
                     controller: _tabController,
                     dividerColor: Colors.transparent,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicator: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: navy.withOpacity(.08),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+                      color: const Color(0xffFD7201),
+                      borderRadius: BorderRadius.circular(9),
+                      boxShadow: [BoxShadow(color: navy.withOpacity(.08), blurRadius: 12, offset: const Offset(0, 5))],
                     ),
-                    labelColor: navy,
+                    labelColor: Colors.white,
                     unselectedLabelColor: softText,
                     labelPadding: const EdgeInsets.symmetric(horizontal: 3),
                     labelStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
@@ -214,7 +167,7 @@ class _OrderTab extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? const Color(0xffFD7201) : const Color(0xffDDE1E6),
+                color: selected ? Colors.white.withOpacity(.22) : const Color(0xffE3E6EA),
                 borderRadius: BorderRadius.circular(9),
               ),
               child: Text(

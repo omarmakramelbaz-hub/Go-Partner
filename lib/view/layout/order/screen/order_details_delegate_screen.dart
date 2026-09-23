@@ -146,23 +146,7 @@ class _OrderDetailsDelegateScreenState extends State<OrderDetailsDelegateScreen>
             isEmpty: delegateOrderController.delegateSingleOrder == null,
             child: Scaffold(
               extendBody: true,
-              appBar: CustomAppBar(
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back_ios, color: AppColor.blackColor(context)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                appBarColor: AppColor.whiteColor(context),
-                context,
-                height: 90,
-                centerTitle: false,
-                leadingPadding: 20,
-                title: Padding(
-                  padding: const EdgeInsets.only(bottom: 25),
-                  child: Text(AppLocaleKey.orderDetailes.tr(), style: AppTextStyle.text20BS(context)),
-                ),
-              ),
+              appBar: CustomAppBar(context, title: Text(AppLocaleKey.orderDetailes.tr())),
               body: RefreshIndicator(
                 onRefresh: () async {
                   delegateOrderController.getDelegateSingleOrder(id: widget.args.orderId);

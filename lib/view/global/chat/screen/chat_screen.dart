@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/theme/app_colors.dart';
-import '../../../../helpers/theme/app_text_style.dart';
 import '../../../../helpers/utils/date_methods.dart';
 import '../../../custom_widgets/custom_app_bar/custom_app_bar.dart';
 import '../../../custom_widgets/custom_form_field/custom_form_field.dart';
@@ -66,19 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Consumer<ChatController>(
       builder: (context, chatController, _) {
         return Scaffold(
-          appBar: CustomAppBar(
-            context,
-            height: 90,
-            radius: 60,
-            actions: const [],
-            leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.arrow_back_ios_rounded),
-            ),
-            title: Text(tr(AppLocaleKey.messages), style: AppTextStyle.text16BS(context)),
-          ),
+          appBar: CustomAppBar(context, title: Text(tr(AppLocaleKey.messages))),
           body: Column(
             children: [
               Expanded(

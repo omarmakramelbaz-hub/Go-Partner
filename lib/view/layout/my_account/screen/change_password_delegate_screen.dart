@@ -44,7 +44,7 @@ class _ChangePasswordDelegateScreenState extends State<ChangePasswordDelegateScr
     return ChangeNotifierProvider(
       create: (_) => MyAccountController(),
       child: Scaffold(
-        backgroundColor: const Color(0xffF8F9FB),
+        backgroundColor: Colors.white,
         appBar: CustomAppBar(
           context,
           height: 86,

@@ -66,7 +66,7 @@ class _PersonalInformationDelegateScreenState extends State<PersonalInformationD
         final hasPhoto = profile?.photoProfile != null && profile!.photoProfile!.isNotEmpty;
 
         return Scaffold(
-          backgroundColor: const Color(0xffF8F9FB),
+          backgroundColor: Colors.white,
           appBar: CustomAppBar(
             context,
             height: 86,

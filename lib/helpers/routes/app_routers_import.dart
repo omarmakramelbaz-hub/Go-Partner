@@ -13,7 +13,6 @@ import '../../view/layout/auth/screen/regester_screen.dart';
 import '../../view/layout/delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen.dart';
 import '../../view/layout/home/screen/location_delegate.dart';
 import '../../view/layout/my_account/controller/delegate_account_controller.dart';
-import '../../view/layout/my_account/controller/my_account_controller.dart';
 import '../../view/layout/my_account/screen/change_password_delegate_screen.dart';
 import '../../view/layout/my_account/screen/contact_us_screen.dart';
 import '../../view/layout/my_account/screen/delegate_reports_screen.dart';
@@ -27,7 +26,6 @@ import '../../view/layout/order/screen/delivery_location_screen.dart';
 import '../../view/layout/order/screen/order_details_delegate_screen.dart';
 import '../../view/layout/screen/splash_screen.dart';
 import '../../view/layout/screen/partner_onboarding_screen.dart';
-import '../../view/layout/wallet/controller/wallet_controller.dart';
 import '../../view/layout/wallet/screen/wallet_screen.dart';
 
 part 'app_routers.dart';

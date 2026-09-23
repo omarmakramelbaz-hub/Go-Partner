@@ -58,10 +58,9 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                 height: 46,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(.9)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(.11), blurRadius: 18, offset: const Offset(0, 8))],
+                  color: active ? const Color(0xffECF9F0) : const Color(0xffF4F5F6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: active ? const Color(0xff85CEA0) : const Color(0xffE6E8EC)),
                 ),
                 child: Row(
                   children: [
@@ -85,7 +84,11 @@ class _DelegateStatusWidgetState extends State<DelegateStatusWidget> {
                                 : (context.locale.languageCode == 'ar' ? 'غير متصل' : 'Offline'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Color(0xff171717), fontSize: 11.5, fontWeight: FontWeight.w900),
+                            style: const TextStyle(
+                              color: Color(0xff171717),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                           Text(
                             active ? AppLocaleKey.active.tr() : AppLocaleKey.inactive.tr(),

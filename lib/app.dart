@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           SoundNotification.instance.stopSound();
         },
         child: MaterialApp(
-          title: 'Faskhaninja Delegate',
+          title: 'GO Partner',
           localizationsDelegates: [...context.localizationDelegates, CountryLocalizations.delegate],
           supportedLocales: context.supportedLocales,
           locale: context.locale,
