@@ -1,3 +1,5 @@
+import '../identity/partner_app_identity.dart';
+
 class AppImages {
   static const String error = 'assets/global_icon/failure.svg';
   static const String help = 'assets/global_icon/help.svg';
@@ -27,8 +29,8 @@ class AppImages {
   static const String delegateAcceptOrderIcon = 'assets/svg/delegateAcceptOrderIcon.svg';
   // static const String delegateLogo2Icon = 'assets/svg/delegateLogo2Icon.svg';
   // static const String delegateCover = 'assets/images/delegateCover.png';
-  static const String lastSplash = 'assets/images/logoOutPng.png';
-  static const String delegateFinalLogoImage = 'assets/images/logoOutPng.png';
+  static const String lastSplash = PartnerAppIdentity.iconAsset;
+  static const String delegateFinalLogoImage = PartnerAppIdentity.iconAsset;
 
   // static const String languageIcon = 'assets/svg/languageIcon.svg';
   // static const String backIcon = 'assets/svg/backIcon.svg';
@@ -106,7 +108,7 @@ class AppImages {
   static const String digitalWallet = 'assets/images/digitalWallet.png';
   static const String walletImage = 'assets/images/walletImage.png';
   static const String delegateSplashImage = 'assets/images/delegateSplashImage.png';
-  static const String appIcon = 'assets/images/logoOutPng.png';
+  static const String appIcon = PartnerAppIdentity.iconAsset;
   // static const String delegateVector = 'assets/svg/delegateVector.svg';
   static const String delegateSplash = 'assets/images/delegateGif.gif';
 }

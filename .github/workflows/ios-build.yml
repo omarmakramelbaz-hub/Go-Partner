@@ -8,6 +8,8 @@ on:
       - "lib/**"
       - "assets/**"
       - "ios/**"
+      - "tool/verify_partner_identity.py"
+      - "test/partner_identity_test.dart"
       - ".github/workflows/ios-build.yml"
   workflow_dispatch:
 
@@ -125,6 +127,11 @@ jobs:
 
       - name: Install Flutter dependencies
         run: flutter pub get
+
+      - name: Verify packaged identity and reject remote branding regressions
+        run: |
+          python3 tool/verify_partner_identity.py
+          flutter test test/partner_identity_test.dart
 
       - name: Install iOS pods
         shell: bash

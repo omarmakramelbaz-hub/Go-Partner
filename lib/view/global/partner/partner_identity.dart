@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../helpers/identity/partner_app_identity.dart';
+
 /// Shared identity for the signed-in GO Partner screens.
 class PartnerIdentity {
   static const ink = Color(0xff171A1F);
@@ -16,9 +18,9 @@ class PartnerWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'GO Partner',
+    label: PartnerAppIdentity.displayName,
     image: true,
-    child: SvgPicture.asset('assets/svg/go_partner_logo_light.svg', height: height, excludeFromSemantics: true),
+    child: SvgPicture.asset(PartnerAppIdentity.lightLogoAsset, height: height, excludeFromSemantics: true),
   );
 }
 

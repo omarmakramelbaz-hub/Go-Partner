@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify packaged app identity
+        run: python3 tool/verify_partner_identity.py
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.0'

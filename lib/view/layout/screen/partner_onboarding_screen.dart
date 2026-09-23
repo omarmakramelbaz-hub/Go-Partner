@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../helpers/identity/partner_app_identity.dart';
 import '../../../helpers/utils/navigator_methods.dart';
 import '../auth/screen/login_screen.dart';
 
@@ -12,7 +13,7 @@ class PartnerOnboardingScreen extends StatelessWidget {
       children: [
         Positioned.fill(
           child: Image.asset(
-            'assets/brand/partner_welcome.webp',
+            PartnerAppIdentity.welcomeBackgroundAsset,
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
           ),
