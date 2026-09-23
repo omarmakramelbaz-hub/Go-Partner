@@ -1,76 +1,52 @@
 import 'package:flutter/material.dart';
 
+import '../../../global/partner/partner_identity.dart';
+
 class SettingButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
-
-  const SettingButton({super.key, required this.title, required this.onTap});
+  final IconData icon;
+  final bool destructive;
+  const SettingButton({
+    super.key,
+    required this.title,
+    required this.onTap,
+    this.icon = Icons.settings_outlined,
+    this.destructive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xFF171A1F);
-    const orange = Color(0xffFD7201);
-
+    final color = destructive ? const Color(0xffD63B43) : PartnerIdentity.ink;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 22),
       child: Material(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(19),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(19),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 62),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(19),
-              border: Border.all(color: const Color(0xffECEEF1)),
-              boxShadow: [
-                BoxShadow(
-                  color: navy.withOpacity(.045),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+            constraints: const BoxConstraints(minHeight: 57),
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: PartnerIdentity.border)),
             ),
             child: Row(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffFFF0E3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.tune_rounded, color: orange, size: 20),
-                ),
-                const SizedBox(width: 12),
+                Icon(icon, color: color, size: 21),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      color: navy,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
-                Container(
-                  width: 32,
-                  height: 32,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffF7F8FA),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left_rounded
-                        : Icons.chevron_right_rounded,
-                    color: orange,
-                    size: 21,
-                  ),
+                const SizedBox(width: 8),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  color: PartnerIdentity.muted,
+                  size: 20,
                 ),
               ],
             ),

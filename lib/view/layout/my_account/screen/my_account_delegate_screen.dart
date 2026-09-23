@@ -1,8 +1,8 @@
+import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../helpers/images/app_images.dart';
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/utils/common_methods.dart';
 import '../../../../helpers/utils/navigator_methods.dart';
@@ -48,141 +48,49 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
     final hasPhoto = profile?.photoProfile != null && profile!.photoProfile!.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xffF8F9FB),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(0, 18, 0, 120),
+        padding: const EdgeInsets.fromLTRB(0, 24, 0, 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Text(
-                'حسابي',
-                style: TextStyle(color: navy, fontSize: 25, fontWeight: FontWeight.w900),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xff171A1F), Color(0xff292D33)],
-                  ),
-                  borderRadius: BorderRadius.circular(26),
-                  boxShadow: [
-                    BoxShadow(
-                      color: navy.withOpacity(.18),
-                      blurRadius: 26,
-                      offset: const Offset(0, 12),
+            Center(
+              child: Column(
+                children: [
+                  Container(
+                    width: 84,
+                    height: 84,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xffFD7201), width: 2),
                     ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -28,
-                      top: -50,
-                      child: Container(
-                        width: 145,
-                        height: 145,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(.05),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 68,
-                          height: 68,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(.14),
-                                blurRadius: 15,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(19),
-                            child: CustomImage(
-                              path: hasPhoto ? profile?.photoProfile ?? '' : AppImages.userIcon,
-                              type: hasPhoto ? ImageType.network : ImageType.svg,
-                              height: 62,
-                              width: 62,
-                              fit: BoxFit.cover,
+                    child: ClipOval(
+                      child: hasPhoto
+                          ? CustomImage(path: profile!.photoProfile!, type: ImageType.network, fit: BoxFit.cover)
+                          : const ColoredBox(
+                              color: Color(0xffFFF1E5),
+                              child: Icon(Icons.person_outline_rounded, size: 42, color: Color(0xffFD7201)),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                profile?.name ?? '',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 29,
-                                    height: 29,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xffFD7201).withOpacity(.20),
-                                      borderRadius: BorderRadius.circular(9),
-                                    ),
-                                    child: const Icon(Icons.location_on_rounded, color: Color(0xffFF9A1A), size: 17),
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Expanded(
-                                    child: Text(
-                                      profile?.areaTitle ?? '',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(.75),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.09),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withOpacity(.10)),
-                          ),
-                          child: const Icon(Icons.verified_user_rounded, color: Color(0xffFF9A1A), size: 21),
-                        ),
-                      ],
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    profile?.name ?? '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: navy, fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    profile?.mobile ?? '',
+                    textDirection: ui.TextDirection.ltr,
+                    style: const TextStyle(color: softText, fontSize: 13),
+                  ),
+                  if (profile?.areaTitle?.isNotEmpty == true) ...[
+                    const SizedBox(height: 6),
+                    Text(profile!.areaTitle!, style: const TextStyle(color: softText, fontSize: 12)),
                   ],
-                ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -193,13 +101,13 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
                 style: const TextStyle(color: softText, fontSize: 13, fontWeight: FontWeight.w700),
               ),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.person_outline_rounded,
               title: AppLocaleKey.personalInformation.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, PersonalInformationDelegateScreen.routeName),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.phone_outlined,
               title: AppLocaleKey.changePhoneNumber.tr(),
               onTap: () => NavigatorMethods.showAppBottomSheet(
                 enableDrag: true,
@@ -208,23 +116,23 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
                 const ChangePhoneNumberBottomSheet(),
               ),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.lock_outline_rounded,
               title: AppLocaleKey.changePassword.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, ChangePasswordDelegateScreen.routeName),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.account_balance_wallet_outlined,
               title: AppLocaleKey.wallet.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, WalletScreen.routeName),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.language_rounded,
               title: AppLocaleKey.changeLanguage.tr(),
               onTap: () => NavigatorMethods.showAppBottomSheet(context, const ChangeLangBottomSheet()),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.bar_chart_rounded,
               title: AppLocaleKey.myReports.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, DelegateReportsScreen.routeName),
             ),
@@ -236,22 +144,21 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
                 style: const TextStyle(color: softText, fontSize: 13, fontWeight: FontWeight.w700),
               ),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.description_outlined,
               title: AppLocaleKey.termsAndConditions.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, TermsAndConditionsScreen.routeName),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.shield_outlined,
               title: AppLocaleKey.privacyPolicy.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, PrivacyPolicyScreen.routeName),
             ),
-            const SizedBox(height: 10),
             SettingButton(
+              icon: Icons.mail_outline_rounded,
               title: AppLocaleKey.connectWithUs.tr(),
               onTap: () => NavigatorMethods.pushNamed(context, ContactUsScreen.routeName),
             ),
-            const SizedBox(height: 10),
             ChangeNotifierProvider(
               create: (_) => MyAccountController()
                 ..initialSetting()
@@ -259,6 +166,7 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
               child: Consumer<MyAccountController>(
                 builder: (context, controller, _) {
                   return SettingButton(
+                    icon: Icons.support_agent_rounded,
                     title: AppLocaleKey.connectSupport.tr(),
                     onTap: () {
                       NavigatorMethods.pushNamed(
@@ -281,8 +189,12 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 10),
-            SettingButton(title: AppLocaleKey.deleteAccount.tr(), onTap: _confirmDeleteAccount),
+            SettingButton(
+              icon: Icons.delete_outline_rounded,
+              destructive: true,
+              title: AppLocaleKey.deleteAccount.tr(),
+              onTap: _confirmDeleteAccount,
+            ),
             const SizedBox(height: 22),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -338,10 +250,7 @@ class _MyAccountDelegateScreenState extends State<MyAccountDelegateScreen> {
                   Container(
                     width: 54,
                     height: 54,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffFDEBEC),
-                      borderRadius: BorderRadius.circular(17),
-                    ),
+                    decoration: BoxDecoration(color: const Color(0xffFDEBEC), borderRadius: BorderRadius.circular(17)),
                     child: const Icon(Icons.delete_outline_rounded, color: Color(0xffE5484D), size: 27),
                   ),
                   const SizedBox(height: 16),

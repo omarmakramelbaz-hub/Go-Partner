@@ -29,23 +29,7 @@ class AppRouters {
       case ContactUsScreen.routeName:
         return MaterialPageRoute(builder: (_) => const ContactUsScreen());
       case WalletScreen.routeName:
-        return MaterialPageRoute(
-          builder: (_) => MultiProvider(
-            providers: [
-              ChangeNotifierProvider(
-                create: (_) => WalletController()
-                  ..initialWallet()
-                  ..getWallet(),
-              ),
-              ChangeNotifierProvider(
-                create: (_) => MyAccountController()
-                  ..initialSetting()
-                  ..getSetting(),
-              ),
-            ],
-            child: const WalletScreen(),
-          ),
-        );
+        return MaterialPageRoute(builder: (_) => const WalletScreen());
 
       // !======================Delegate======================
       case DelegateBottomNavBarScreen.routeName:

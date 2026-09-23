@@ -3,21 +3,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../helpers/networking/api_helper.dart';
 import '../../../../helpers/networking/urls.dart';
+import '../../../custom_widgets/custom_app_bar/custom_app_bar.dart';
 
 class PartnerServiceRequestsScreen extends StatefulWidget {
-  const PartnerServiceRequestsScreen({super.key});
+  const PartnerServiceRequestsScreen({super.key, this.embedded = false});
+  final bool embedded;
 
   @override
-  State<PartnerServiceRequestsScreen> createState() =>
-      _PartnerServiceRequestsScreenState();
+  State<PartnerServiceRequestsScreen> createState() => _PartnerServiceRequestsScreenState();
 }
 
-class _PartnerServiceRequestsScreenState
-    extends State<PartnerServiceRequestsScreen> {
+class _PartnerServiceRequestsScreenState extends State<PartnerServiceRequestsScreen> {
   static const _orange = Color(0xFFFD7201);
   static const _navy = Color(0xFF171A1F);
   static const _muted = Color(0xFF7D8490);
-  static const _bg = Color(0xFFF7F8FA);
+  static const _bg = Colors.white;
 
   bool _loading = true;
   String? _error;
@@ -35,21 +35,13 @@ class _PartnerServiceRequestsScreenState
       _error = null;
     });
 
-    final response = await ApiHelper.instance.get(
-      Urls.delegateServiceRequests,
-      queryParameters: {'status': 'current'},
-    );
+    final response = await ApiHelper.instance.get(Urls.delegateServiceRequests, queryParameters: {'status': 'current'});
 
     if (!mounted) return;
     if (response.state == ResponseState.complete) {
       final raw = response.data is Map ? response.data['data'] : null;
       setState(() {
-        _items = raw is List
-            ? raw
-                .whereType<Map>()
-                .map((e) => Map<String, dynamic>.from(e))
-                .toList()
-            : [];
+        _items = raw is List ? raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList() : [];
         _loading = false;
       });
     } else {
@@ -63,10 +55,7 @@ class _PartnerServiceRequestsScreenState
   }
 
   Future<void> _update(int id, String status) async {
-    final response = await ApiHelper.instance.post(
-      Urls.updateDelegateServiceRequest(id),
-      body: {'status': status},
-    );
+    final response = await ApiHelper.instance.post(Urls.updateDelegateServiceRequest(id), body: {'status': status});
 
     if (!mounted) return;
     if (response.state == ResponseState.complete) {
@@ -76,8 +65,8 @@ class _PartnerServiceRequestsScreenState
             status == 'accepted'
                 ? 'تم قبول الطلب.'
                 : status == 'completed'
-                    ? 'تم إنهاء الطلب.'
-                    : 'تم رفض الطلب.',
+                ? 'تم إنهاء الطلب.'
+                : 'تم رفض الطلب.',
           ),
         ),
       );
@@ -86,9 +75,7 @@ class _PartnerServiceRequestsScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            response.data is Map
-                ? response.data['message']?.toString() ?? 'تعذر تحديث الطلب.'
-                : 'تعذر تحديث الطلب.',
+            response.data is Map ? response.data['message']?.toString() ?? 'تعذر تحديث الطلب.' : 'تعذر تحديث الطلب.',
           ),
         ),
       );
@@ -109,15 +96,7 @@ class _PartnerServiceRequestsScreenState
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _bg,
-        appBar: AppBar(
-          backgroundColor: _bg,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          title: const Text(
-            'طلبات الخدمات',
-            style: TextStyle(color: _navy, fontWeight: FontWeight.w900),
-          ),
-        ),
+        appBar: widget.embedded ? null : CustomAppBar(context, title: const Text('طلبات الخدمات')),
         body: RefreshIndicator(
           onRefresh: _load,
           child: ListView(
@@ -139,11 +118,7 @@ class _PartnerServiceRequestsScreenState
                     CircleAvatar(
                       radius: 27,
                       backgroundColor: Color(0x22FFFFFF),
-                      child: Icon(
-                        Icons.handyman_rounded,
-                        color: _orange,
-                        size: 30,
-                      ),
+                      child: Icon(Icons.handyman_rounded, color: _orange, size: 30),
                     ),
                     SizedBox(width: 13),
                     Expanded(
@@ -152,20 +127,12 @@ class _PartnerServiceRequestsScreenState
                         children: [
                           Text(
                             'طلبات العملاء لمهنتك',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
                           ),
                           SizedBox(height: 5),
                           Text(
                             'ستظهر هنا الطلبات المرسلة لك بكل تفاصيل العميل والموقع والصور.',
-                            style: TextStyle(
-                              color: Color(0xFFC8D6E0),
-                              height: 1.45,
-                              fontSize: 12.5,
-                            ),
+                            style: TextStyle(color: Color(0xFFC8D6E0), height: 1.45, fontSize: 12.5),
                           ),
                         ],
                       ),
@@ -195,31 +162,17 @@ class _PartnerServiceRequestsScreenState
   Widget _state(String text, bool retry) {
     return Container(
       padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(22)),
       child: Column(
         children: [
-          const Icon(
-            Icons.inbox_outlined,
-            color: _orange,
-            size: 50,
-          ),
+          const Icon(Icons.inbox_outlined, color: _orange, size: 50),
           const SizedBox(height: 12),
           Text(
             text,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: _navy,
-              height: 1.5,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(color: _navy, height: 1.5, fontWeight: FontWeight.w700),
           ),
-          if (retry) ...[
-            const SizedBox(height: 10),
-            TextButton(onPressed: _load, child: const Text('إعادة المحاولة')),
-          ],
+          if (retry) ...[const SizedBox(height: 10), TextButton(onPressed: _load, child: const Text('إعادة المحاولة'))],
         ],
       ),
     );
@@ -230,10 +183,8 @@ class _PartnerServiceRequestsScreenState
     final profession = item['profession'] is Map
         ? (item['profession']['ar']?.toString() ?? item['profession_key']?.toString())
         : item['profession_key']?.toString();
-    final customer =
-        item['customer'] is Map ? Map<String, dynamic>.from(item['customer']) : <String, dynamic>{};
-    final location =
-        item['location'] is Map ? Map<String, dynamic>.from(item['location']) : <String, dynamic>{};
+    final customer = item['customer'] is Map ? Map<String, dynamic>.from(item['customer']) : <String, dynamic>{};
+    final location = item['location'] is Map ? Map<String, dynamic>.from(item['location']) : <String, dynamic>{};
     final photos = item['photos'] is List ? item['photos'] as List : const [];
 
     return Container(
@@ -243,13 +194,7 @@ class _PartnerServiceRequestsScreenState
         color: Colors.white,
         borderRadius: BorderRadius.circular(23),
         border: Border.all(color: const Color(0xFFE7EAED)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
+        boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 16, offset: Offset(0, 6))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -259,10 +204,7 @@ class _PartnerServiceRequestsScreenState
               Container(
                 width: 45,
                 height: 45,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1E7),
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                decoration: BoxDecoration(color: const Color(0xFFFFF1E7), borderRadius: BorderRadius.circular(15)),
                 child: const Icon(Icons.build_circle_outlined, color: _orange),
               ),
               const SizedBox(width: 10),
@@ -272,20 +214,12 @@ class _PartnerServiceRequestsScreenState
                   children: [
                     Text(
                       profession ?? 'طلب خدمة',
-                      style: const TextStyle(
-                        color: _navy,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: const TextStyle(color: _navy, fontSize: 16, fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       customer['name']?.toString() ?? 'عميل GO',
-                      style: const TextStyle(
-                        color: _muted,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: const TextStyle(color: _muted, fontSize: 12, fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
@@ -338,9 +272,7 @@ class _PartnerServiceRequestsScreenState
             style: OutlinedButton.styleFrom(
               foregroundColor: _orange,
               side: const BorderSide(color: Color(0xFFFFCBA9)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             ),
           ),
           const SizedBox(height: 8),
@@ -352,14 +284,9 @@ class _PartnerServiceRequestsScreenState
                     onPressed: () => _update(item['id'] as int, 'declined'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.redAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
-                    child: const Text(
-                      'رفض',
-                      style: TextStyle(fontWeight: FontWeight.w900),
-                    ),
+                    child: const Text('رفض', style: TextStyle(fontWeight: FontWeight.w900)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -369,14 +296,9 @@ class _PartnerServiceRequestsScreenState
                     onPressed: () => _update(item['id'] as int, 'accepted'),
                     style: FilledButton.styleFrom(
                       backgroundColor: _orange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
-                    child: const Text(
-                      'قبول الطلب',
-                      style: TextStyle(fontWeight: FontWeight.w900),
-                    ),
+                    child: const Text('قبول الطلب', style: TextStyle(fontWeight: FontWeight.w900)),
                   ),
                 ),
               ],
@@ -385,15 +307,10 @@ class _PartnerServiceRequestsScreenState
             FilledButton.icon(
               onPressed: () => _update(item['id'] as int, 'completed'),
               icon: const Icon(Icons.check_circle_outline_rounded),
-              label: const Text(
-                'تم تنفيذ الخدمة',
-                style: TextStyle(fontWeight: FontWeight.w900),
-              ),
+              label: const Text('تم تنفيذ الخدمة', style: TextStyle(fontWeight: FontWeight.w900)),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF178C4B),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
         ],
@@ -410,12 +327,7 @@ class _PartnerServiceRequestsScreenState
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: _navy,
-              height: 1.45,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(color: _navy, height: 1.45, fontSize: 13, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -427,9 +339,7 @@ class _PartnerServiceRequestsScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
       decoration: BoxDecoration(
-        color: accepted
-            ? const Color(0xFFEAF8EF)
-            : const Color(0xFFFFF1E7),
+        color: accepted ? const Color(0xFFEAF8EF) : const Color(0xFFFFF1E7),
         borderRadius: BorderRadius.circular(99),
       ),
       child: Text(

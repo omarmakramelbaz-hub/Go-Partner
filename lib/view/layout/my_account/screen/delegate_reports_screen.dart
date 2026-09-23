@@ -40,7 +40,7 @@ class _DelegateReportsScreenState extends State<DelegateReportsScreen> {
           final totalOrderPrice = calculateTotalOrderPrice(reports?.orders ?? []);
 
           return Scaffold(
-            backgroundColor: const Color(0xffF8F9FB),
+            backgroundColor: Colors.white,
             appBar: CustomAppBar(
               context,
               height: 86,

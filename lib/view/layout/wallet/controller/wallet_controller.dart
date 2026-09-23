@@ -19,16 +19,29 @@ class WalletController extends ChangeNotifier {
   WalletModel? _wallet;
   WalletModel? get wallet => _wallet;
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> getWallet() async {
+    if (_disposed || _walletResponse.state == ResponseState.loading) return;
     _walletResponse = ApiResponse(state: ResponseState.loading, data: null);
-    _wallet = null;
     notifyListeners();
-    _walletResponse = await ApiHelper.instance.get(Urls.wallet);
-    notifyListeners();
-    if (_walletResponse.state == ResponseState.complete) {
-      _wallet = WalletModel.fromJson(_walletResponse.data['data']);
-      notifyListeners();
+    final response = await ApiHelper.instance.get(Urls.wallet);
+    if (_disposed) return;
+    try {
+      if (response.state == ResponseState.complete) {
+        _wallet = WalletModel.fromJson(Map<String, dynamic>.from(response.data['data']));
+      }
+      _walletResponse = response;
+    } catch (_) {
+      _walletResponse = ApiResponse(state: ResponseState.error, data: null);
     }
+    notifyListeners();
   }
 
   String? _selectedPayment;
@@ -42,10 +55,7 @@ class WalletController extends ChangeNotifier {
   Future<void> chargingWallet({required dynamic amount, required Function(String paymentUrl) onSuccess}) async {
     NavigatorMethods.loading();
     try {
-      final FormData body = FormData.fromMap({
-        'amount': amount,
-        'payment_method': _selectedPayment,
-      });
+      final FormData body = FormData.fromMap({'amount': amount, 'payment_method': _selectedPayment});
       final response = await ApiHelper.instance.post(Urls.chargingWallet, body: body);
 
       if (response.state == ResponseState.complete) {
@@ -53,16 +63,13 @@ class WalletController extends ChangeNotifier {
         final dynamic data = payload is Map ? payload['data'] : null;
         final String link = data is Map ? (data['link']?.toString().trim() ?? '') : '';
         final Uri? uri = link.isEmpty ? null : Uri.tryParse(link);
-        final bool validLink = uri != null &&
-            uri.hasScheme &&
-            (uri.scheme.toLowerCase() == 'http' || uri.scheme.toLowerCase() == 'https');
+        final bool validLink =
+            uri != null && uri.hasScheme && (uri.scheme.toLowerCase() == 'http' || uri.scheme.toLowerCase() == 'https');
 
         if (!validLink) {
           final String serverMessage = payload is Map ? (payload['message']?.toString().trim() ?? '') : '';
           CommonMethods.showError(
-            message: serverMessage.isNotEmpty
-                ? serverMessage
-                : 'تعذر إنشاء رابط الدفع. حاول مرة أخرى.',
+            message: serverMessage.isNotEmpty ? serverMessage : 'تعذر إنشاء رابط الدفع. حاول مرة أخرى.',
           );
           return;
         }

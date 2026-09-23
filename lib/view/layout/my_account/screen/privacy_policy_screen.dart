@@ -18,7 +18,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     const softText = Color(0xff7D8490);
 
     return Scaffold(
-      backgroundColor: const Color(0xffF8F9FB),
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(
         context,
         height: 86,

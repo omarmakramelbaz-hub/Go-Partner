@@ -47,7 +47,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> with ValidationMixin 
           return Form(
             key: _formKey,
             child: Scaffold(
-              backgroundColor: const Color(0xffF8F9FB),
+              backgroundColor: Colors.white,
               appBar: CustomAppBar(
                 context,
                 height: 86,

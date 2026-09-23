@@ -9,6 +9,7 @@ import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/pusher_service/pusher_controller.dart';
 import '../../../custom_widgets/api_response_widget/api_response_widget.dart';
+import '../../../custom_widgets/custom_app_bar/custom_app_bar.dart';
 import '../../../global/widget/no_notification_widget.dart';
 import '../controller/notifications_delegate_Controller.dart';
 import '../model/notifications_model.dart';
@@ -63,7 +64,8 @@ class _NotificationsDelegateScreenState extends State<NotificationsDelegateScree
     const softText = Color(0xff7D8490);
 
     return Scaffold(
-      backgroundColor: const Color(0xffF8F9FB),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(context, title: Text(AppLocaleKey.notifications.tr())),
       body: Consumer<NotificationsDelegateController>(
         builder: (context, controller, _) {
           return Padding(
@@ -123,11 +125,7 @@ class _NotificationsDelegateScreenState extends State<NotificationsDelegateScree
                         ),
                         child: Text(
                           controller.notifications.length.toString(),
-                          style: const TextStyle(
-                            color: Color(0xffFD7201),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: const TextStyle(color: Color(0xffFD7201), fontSize: 13, fontWeight: FontWeight.w900),
                         ),
                       ),
                   ],

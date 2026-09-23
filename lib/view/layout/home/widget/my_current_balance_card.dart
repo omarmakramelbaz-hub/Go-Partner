@@ -99,7 +99,9 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                   end: Alignment.bottomRight,
                   colors: [Color(0xff151515), Color(0xff242424)],
                 ),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(.16), blurRadius: 24, offset: const Offset(0, 11))],
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(.16), blurRadius: 24, offset: const Offset(0, 11)),
+                ],
               ),
               child: Stack(
                 children: [
@@ -134,13 +136,7 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                             border: Border.all(color: Colors.white.withOpacity(.08)),
                           ),
                           alignment: Alignment.center,
-                          child: Image.asset(
-                            AppImages.walletImage,
-                            width: 66,
-                            height: 66,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.account_balance_wallet_rounded, color: orange, size: 42),
-                          ),
+                          child: const Icon(Icons.account_balance_wallet_outlined, color: orange, size: 38),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -148,9 +144,19 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(_t('محفظتي', 'My wallet'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
+                              Text(
+                                _t('محفظتي', 'My wallet'),
+                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
+                              ),
                               const SizedBox(height: 3),
-                              Text(AppLocaleKey.myCurrentBalance.tr(), style: TextStyle(color: Colors.white.withOpacity(.55), fontSize: 9.5, fontWeight: FontWeight.w600)),
+                              Text(
+                                AppLocaleKey.myCurrentBalance.tr(),
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(.55),
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               balance == null
                                   ? const CustomShimmer(height: 25, width: 100, radius: 8, shimmerColor: orange)
@@ -158,8 +164,16 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                                       fit: BoxFit.scaleDown,
                                       alignment: AlignmentDirectional.centerStart,
                                       child: Text(
-                                        AppLocaleKey.pound.tr().replaceAll('{}', pusherWalletAmount ?? balance?.toStringAsFixed(0) ?? '0'),
-                                        style: const TextStyle(color: Colors.white, fontSize: 29, height: 1, fontWeight: FontWeight.w900),
+                                        AppLocaleKey.pound.tr().replaceAll(
+                                          '{}',
+                                          pusherWalletAmount ?? balance?.toStringAsFixed(0) ?? '0',
+                                        ),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 29,
+                                          height: 1,
+                                          fontWeight: FontWeight.w900,
+                                        ),
                                       ),
                                     ),
                             ],
@@ -171,7 +185,9 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                           height: 46,
                           decoration: const BoxDecoration(color: orange, shape: BoxShape.circle),
                           child: Icon(
-                            context.locale.languageCode == 'ar' ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
+                            context.locale.languageCode == 'ar'
+                                ? Icons.arrow_back_rounded
+                                : Icons.arrow_forward_rounded,
                             color: Colors.white,
                             size: 22,
                           ),
@@ -191,7 +207,10 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
           ],
           if (balance! < minWalletDisabled!) ...[
             const SizedBox(height: 8),
-            _buildAlertContainer(context, AppLocaleKey.yourAccountIsCurrentlySuspended.tr(args: [minWallet!.toString()])),
+            _buildAlertContainer(
+              context,
+              AppLocaleKey.yourAccountIsCurrentlySuspended.tr(args: [minWallet!.toString()]),
+            ),
           ],
         ],
       ],
@@ -217,12 +236,25 @@ class _MyCurrentBalanceWidgetState extends State<MyCurrentBalanceWidget> {
                 width: 32,
                 height: 32,
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(.85), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(.85),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: const CustomImage(path: AppImages.infoIcon, type: ImageType.svg),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xff66511F), fontSize: 10.5, fontWeight: FontWeight.w600, height: 1.35)),
+                child: Text(
+                  message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xff66511F),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                  ),
+                ),
               ),
             ],
           ),

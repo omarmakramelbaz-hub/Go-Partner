@@ -5,27 +5,24 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
-import '../../../../helpers/images/app_images.dart';
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/networking/notification_helper.dart';
 import '../../../../helpers/pusher_service/pusher_controller.dart';
 import '../../../../helpers/routes/app_routers_import.dart';
-import '../../../../helpers/theme/app_colors.dart';
 import '../../../../helpers/utils/common_methods.dart';
 import '../../../../helpers/utils/navigator_methods.dart';
 import '../../../global/chat/screen/admin_chat_screen.dart';
 import '../../../global/chat/screen/chat_screen.dart';
+import '../../../global/partner/partner_identity.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../home/screen/home_delegate_screen.dart';
 import '../../home/screen/location_delegate.dart';
 import '../../home/screen/partner_service_requests_screen.dart';
 import '../../my_account/screen/my_account_delegate_screen.dart';
 import '../../notification/model/notfication_from_firebase_model.dart';
-import '../../notification/screen/notification_delegate_screen.dart';
 import '../../order/screen/order_delegate_screen.dart';
 import '../../order/screen/order_details_delegate_screen.dart';
 import '../../wallet/screen/wallet_screen.dart';
@@ -84,23 +81,20 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff171A1F);
-
     return ChangeNotifierProvider(
       create: (_) => DelegateBottomNavBarController(),
       child: Consumer<DelegateBottomNavBarController>(
         builder: (context, controller, _) {
           final profile = context.watch<AuthController>().profile;
-          final isProfessionalPartner = profile?.isGoPartner == true &&
+          final isProfessionalPartner =
+              profile?.isGoPartner == true &&
               profile?.partnerProfessionKey != null &&
               profile?.partnerProfessionKey != 'delivery_courier';
 
           final pages = <Widget>[
             const HomeDelegateScreen(),
-            isProfessionalPartner
-                ? const PartnerServiceRequestsScreen()
-                : const OrdersDelegateScreen(),
-            const WalletScreen(),
+            isProfessionalPartner ? const PartnerServiceRequestsScreen(embedded: true) : const OrdersDelegateScreen(),
+            const WalletScreen(embedded: true),
             const MyAccountDelegateScreen(),
           ];
 
@@ -108,159 +102,75 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
             canPop: controller.screenIndex == 0,
             onPopInvoked: controller.onWillPop,
             child: Scaffold(
-              backgroundColor: const Color(0xffF5F7FA),
-              extendBody: true,
+              backgroundColor: PartnerIdentity.ink,
+              extendBody: false,
               resizeToAvoidBottomInset: false,
               appBar: controller.screenIndex == 0
                   ? null
-                  : PreferredSize(
-                      preferredSize: const Size.fromHeight(88),
-                      child: SafeArea(
-                        bottom: false,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          child: Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(22),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(22),
-                              onTap: () => NavigatorMethods.pushNamed(context, DelegateLocationScreen.routeName),
-                              child: Container(
-                                height: 70,
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(22),
-                                  border: Border.all(color: const Color(0xffECEEF1)),
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [Color(0xfffff8f2), Colors.white],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: navy.withOpacity(.07),
-                                      blurRadius: 22,
-                                      offset: const Offset(0, 9),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xffFFF0E3),
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: const Icon(
-                                        Icons.location_on_rounded,
-                                        color: Color(0xffFD7201),
-                                        size: 24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            AppLocaleKey.address.tr(),
-                                            style: const TextStyle(
-                                              color: Color(0xff7D8490),
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            context.watch<AuthController>().profile?.areaTitle ?? '',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: navy,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 34,
-                                      height: 34,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xffF7F8FA),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(
-                                        context.locale.languageCode == 'ar'
-                                            ? Icons.chevron_left_rounded
-                                            : Icons.chevron_right_rounded,
-                                        color: const Color(0xffFD7201),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                  : PartnerTabHeader(
+                      title: controller.screenIndex == 1
+                          ? (isProfessionalPartner
+                                ? (context.locale.languageCode == 'ar' ? 'طلبات الخدمات' : 'Service requests')
+                                : AppLocaleKey.orders.tr())
+                          : controller.screenIndex == 2
+                          ? AppLocaleKey.wallet.tr()
+                          : AppLocaleKey.myAccount.tr(),
+                      location: profile?.areaTitle ?? '',
+                      onLocationTap: () => NavigatorMethods.pushNamed(context, DelegateLocationScreen.routeName),
+                      onBack: () => controller.updateIndex(0),
                     ),
-              body: IndexedStack(index: controller.screenIndex, children: pages),
-              bottomNavigationBar: SafeArea(
-                minimum: const EdgeInsets.fromLTRB(12, 0, 12, 9),
-                child: Container(
-                  height: 82,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(29),
-                    border: Border.all(color: const Color(0xffE8ECF1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: navy.withOpacity(.13),
-                        blurRadius: 32,
-                        offset: const Offset(0, 13),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      _NavItem(
-                        label: AppLocaleKey.home.tr(),
-                        activeIcon: AppImages.homeFillIcon,
-                        inactiveIcon: AppImages.homeIcon,
-                        selected: controller.screenIndex == 0,
-                        onTap: () => controller.updateIndex(0),
-                      ),
-                      _NavItem(
-                        label: isProfessionalPartner
-                            ? (context.locale.languageCode == 'ar'
-                                ? 'طلبات الخدمات'
-                                : 'Service requests')
-                            : AppLocaleKey.orders.tr(),
-                        activeIcon: AppImages.orderFillIcon,
-                        inactiveIcon: AppImages.ordersIcon,
-                        selected: controller.screenIndex == 1,
-                        onTap: () => controller.updateIndex(1),
-                      ),
-                      _NavItem(
-                        label: context.locale.languageCode == 'ar' ? 'المحفظة' : 'Wallet',
-                        activeIcon: AppImages.walletIcon,
-                        inactiveIcon: AppImages.walletIcon,
-                        selected: controller.screenIndex == 2,
-                        onTap: () => controller.updateIndex(2),
-                      ),
-                      _NavItem(
-                        label: AppLocaleKey.myAccount.tr(),
-                        activeIcon: AppImages.accountFillIcon,
-                        inactiveIcon: AppImages.myAccountIcon,
-                        selected: controller.screenIndex == 3,
-                        onTap: () => controller.updateIndex(3),
-                      ),
-                    ],
+              body: IndexedStack(
+                index: controller.screenIndex,
+                children: [
+                  pages.first,
+                  for (final page in pages.skip(1)) PartnerSurface(child: page),
+                ],
+              ),
+              bottomNavigationBar: ColoredBox(
+                color: Colors.white,
+                child: SafeArea(
+                  minimum: const EdgeInsets.only(bottom: 8),
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.zero,
+                      border: const Border(top: BorderSide(color: PartnerIdentity.border)),
+                    ),
+                    child: Row(
+                      children: [
+                        _NavItem(
+                          label: AppLocaleKey.home.tr(),
+                          activeIcon: Icons.home_rounded,
+                          inactiveIcon: Icons.home_outlined,
+                          selected: controller.screenIndex == 0,
+                          onTap: () => controller.updateIndex(0),
+                        ),
+                        _NavItem(
+                          label: isProfessionalPartner
+                              ? (context.locale.languageCode == 'ar' ? 'طلبات الخدمات' : 'Service requests')
+                              : AppLocaleKey.orders.tr(),
+                          activeIcon: Icons.assignment_rounded,
+                          inactiveIcon: Icons.assignment_outlined,
+                          selected: controller.screenIndex == 1,
+                          onTap: () => controller.updateIndex(1),
+                        ),
+                        _NavItem(
+                          label: context.locale.languageCode == 'ar' ? 'المحفظة' : 'Wallet',
+                          activeIcon: Icons.account_balance_wallet_outlined,
+                          inactiveIcon: Icons.account_balance_wallet_outlined,
+                          selected: controller.screenIndex == 2,
+                          onTap: () => controller.updateIndex(2),
+                        ),
+                        _NavItem(
+                          label: AppLocaleKey.myAccount.tr(),
+                          activeIcon: Icons.person_rounded,
+                          inactiveIcon: Icons.person_outline_rounded,
+                          selected: controller.screenIndex == 3,
+                          onTap: () => controller.updateIndex(3),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -327,11 +237,8 @@ class _DelegateBottomNavBarScreenState extends State<DelegateBottomNavBarScreen>
         NavigatorMethods.pushNamed(AppRouters.navigatorKey.currentContext ?? context, WalletScreen.routeName);
         break;
       case '7':
-        Navigator.of(AppRouters.navigatorKey.currentContext ?? context).push(
-          MaterialPageRoute(
-            builder: (_) => const PartnerServiceRequestsScreen(),
-          ),
-        );
+        Navigator.of(AppRouters.navigatorKey.currentContext ?? context)
+            .push(MaterialPageRoute(builder: (_) => const PartnerServiceRequestsScreen(embedded: true)));
         break;
       case '8':
         NavigatorMethods.pushNamed(
@@ -385,8 +292,8 @@ class _NavItem extends StatelessWidget {
   });
 
   final String label;
-  final String activeIcon;
-  final String inactiveIcon;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
   final bool selected;
   final VoidCallback onTap;
 
@@ -407,20 +314,16 @@ class _NavItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 210),
                   curve: Curves.easeOutCubic,
                   width: 47,
-                  height: 35,
+                  height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: selected ? const Color(0xffFFF0E3) : Colors.transparent,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: SvgPicture.asset(
+                  child: Icon(
                     selected ? activeIcon : inactiveIcon,
-                    width: 23,
-                    height: 23,
-                    colorFilter: ColorFilter.mode(
-                      selected ? const Color(0xffFD7201) : const Color(0xff929AA5),
-                      BlendMode.srcIn,
-                    ),
+                    size: 23,
+                    color: selected ? PartnerIdentity.orange : PartnerIdentity.ink,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -429,7 +332,7 @@ class _NavItem extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: selected ? const Color(0xff171A1F) : const Color(0xff8B929D),
+                    color: selected ? PartnerIdentity.orange : PartnerIdentity.muted,
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
                   ),
@@ -439,10 +342,7 @@ class _NavItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 210),
                   width: selected ? 30 : 0,
                   height: 3,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffFD7201),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xffFD7201), borderRadius: BorderRadius.circular(8)),
                 ),
               ],
             ),

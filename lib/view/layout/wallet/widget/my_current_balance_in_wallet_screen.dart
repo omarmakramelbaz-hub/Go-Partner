@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
-import '../../../../helpers/images/app_images.dart';
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../custom_widgets/custom_loading/custom_shimmer.dart';
 import '../model/wallet_model.dart';
@@ -11,11 +9,7 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
   final WalletModel? wallet;
   final String? pusherWalletAmount;
 
-  const MyCurrentBalanceInWalletScreenWidget({
-    super.key,
-    required this.wallet,
-    this.pusherWalletAmount,
-  });
+  const MyCurrentBalanceInWalletScreenWidget({super.key, required this.wallet, this.pusherWalletAmount});
 
   @override
   Widget build(BuildContext context) {
@@ -23,22 +17,16 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 176,
+      height: 154,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(18),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF171A1F), Color(0xff17466F)],
+          colors: [Color(0xFF171A1F), Color(0xff292D33)],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: navy.withOpacity(.22),
-            blurRadius: 28,
-            offset: const Offset(0, 13),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: navy.withOpacity(.22), blurRadius: 28, offset: const Offset(0, 13))],
       ),
       child: Stack(
         children: [
@@ -57,10 +45,7 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
             child: Container(
               width: 140,
               height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xffFD7201).withOpacity(.16),
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xffFD7201).withOpacity(.16)),
             ),
           ),
           Row(
@@ -72,30 +57,25 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
                   children: [
                     Text(
                       AppLocaleKey.myCurrentBalance.tr(),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(.72),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 13),
                     wallet?.balance == null
-                        ? const CustomShimmer(
-                            height: 28,
-                            width: 125,
-                            radius: 7,
-                            shimmerColor: Color(0xffFF8A08),
-                          )
-                        : Text(
-                            AppLocaleKey.pound.tr().replaceAll(
-                              '{}',
-                              pusherWalletAmount ?? wallet?.balance?.toStringAsFixed(0) ?? '0',
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              height: 1.1,
-                              fontWeight: FontWeight.w900,
+                        ? const CustomShimmer(height: 28, width: 125, radius: 7, shimmerColor: Color(0xffFF8A08))
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              AppLocaleKey.pound.tr().replaceAll(
+                                '{}',
+                                pusherWalletAmount ?? wallet?.balance?.toStringAsFixed(2) ?? '0',
+                              ),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 28,
+                                height: 1.1,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                     const SizedBox(height: 12),
@@ -136,10 +116,7 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: SvgPicture.asset(
-                  AppImages.walletIcon,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
+                child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 32),
               ),
             ],
           ),
