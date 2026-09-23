@@ -70,7 +70,7 @@ class _OrderDelegateWidgetState extends State<OrderDelegateWidget> {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const softText = Color(0xff7D8490);
     const orange = Color(0xffFD7201);
 
@@ -317,7 +317,7 @@ class _LocationBlock extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Color(0xff082A4D), fontSize: 12.5, fontWeight: FontWeight.w800),
+                style: const TextStyle(color: Color(0xFF171A1F), fontSize: 12.5, fontWeight: FontWeight.w800),
               ),
             ),
           ],

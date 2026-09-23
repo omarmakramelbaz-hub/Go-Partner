@@ -57,7 +57,7 @@ class _PersonalInformationDelegateScreenState extends State<PersonalInformationD
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const softText = Color(0xff7D8490);
 
     return Consumer<AuthController>(
@@ -91,7 +91,7 @@ class _PersonalInformationDelegateScreenState extends State<PersonalInformationD
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xff082A4D), Color(0xff143F69)],
+                        colors: [Color(0xFF171A1F), Color(0xFF292D33)],
                       ),
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [

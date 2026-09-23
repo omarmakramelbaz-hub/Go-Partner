@@ -15,7 +15,7 @@ class PartnerServiceRequestsScreen extends StatefulWidget {
 class _PartnerServiceRequestsScreenState
     extends State<PartnerServiceRequestsScreen> {
   static const _orange = Color(0xFFFD7201);
-  static const _navy = Color(0xFF082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _muted = Color(0xFF7D8490);
   static const _bg = Color(0xFFF7F8FA);
 
@@ -130,7 +130,7 @@ class _PartnerServiceRequestsScreenState
                   gradient: const LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
-                    colors: [Color(0xFF0E3654), Color(0xFF071724)],
+                    colors: [Color(0xFF292D33), Color(0xFF101216)],
                   ),
                   borderRadius: BorderRadius.circular(24),
                 ),

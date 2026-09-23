@@ -27,7 +27,7 @@ class CustomOtpField extends StatefulWidget {
 class _CustomOtpFieldState extends State<CustomOtpField> {
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const orange = Color(0xffFD7201);
 
     PinTheme theme({

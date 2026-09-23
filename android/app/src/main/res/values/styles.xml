@@ -14,7 +14,7 @@
         <!-- Your main app theme settings -->
     </style>
     <!-- Colors -->
-    <color name="splashBackground">#FD7201</color>
+    <color name="splashBackground">#171A1F</color>
     <!-- Solid orange -->
     <color name="primaryColor">#FD7201</color>
 </resources>

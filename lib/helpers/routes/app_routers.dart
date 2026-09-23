@@ -17,10 +17,6 @@ class AppRouters {
 
       case ForgetPasswordScreen.routeName:
         return MaterialPageRoute(builder: (_) => const ForgetPasswordScreen());
-      case VerificationCodeScreen.routeName:
-        return MaterialPageRoute(builder: (_) => const VerificationCodeScreen());
-      case CreateNewPasswordScreen.routeName:
-        return MaterialPageRoute(builder: (_) => const CreateNewPasswordScreen());
       case PasswordChangedSuccessfullyScreen.routeName:
         return MaterialPageRoute(builder: (_) => const PasswordChangedSuccessfullyScreen());
 

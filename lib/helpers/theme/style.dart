@@ -5,7 +5,7 @@ import 'app_colors.dart';
 import 'app_theme.dart';
 
 ThemeData appThemeData(BuildContext context) {
-  const navy = Color(0xff082A4D);
+  const navy = Color(0xFF171A1F);
   const orange = Color(0xffFD7201);
   const softText = Color(0xff7D8490);
   const border = Color(0xffE6E8EC);
@@ -112,11 +112,11 @@ class TextStyleTheme {
       surfaceTintColor: Colors.white,
       elevation: 0,
       centerTitle: false,
-      foregroundColor: const Color(0xff082A4D),
-      iconTheme: const IconThemeData(color: Color(0xff082A4D)),
-      actionsIconTheme: const IconThemeData(color: Color(0xff082A4D)),
+      foregroundColor: const Color(0xFF171A1F),
+      iconTheme: const IconThemeData(color: Color(0xFF171A1F)),
+      actionsIconTheme: const IconThemeData(color: Color(0xFF171A1F)),
       titleTextStyle: TextStyle(
-        color: const Color(0xff082A4D),
+        color: const Color(0xFF171A1F),
         fontSize: 20,
         fontWeight: FontWeight.w800,
         fontFamily: context.fontFamily(),
@@ -127,7 +127,7 @@ class TextStyleTheme {
 
 List<BoxShadow> appShadow = [
   BoxShadow(
-    color: const Color(0xff082A4D).withOpacity(.08),
+    color: const Color(0xFF171A1F).withOpacity(.08),
     offset: const Offset(0, 10),
     blurRadius: 28,
   ),

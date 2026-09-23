@@ -19,7 +19,7 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
 
     return Container(
       width: double.infinity,
@@ -30,7 +30,7 @@ class MyCurrentBalanceInWalletScreenWidget extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xff082A4D), Color(0xff17466F)],
+          colors: [Color(0xFF171A1F), Color(0xff17466F)],
         ),
         boxShadow: [
           BoxShadow(

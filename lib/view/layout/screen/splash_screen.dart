@@ -10,7 +10,6 @@ import '../../../../../../helpers/utils/navigator_methods.dart';
 import '../../../helpers/hive/hive_methods.dart';
 import '../../../helpers/pusher_service/pusher_controller.dart';
 import '../auth/controller/auth_controller.dart';
-import '../auth/screen/login_screen.dart';
 import 'partner_onboarding_screen.dart';
 import '../delegate_bottom_nav_bar.dart/screen/delegate_bottom_nav_bar_screen.dart';
 
@@ -45,7 +44,10 @@ class _SplashScreenState extends State<SplashScreen> {
     await _waitForOpening();
     if (!mounted || _navigated) return;
     _navigated = true;
-    NavigatorMethods.pushNamedAndRemoveUntil(context, PartnerOnboardingScreen.routeName);
+    NavigatorMethods.pushNamedAndRemoveUntil(
+      context,
+      PartnerOnboardingScreen.routeName,
+    );
   }
 
   Future<void> _goHome() async {
@@ -119,71 +121,35 @@ class _SplashScreenState extends State<SplashScreen> {
 
 class _GoPartnerOpening extends StatelessWidget {
   const _GoPartnerOpening();
-
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final logoWidth = (constraints.maxWidth * .62).clamp(210.0, 320.0);
-
-        return DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xff24282E), Color(0xff171A1F), Color(0xff0F1114)],
-            ),
-          ),
-          child: Stack(
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      Image.asset('assets/brand/partner_splash.webp', fit: BoxFit.cover),
+      SafeArea(
+        child: Align(
+          alignment: const Alignment(0, -.52),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Positioned(
-                top: -90,
-                right: -70,
-                child: Container(
-                  width: 260,
-                  height: 260,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xffFD7201).withOpacity(.10),
-                  ),
-                ),
+              SvgPicture.asset(
+                'assets/svg/go_partner_logo_light.svg',
+                width: 210,
+                height: 168,
               ),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x33000000), blurRadius: 34, offset: Offset(0, 16)),
-                    ],
-                  ),
-                  child: SvgPicture.asset(
-                    'assets/svg/go_partner_logo.svg',
-                    width: logoWidth,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const Positioned(
-                left: 0,
-                right: 0,
-                bottom: 54,
-                child: Text(
-                  'معًا نصنع الفرص',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: .2,
-                  ),
+              const SizedBox(height: 12),
+              const Text(
+                'معًا نصنع الفرص',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      ),
+    ],
+  );
 }

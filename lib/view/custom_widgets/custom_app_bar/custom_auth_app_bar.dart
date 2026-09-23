@@ -69,7 +69,7 @@ class CustomAuthAppBar extends PreferredSize {
                                 border: Border.all(color: const Color(0xffECEEF1)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xff082A4D).withOpacity(.07),
+                                    color: const Color(0xFF171A1F).withOpacity(.07),
                                     blurRadius: 12,
                                     offset: const Offset(0, 5),
                                   ),

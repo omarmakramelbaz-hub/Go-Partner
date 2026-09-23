@@ -30,7 +30,7 @@ class DelegateLocationScreen extends StatefulWidget {
 }
 
 class _DelegateLocationScreenState extends State<DelegateLocationScreen> {
-  static const _navy = Color(0xff082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _orange = Color(0xffFD7201);
   static const _softText = Color(0xff7D8490);
   static const _styleUrl = 'https://tiles.openfreemap.org/styles/liberty';

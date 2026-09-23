@@ -43,7 +43,7 @@ jobs:
           grep -q 'GO' assets/svg/go_partner_logo.svg
           grep -q 'Partner' assets/svg/go_partner_logo.svg
           grep -q 'assets/svg/go_partner_logo.svg' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'assets/svg/go_partner_logo.svg' lib/view/layout/screen/splash_screen.dart
+          grep -q 'assets/brand/partner_splash.webp' lib/view/layout/screen/splash_screen.dart
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/Go-Partner/"
@@ -76,11 +76,11 @@ jobs:
           original = '<script src="flutter_bootstrap.js" async></script>'
           opening = f'''
           <style>
-            html, body {{ margin: 0; width: 100%; height: 100%; background: #fff; }}
-            #go-partner-opening {{ position: fixed; inset: 0; z-index: 2147483647; background: #fff; display: flex; align-items: center; justify-content: center; }}
-            #go-partner-opening img {{ width: min(72vw, 360px); max-height: 48vh; object-fit: contain; display: block; }}
+            html, body {{ margin: 0; width: 100%; height: 100%; background: #171a1f; }}
+            #go-partner-opening {{ position: fixed; inset: 0; z-index: 2147483647; background: #171a1f url(assets/assets/brand/partner_splash.webp) center/cover; display: flex; align-items: center; justify-content: center; padding-bottom: 22vh; box-sizing: border-box; }}
+            #go-partner-opening img {{ width: min(50vw, 220px); max-height: 48vh; object-fit: contain; display: block; }}
           </style>
-          <div id="go-partner-opening"><img src="assets/assets/svg/go_partner_logo.svg?build={build}" alt="GO Partner"></div>
+          <div id="go-partner-opening"><img src="assets/assets/svg/go_partner_logo_light.svg?build={build}" alt="GO Partner"></div>
           <script>
           (async function () {{
             try {{

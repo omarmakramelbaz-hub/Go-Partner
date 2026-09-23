@@ -19,7 +19,7 @@ class CustomAppTable extends StatefulWidget {
 class _CustomAppTableState extends State<CustomAppTable> {
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xff082A4D);
+    const navy = Color(0xFF171A1F);
     const softText = Color(0xff7D8490);
 
     return ClipRRect(

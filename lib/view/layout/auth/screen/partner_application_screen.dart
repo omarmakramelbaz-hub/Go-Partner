@@ -2,12 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'partner_email_verification_screen.dart';
+import 'partner_password_screen.dart';
 
 import '../../../../helpers/networking/api_helper.dart';
 import '../../../../helpers/networking/urls.dart';
 
 class PartnerApplicationScreen extends StatefulWidget {
-  const PartnerApplicationScreen({super.key});
+  const PartnerApplicationScreen({super.key, this.partnerType = 'profession'});
+  final String partnerType;
 
   @override
   State<PartnerApplicationScreen> createState() =>
@@ -16,7 +20,7 @@ class PartnerApplicationScreen extends StatefulWidget {
 
 class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   static const _orange = Color(0xFFFD7201);
-  static const _navy = Color(0xFF082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _muted = Color(0xFF7D8490);
   static const _bg = Color(0xFFF7F8FA);
 
@@ -24,6 +28,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   final _name = TextEditingController();
   final _age = TextEditingController();
   final _phone = TextEditingController();
+  final _email = TextEditingController();
   final _payment = TextEditingController();
   final _picker = ImagePicker();
 
@@ -37,8 +42,16 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   bool _busy = false;
   bool _locating = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.partnerType == 'delegate') _profession = 'delivery_courier';
+    if (widget.partnerType == 'vendor') _profession = 'store_owner';
+  }
+
   static const _professions = <Map<String, String>>[
     {'key': 'delivery_courier', 'title': 'مندوب توصيل'},
+    {'key': 'store_owner', 'title': 'صاحب مطعم أو متجر'},
     {'key': 'appliance_technician', 'title': 'فني صيانة ثلاجات وغسالات'},
     {'key': 'plumber', 'title': 'سباك'},
     {'key': 'painter', 'title': 'نقاش'},
@@ -64,6 +77,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
     _name.dispose();
     _age.dispose();
     _phone.dispose();
+    _email.dispose();
     _payment.dispose();
     super.dispose();
   }
@@ -98,6 +112,9 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
           _lng = position.longitude;
         });
       }
+    } catch (_) {
+      if (mounted)
+        _show('تعذر تحديد الموقع. تأكد من تشغيل خدمة الموقع وحاول مرة أخرى.');
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -124,12 +141,27 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
 
     setState(() => _busy = true);
     try {
+      final proof = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartnerEmailVerificationScreen(
+            mobile: _phone.text.trim(),
+            email: _email.text.trim(),
+            purpose: 'application',
+          ),
+        ),
+      );
+      if (!mounted || proof == null) return;
       final bytes = await _photo!.readAsBytes();
       final body = FormData.fromMap({
         'photo': MultipartFile.fromBytes(
           bytes,
           filename: _photo!.name.isEmpty ? 'partner.jpg' : _photo!.name,
         ),
+        'email': _email.text.trim().toLowerCase(),
+        'email_verification_token': proof,
+        'source_app': 'go',
+        'partner_type': widget.partnerType,
         'full_name': _name.text.trim(),
         'age': int.parse(_age.text.trim()),
         'profession_key': _profession,
@@ -152,9 +184,8 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
       if (response.state == ResponseState.complete) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => PartnerApplicationSubmittedScreen(
-              mobile: _phone.text.trim(),
-            ),
+            builder: (_) =>
+                PartnerApplicationSubmittedScreen(mobile: _phone.text.trim()),
           ),
         );
       } else {
@@ -172,29 +203,27 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   }
 
   void _show(String value) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(value)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value)));
   }
 
   InputDecoration _dec(String label, IconData icon) => InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: _orange),
-        filled: true,
-        fillColor: const Color(0xFFFAFBFC),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(17),
-          borderSide: const BorderSide(color: Color(0xFFE1E5E8)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(17),
-          borderSide: const BorderSide(color: Color(0xFFE1E5E8)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(17),
-          borderSide: const BorderSide(color: _orange, width: 1.4),
-        ),
-      );
+    labelText: label,
+    prefixIcon: Icon(icon, color: _orange),
+    filled: true,
+    fillColor: const Color(0xFFFAFBFC),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(17),
+      borderSide: const BorderSide(color: Color(0xFFE1E5E8)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(17),
+      borderSide: const BorderSide(color: Color(0xFFE1E5E8)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(17),
+      borderSide: const BorderSide(color: _orange, width: 1.4),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +273,9 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                                   _photo == null
                                       ? Icons.add_a_photo_outlined
                                       : Icons.check_circle_rounded,
-                                  color: _photo == null ? _orange : Colors.green,
+                                  color: _photo == null
+                                      ? _orange
+                                      : Colors.green,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -285,14 +316,31 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        textDirection: TextDirection.ltr,
+                        decoration: _dec(
+                          'البريد الإلكتروني (Gmail أو غيره)',
+                          Icons.email_outlined,
+                        ),
+                        validator: (v) =>
+                            !RegExp(
+                              r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                            ).hasMatch((v ?? '').trim())
+                            ? 'اكتب بريدًا إلكترونيًا صحيحًا لاستقبال كود التأكيد'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
                         controller: _phone,
                         keyboardType: TextInputType.phone,
                         decoration: _dec('رقم الهاتف', Icons.phone_outlined),
                         validator: (v) =>
                             v == null ||
-                                    v.replaceAll(RegExp(r'\D'), '').length < 10
-                                ? 'اكتب رقم هاتف صحيح'
-                                : null,
+                                v.replaceAll(RegExp(r'\D'), '').length < 10
+                            ? 'اكتب رقم هاتف صحيح'
+                            : null,
                       ),
                     ],
                   ),
@@ -306,9 +354,19 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                       DropdownButtonFormField<String>(
                         value: _profession,
                         isExpanded: true,
-                        decoration:
-                            _dec('اختر المهنة', Icons.work_outline_rounded),
+                        decoration: _dec(
+                          'اختر المهنة',
+                          Icons.work_outline_rounded,
+                        ),
                         items: _professions
+                            .where(
+                              (p) => widget.partnerType == 'profession'
+                                  ? ![
+                                      'delivery_courier',
+                                      'store_owner',
+                                    ].contains(p['key'])
+                                  : p['key'] == _profession,
+                            )
                             .map(
                               (p) => DropdownMenuItem(
                                 value: p['key'],
@@ -316,8 +374,9 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                               ),
                             )
                             .toList(),
-                        onChanged: (value) =>
-                            setState(() => _profession = value),
+                        onChanged: widget.partnerType == 'profession'
+                            ? (value) => setState(() => _profession = value)
+                            : null,
                       ),
                       const SizedBox(height: 13),
                       SizedBox(
@@ -328,8 +387,9 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : Icon(
                                   _lat == null
@@ -373,12 +433,10 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                                 selected: _radius == km,
                                 selectedColor: _orange,
                                 labelStyle: TextStyle(
-                                  color:
-                                      _radius == km ? Colors.white : _navy,
+                                  color: _radius == km ? Colors.white : _navy,
                                   fontWeight: FontWeight.w800,
                                 ),
-                                onSelected: (_) =>
-                                    setState(() => _radius = km),
+                                onSelected: (_) => setState(() => _radius = km),
                               ),
                             )
                             .toList(),
@@ -465,142 +523,137 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   }
 
   Widget _hero() => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Color(0xFF0E3654), Color(0xFF071724)],
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topRight,
+        end: Alignment.bottomLeft,
+        colors: [Color(0xFF292D33), Color(0xFF101216)],
+      ),
+      borderRadius: BorderRadius.circular(26),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 58,
+          height: 58,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
           ),
-          borderRadius: BorderRadius.circular(26),
+          child: SvgPicture.asset(
+            'assets/svg/go_partner_logo.svg',
+            fit: BoxFit.contain,
+          ),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 58,
-              height: 58,
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
+        SizedBox(width: 13),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ابدأ رحلتك مع GO Partner',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-              child: Image.asset(
-                'assets/images/go_drive_logo_hd.webp',
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
+              SizedBox(height: 5),
+              Text(
+                'قدّم بياناتك أولاً. بعد مراجعة الإدارة والموافقة يتم تفعيل حسابك لاستقبال الطلبات المتوافقة مع مهنتك ونطاقك.',
+                style: TextStyle(color: Color(0xFFC8D6E0), height: 1.5),
               ),
-            ),
-            SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ابدأ كصاحب مهنة على GO',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    'قدّم بياناتك أولاً. بعد مراجعة الإدارة والموافقة يتم تفعيل حسابك لاستقبال الطلبات المتوافقة مع مهنتك ونطاقك.',
-                    style: TextStyle(
-                      color: Color(0xFFC8D6E0),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _card({
     required String title,
     required IconData icon,
     required Widget child,
-  }) =>
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFFE7EAED)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x08000000),
-              blurRadius: 18,
-              offset: Offset(0, 6),
-            ),
-          ],
+  }) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: const Color(0xFFE7EAED)),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x08000000),
+          blurRadius: 18,
+          offset: Offset(0, 6),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1E7),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: _orange),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: _navy,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1E7),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: _orange),
             ),
-            const SizedBox(height: 16),
-            child,
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                color: _navy,
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
         ),
-      );
+        const SizedBox(height: 16),
+        child,
+      ],
+    ),
+  );
 
   Widget _termsCard() => Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFFE7EAED)),
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: const Color(0xFFE7EAED)),
+    ),
+    child: Column(
+      children: [
+        CheckboxListTile(
+          value: _terms,
+          onChanged: (value) => setState(() => _terms = value ?? false),
+          activeColor: _orange,
+          contentPadding: EdgeInsets.zero,
+          title: const Text(
+            'أوافق على شروط وأحكام شركاء GO',
+            style: TextStyle(color: _navy, fontWeight: FontWeight.w900),
+          ),
+          subtitle: const Text(
+            'صحة البيانات، الخبرة المهنية، جودة الخدمة، احترام العملاء، استخدام الموقع، وسياسات المنصة والخصوصية.',
+            style: TextStyle(color: _muted, height: 1.45),
+          ),
         ),
-        child: Column(
-          children: [
-            CheckboxListTile(
-              value: _terms,
-              onChanged: (value) => setState(() => _terms = value ?? false),
-              activeColor: _orange,
-              contentPadding: EdgeInsets.zero,
-              title: const Text(
-                'أوافق على شروط وأحكام شركاء GO',
-                style: TextStyle(color: _navy, fontWeight: FontWeight.w900),
-              ),
-              subtitle: const Text(
-                'صحة البيانات، الخبرة المهنية، جودة الخدمة، احترام العملاء، استخدام الموقع، وسياسات المنصة والخصوصية.',
-                style: TextStyle(color: _muted, height: 1.45),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _showTerms,
-                child: const Text('عرض الشروط كاملة'),
-              ),
-            ),
-          ],
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: _showTerms,
+            child: const Text('عرض الشروط كاملة'),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   void _showTerms() {
     const terms = [
@@ -684,10 +737,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
 }
 
 class PartnerApplicationSubmittedScreen extends StatefulWidget {
-  const PartnerApplicationSubmittedScreen({
-    super.key,
-    required this.mobile,
-  });
+  const PartnerApplicationSubmittedScreen({super.key, required this.mobile});
 
   final String mobile;
 
@@ -699,7 +749,7 @@ class PartnerApplicationSubmittedScreen extends StatefulWidget {
 class _PartnerApplicationSubmittedScreenState
     extends State<PartnerApplicationSubmittedScreen> {
   static const _orange = Color(0xFFFD7201);
-  static const _navy = Color(0xFF082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _muted = Color(0xFF7D8490);
 
   String _status = 'pending';
@@ -751,8 +801,7 @@ class _PartnerApplicationSubmittedScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            response.data['message']?.toString() ??
-                'تعذر تحديث حالة الطلب.',
+            response.data['message']?.toString() ?? 'تعذر تحديث حالة الطلب.',
           ),
         ),
       );
@@ -762,238 +811,36 @@ class _PartnerApplicationSubmittedScreenState
   }
 
   Future<void> _activateAccount() async {
-    final formKey = GlobalKey<FormState>();
-    final password = TextEditingController();
-    final confirm = TextEditingController();
-
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            Future<void> submit() async {
-              if (!formKey.currentState!.validate()) return;
-
-              setSheetState(() => _activating = true);
-              final response = await ApiHelper.instance.post(
-                Urls.partnerActivate,
-                body: FormData.fromMap({
-                  'mobile': _normalizePhone(widget.mobile),
-                  'password': password.text,
-                  'password_confirmation': confirm.text,
-                }),
-                hasToken: false,
-              );
-              if (!sheetContext.mounted) return;
-              setSheetState(() => _activating = false);
-
-              if (response.state == ResponseState.complete) {
-                Navigator.pop(sheetContext);
-                if (!mounted) return;
-                await showDialog<void>(
-                  context: context,
-                  builder: (dialogContext) => Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: AlertDialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      icon: const Icon(
-                        Icons.verified_rounded,
-                        color: Colors.green,
-                        size: 48,
-                      ),
-                      title: const Text(
-                        'تم تفعيل حساب الشريك',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _navy,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      content: const Text(
-                        'يمكنك الآن العودة إلى شاشة تسجيل الدخول والدخول برقم الهاتف وكلمة المرور التي أنشأتها.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: _muted, height: 1.5),
-                      ),
-                      actionsAlignment: MainAxisAlignment.center,
-                      actions: [
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _orange,
-                          ),
-                          onPressed: () => Navigator.pop(dialogContext),
-                          child: const Text('الذهاب لتسجيل الدخول'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-                if (mounted) Navigator.of(context).pop();
-              } else {
-                ScaffoldMessenger.of(sheetContext).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      response.data is Map
-                          ? (response.data['message']?.toString() ??
-                              'تعذر تفعيل الحساب.')
-                          : 'تعذر تفعيل الحساب.',
-                    ),
-                  ),
-                );
-              }
-            }
-
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(30),
-                    ),
-                  ),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 46,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD9DDE2),
-                              borderRadius: BorderRadius.circular(99),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        const Icon(
-                          Icons.verified_user_outlined,
-                          color: _orange,
-                          size: 48,
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'إنشاء حساب الشريك',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: _navy,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        if (_professionName?.isNotEmpty == true) ...[
-                          const SizedBox(height: 5),
-                          Text(
-                            _professionName!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: _orange,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 10),
-                        const Text(
-                          'تمت الموافقة على طلبك. أنشئ كلمة مرور الآن لإتمام تفعيل الحساب.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: _muted, height: 1.5),
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: password,
-                          obscureText: true,
-                          textDirection: TextDirection.ltr,
-                          decoration: InputDecoration(
-                            labelText: 'كلمة المرور',
-                            prefixIcon: const Icon(
-                              Icons.lock_outline_rounded,
-                              color: _orange,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          validator: (value) =>
-                              (value ?? '').length < 6
-                                  ? 'كلمة المرور يجب ألا تقل عن 6 أحرف'
-                                  : null,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: confirm,
-                          obscureText: true,
-                          textDirection: TextDirection.ltr,
-                          decoration: InputDecoration(
-                            labelText: 'تأكيد كلمة المرور',
-                            prefixIcon: const Icon(
-                              Icons.lock_reset_rounded,
-                              color: _orange,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          validator: (value) =>
-                              value != password.text
-                                  ? 'كلمتا المرور غير متطابقتين'
-                                  : null,
-                        ),
-                        const SizedBox(height: 18),
-                        SizedBox(
-                          height: 56,
-                          child: FilledButton.icon(
-                            onPressed: _activating ? null : submit,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: _orange,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                            icon: _activating
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.person_add_alt_1_rounded),
-                            label: Text(
-                              _activating
-                                  ? 'جاري التفعيل...'
-                                  : 'تفعيل حساب الشريك',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+    if (_activating) return;
+    setState(() => _activating = true);
+    final proof = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PartnerEmailVerificationScreen(
+          mobile: widget.mobile,
+          purpose: 'activation',
+        ),
+      ),
     );
-
-    password.dispose();
-    confirm.dispose();
+    if (!mounted) return;
+    if (proof != null) {
+      final success = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PartnerPasswordScreen(
+            mobile: widget.mobile,
+            proof: proof,
+            activation: true,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (success == true) {
+        Navigator.pop(context);
+        return;
+      }
+    }
+    setState(() => _activating = false);
   }
 
   @override
@@ -1015,22 +862,22 @@ class _PartnerApplicationSubmittedScreenState
                   accepted
                       ? Icons.verified_rounded
                       : declined
-                          ? Icons.cancel_rounded
-                          : Icons.schedule_rounded,
+                      ? Icons.cancel_rounded
+                      : Icons.schedule_rounded,
                   size: 94,
                   color: accepted
                       ? const Color(0xFF1B9A55)
                       : declined
-                          ? Colors.redAccent
-                          : _orange,
+                      ? Colors.redAccent
+                      : _orange,
                 ),
                 const SizedBox(height: 20),
                 Text(
                   accepted
                       ? 'تم قبول طلبك'
                       : declined
-                          ? 'لم تتم الموافقة على الطلب'
-                          : 'تم استلام طلبك بنجاح',
+                      ? 'لم تتم الموافقة على الطلب'
+                      : 'تم استلام طلبك بنجاح',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: _navy,
@@ -1043,10 +890,10 @@ class _PartnerApplicationSubmittedScreenState
                   accepted
                       ? 'يمكنك الآن إنشاء حساب الشريك. لن يكون إنشاء الحساب متاحًا قبل موافقة الإدارة.'
                       : declined
-                          ? (_reason?.isNotEmpty == true
-                              ? 'سبب الرفض: $_reason'
-                              : 'يمكنك تحديث بياناتك والتقديم مرة أخرى.')
-                          : 'طلبك قيد المراجعة. لن يمكن إنشاء حساب شريك أو استقبال طلبات قبل موافقة الإدارة.',
+                      ? (_reason?.isNotEmpty == true
+                            ? 'سبب الرفض: $_reason'
+                            : 'يمكنك تحديث بياناتك والتقديم مرة أخرى.')
+                      : 'طلبك قيد المراجعة. لن يمكن إنشاء حساب شريك أو استقبال طلبات قبل موافقة الإدارة.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: _muted,
@@ -1070,7 +917,7 @@ class _PartnerApplicationSubmittedScreenState
                     width: double.infinity,
                     height: 56,
                     child: FilledButton.icon(
-                      onPressed: _activateAccount,
+                      onPressed: _activating ? null : _activateAccount,
                       icon: const Icon(Icons.person_add_alt_1_rounded),
                       label: const Text(
                         'إنشاء وتفعيل حساب الشريك',

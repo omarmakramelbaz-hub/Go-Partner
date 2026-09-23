@@ -27,7 +27,7 @@ class CustomToast extends StatelessWidget {
   });
 
   static const _orange = Color(0xffFD7201);
-  static const _navy = Color(0xff082A4D);
+  static const _navy = Color(0xFF171A1F);
   static const _softText = Color(0xff667384);
 
   @override

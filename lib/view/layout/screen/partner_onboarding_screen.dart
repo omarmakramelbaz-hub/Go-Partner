@@ -1,133 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../../helpers/utils/navigator_methods.dart';
+import '../../../helpers/utils/navigator_methods.dart';
 import '../auth/screen/login_screen.dart';
 
 class PartnerOnboardingScreen extends StatelessWidget {
   const PartnerOnboardingScreen({super.key});
-
   static const String routeName = 'PartnerOnboardingScreen';
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xff171A1F),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: _OnboardingBackground()),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 24),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: SvgPicture.asset(
-                      'assets/svg/go_partner_logo.svg',
-                      width: 150,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 170,
-                    height: 170,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffFD7201).withOpacity(.12),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xffFD7201).withOpacity(.28)),
-                    ),
-                    child: const Icon(Icons.handshake_rounded, size: 86, color: Color(0xffFD7201)),
-                  ),
-                  const SizedBox(height: 34),
-                  const Text(
-                    'انضم كشريك في GO',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 30, height: 1.2, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'اختر مجالك، استقبل الطلبات المناسبة لك، وابدأ رحلتك معنا',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white.withOpacity(.72), fontSize: 16, height: 1.65, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 28),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(width: 22, height: 7, decoration: BoxDecoration(color: const Color(0xffFD7201), borderRadius: BorderRadius.circular(10))),
-                      const SizedBox(width: 6),
-                      Container(width: 7, height: 7, decoration: BoxDecoration(color: Colors.white.withOpacity(.28), shape: BoxShape.circle)),
-                      const SizedBox(width: 6),
-                      Container(width: 7, height: 7, decoration: BoxDecoration(color: Colors.white.withOpacity(.28), shape: BoxShape.circle)),
-                    ],
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: FilledButton(
-                      onPressed: () => NavigatorMethods.pushNamedAndRemoveUntil(context, LoginScreen.routeName),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xffFD7201),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('ابدأ الآن', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
-                          SizedBox(width: 9),
-                          Icon(Icons.arrow_forward_rounded),
-                        ],
-                      ),
-                    ),
-                  ),
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: const Color(0xff101216),
+    body: Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/brand/partner_welcome.webp',
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        const Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.transparent,
+                  Color(0xe6101216),
+                  Color(0xff101216),
                 ],
+                stops: [0, .45, .75, 1],
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OnboardingBackground extends StatelessWidget {
-  const _OnboardingBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xff24282E), Color(0xff171A1F), Color(0xff0F1114)],
         ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -90,
-            top: 120,
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xffFD7201).withOpacity(.08)),
+        SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(26, 24, 26, 26),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 50,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Spacer(),
+                      SizedBox(height: constraints.maxHeight * .5),
+                      const Text(
+                        'انضم كشريك في GO',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          height: 1.3,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'اختر مجالك، وابدأ رحلتك معنا',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xffd3d6dc),
+                          fontSize: 17,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        height: 56,
+                        child: FilledButton(
+                          onPressed: () =>
+                              NavigatorMethods.pushNamedAndRemoveUntil(
+                                context,
+                                LoginScreen.routeName,
+                              ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xfffd7201),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'ابدأ الآن',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'معًا نصنع الفرص',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Color(0xffa9afb8)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-          Positioned(
-            left: -110,
-            bottom: 70,
-            child: Container(
-              width: 260,
-              height: 260,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(.025)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }

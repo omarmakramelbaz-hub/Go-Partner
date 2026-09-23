@@ -47,7 +47,7 @@ jobs:
 
       - name: Verify mobile version
         run: |
-          grep -q '^version: 1.0.23+24$' pubspec.yaml
+          grep -q '^version: 1.0.24+25$' pubspec.yaml
 
       - name: Sync iOS branding and version
         shell: bash
@@ -58,9 +58,9 @@ jobs:
 
           pbx = Path('ios/Runner.xcodeproj/project.pbxproj')
           text = pbx.read_text(encoding='utf-8')
-          text = text.replace('CURRENT_PROJECT_VERSION = 23;', 'CURRENT_PROJECT_VERSION = 24;')
-          text = text.replace('CURRENT_PROJECT_VERSION = 19;', 'CURRENT_PROJECT_VERSION = 24;')
-          text = text.replace('MARKETING_VERSION = 1.0.21;', 'MARKETING_VERSION = 1.0.23;')
+          text = text.replace('CURRENT_PROJECT_VERSION = 23;', 'CURRENT_PROJECT_VERSION = 25;')
+          text = text.replace('CURRENT_PROJECT_VERSION = 19;', 'CURRENT_PROJECT_VERSION = 25;')
+          text = text.replace('MARKETING_VERSION = 1.0.21;', 'MARKETING_VERSION = 1.0.24;')
           text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Go Drive";',
                               'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";')
           text = text.replace('INFOPLIST_KEY_CFBundleDisplayName = "Fasakhaninja Delegate";',
@@ -76,8 +76,8 @@ jobs:
           plist.write_text(p, encoding='utf-8')
           PY
 
-          grep -q 'CURRENT_PROJECT_VERSION = 24;' ios/Runner.xcodeproj/project.pbxproj
-          grep -q 'MARKETING_VERSION = 1.0.23;' ios/Runner.xcodeproj/project.pbxproj
+          grep -q 'CURRENT_PROJECT_VERSION = 25;' ios/Runner.xcodeproj/project.pbxproj
+          grep -q 'MARKETING_VERSION = 1.0.24;' ios/Runner.xcodeproj/project.pbxproj
           grep -q 'INFOPLIST_KEY_CFBundleDisplayName = "GO Partner";' ios/Runner.xcodeproj/project.pbxproj
           grep -q '<string>GO Partner</string>' ios/Runner/Info.plist
 
@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SRC="assets/images/go_drive_app_icon.png"
+          SRC="assets/images/go_partner_app_icon.png"
           DST="ios/Runner/Assets.xcassets/AppIcon.appiconset"
           test -s "$SRC"
           mkdir -p "$DST"
@@ -134,7 +134,7 @@ jobs:
           pod install --repo-update
 
       - name: Build iOS Release without code signing
-        run: flutter build ios --release --no-codesign --build-name=1.0.23 --build-number=24
+        run: flutter build ios --release --no-codesign --build-name=1.0.24 --build-number=25
 
       - name: Verify iOS app
         shell: bash
@@ -145,16 +145,16 @@ jobs:
           test -d "$APP"
           test -s "$PLIST"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST")" = "GO Partner"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")" = "1.0.23"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")" = "1.0.24"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")" = "24"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" go-partner-1.0.23-build24-ios-unsigned.zip
-          shasum -a 256 go-partner-1.0.23-build24-ios-unsigned.zip
+          ditto -c -k --sequesterRsrc --keepParent "$APP" go-partner-1.0.24-build25-ios-unsigned.zip
+          shasum -a 256 go-partner-1.0.24-build25-ios-unsigned.zip
 
       - name: Upload iOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: go-partner-1.0.23-build24-ios-unsigned
-          path: go-partner-1.0.23-build24-ios-unsigned.zip
+          name: go-partner-1.0.24-build25-ios-unsigned
+          path: go-partner-1.0.24-build25-ios-unsigned.zip
           if-no-files-found: error
           retention-days: 14
 
