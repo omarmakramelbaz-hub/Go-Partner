@@ -35,15 +35,12 @@ jobs:
       - name: Configure Flutter Web platform
         run: flutter create . --platforms web --no-pub
 
-      - name: Verify GO Partner brand assets
+      - name: Verify GO Partner packaged identity
         shell: bash
         run: |
           set -euo pipefail
-          test -s assets/svg/go_partner_logo.svg
-          grep -q 'GO' assets/svg/go_partner_logo.svg
-          grep -q 'Partner' assets/svg/go_partner_logo.svg
-          grep -q 'assets/svg/go_partner_logo.svg' lib/view/layout/auth/screen/login_screen.dart
-          grep -q 'assets/brand/partner_splash.webp' lib/view/layout/screen/splash_screen.dart
+          python3 tool/verify_partner_identity.py
+          flutter test test/partner_identity_test.dart
 
       - name: Build Flutter Web
         shell: bash
