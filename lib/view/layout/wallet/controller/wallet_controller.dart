@@ -55,7 +55,12 @@ class WalletController extends ChangeNotifier {
   Future<void> chargingWallet({required dynamic amount, required Function(String paymentUrl) onSuccess}) async {
     NavigatorMethods.loading();
     try {
-      final FormData body = FormData.fromMap({'amount': amount, 'payment_method': _selectedPayment});
+      // Apple Pay / Google Pay are visible as distinct UX choices now. Until
+      // Paymob activates dedicated integration IDs, route them through the
+      // existing online checkout instead of sending unsupported method names.
+      final String? gatewayPaymentMethod =
+          (_selectedPayment == 'apple_pay' || _selectedPayment == 'google_pay') ? 'online' : _selectedPayment;
+      final FormData body = FormData.fromMap({'amount': amount, 'payment_method': gatewayPaymentMethod});
       final response = await ApiHelper.instance.post(Urls.chargingWallet, body: body);
 
       if (response.state == ResponseState.complete) {
