@@ -16,24 +16,56 @@ class ChooseVCashOrVisaWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final methods = <Widget>[];
+
+    if (myAccountController.setting?.walletCardActivate == 'true') {
+      methods.add(PaymentMethodWidget(
+        icon: AppImages.digitalWallet,
+        label: 'محفظة إلكترونية',
+        subtitle: 'Vodafone Cash والمحافظ الإلكترونية',
+        selectedPayment: 'v_cash',
+        isSvg: false,
+      ));
+    }
+    if (myAccountController.setting?.paymentCardActivate == 'true') {
+      methods.add(PaymentMethodWidget(
+        icon: AppImages.visaIcon,
+        label: AppLocaleKey.creditCard.tr(),
+        subtitle: 'Visa / Mastercard',
+        selectedPayment: 'online',
+      ));
+    }
+
+    // Apple Pay and Google Pay are intentionally presented as separate choices.
+    // Until Paymob provides/activates their dedicated integration IDs, both use
+    // the existing online checkout route so no unverified gateway identifiers
+    // are hard-coded in the app.
+    if (myAccountController.setting?.paymentCardActivate == 'true') {
+      methods.add(const PaymentMethodWidget(
+        icon: '',
+        label: 'Apple Pay',
+        subtitle: 'الدفع السريع والآمن',
+        selectedPayment: 'apple_pay',
+        fallbackIcon: Icons.apple,
+      ));
+      methods.add(const PaymentMethodWidget(
+        icon: '',
+        label: 'Google Pay',
+        subtitle: 'الدفع باستخدام Google Pay',
+        selectedPayment: 'google_pay',
+        fallbackIcon: Icons.account_balance_wallet_outlined,
+      ));
+    }
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        myAccountController.setting?.paymentCardActivate == 'true'
-            ? PaymentMethodWidget(
-                icon: AppImages.visaIcon,
-                label: AppLocaleKey.creditCard.tr(),
-                selectedPayment: 'online',
-              )
-            : const SizedBox(),
-        const SizedBox(height: 16),
-        myAccountController.setting?.walletCardActivate == 'true'
-            ? PaymentMethodWidget(
-                icon: AppImages.digitalWallet,
-                label: AppLocaleKey.digitalWalletAndInstaPay.tr(),
-                selectedPayment: 'v_cash',
-                isSvg: false,
-              )
-            : const SizedBox(),
+        Text('اختر طريقة الدفع', style: AppTextStyle.text16MS(context)),
+        const SizedBox(height: 12),
+        for (var i = 0; i < methods.length; i++) ...[
+          methods[i],
+          if (i != methods.length - 1) const SizedBox(height: 12),
+        ],
       ],
     );
   }
@@ -42,54 +74,98 @@ class ChooseVCashOrVisaWidget extends StatelessWidget {
 class PaymentMethodWidget extends StatelessWidget {
   final String icon;
   final String label;
+  final String? subtitle;
   final bool isSvg;
   final String selectedPayment;
+  final IconData? fallbackIcon;
 
   const PaymentMethodWidget({
     super.key,
     required this.icon,
     required this.label,
+    this.subtitle,
     this.isSvg = true,
     required this.selectedPayment,
+    this.fallbackIcon,
   });
 
   @override
   Widget build(BuildContext context) {
     final walletController = context.watch<WalletController>();
     final isSelected = walletController.selectedPayment == selectedPayment;
-    return InkWell(
-      onTap: () => walletController.setSelectedPayment(selectedPayment),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: AppColor.whiteColor(context),
-          border: Border.all(
-            color: isSelected ? AppColor.mainAppColor(context) : AppColor.borderColor(context),
-            width: 1,
+    final mainColor = AppColor.mainAppColor(context);
+
+    Widget leading;
+    if (fallbackIcon != null) {
+      leading = Icon(fallbackIcon, size: 27, color: isSelected ? mainColor : AppColor.greyColor(context));
+    } else {
+      leading = isSvg
+          ? SvgPicture.asset(icon, width: 27, height: 27)
+          : Image.asset(icon, height: 27, width: 27, fit: BoxFit.contain);
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => walletController.setSelectedPayment(selectedPayment),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: isSelected ? mainColor.withOpacity(.07) : AppColor.whiteColor(context),
+            border: Border.all(
+              color: isSelected ? mainColor : AppColor.borderColor(context),
+              width: isSelected ? 1.5 : 1,
+            ),
           ),
-        ),
-        child: Center(
           child: Row(
             children: [
-              isSvg ? SvgPicture.asset(icon) : Image.asset(icon, height: 25),
-              const SizedBox(width: 10),
-              Text(label, style: AppTextStyle.text16MS(context)),
-              const Spacer(),
-              isSelected
-                  ? Container(
-                      height: 16,
-                      width: 16,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(width: 1.3, color: AppColor.mainAppColor(context)),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(13),
+                  color: isSelected ? mainColor.withOpacity(.12) : AppColor.greyColor(context).withOpacity(.08),
+                ),
+                alignment: Alignment.center,
+                child: leading,
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: AppTextStyle.text16MS(context)),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle!,
+                        style: TextStyle(fontSize: 12, color: AppColor.greyColor(context)),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: CircleAvatar(backgroundColor: AppColor.mainAppColor(context)),
-                      ),
-                    )
-                  : const SizedBox(),
+                    ],
+                  ],
+                ),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 22,
+                width: 22,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    width: 1.5,
+                    color: isSelected ? mainColor : AppColor.borderColor(context),
+                  ),
+                ),
+                child: isSelected
+                    ? DecoratedBox(
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: mainColor),
+                      )
+                    : null,
+              ),
             ],
           ),
         ),
