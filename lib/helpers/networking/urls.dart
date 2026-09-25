@@ -78,6 +78,7 @@ class Urls {
   static const String delegateOrderDetails = '${baseUrl}delegate/orders/';
   static const String delegateHomeCurrentOrder = '${baseUrl}delegate/orders?home=yes&status=current';
   static const String delegateAcceptDecline = '${baseUrl}delegate/accept_decline/orders/';
+  static String delegateShippingOffer(int orderId) => '${baseUrl}delegate/shipping/orders/$orderId/offer';
   static const String compleatOrderDelegate = '${baseUrl}delegate/orders/';
   static const String delegateCurrentOrders = '${baseUrl}delegate/orders?status=current';
   static const String delegateReports = '${baseUrl}delegate/reports';
