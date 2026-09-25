@@ -448,15 +448,15 @@ class PartnerOrderCard extends StatelessWidget {
                   child: FilledButton.icon(
                     key: ValueKey('accept-${order.key}'),
                     onPressed: enabled
-                        ? () => _act(
-                            context,
-                            controller,
-                            PartnerOrderAction.accept,
-                          )
+                        ? () => order.isDelivery
+                            ? _offer(context, controller)
+                            : _act(context, controller, PartnerOrderAction.accept)
                         : null,
                     style: _buttonStyle(),
                     icon: const Icon(Icons.check_rounded, size: 19),
-                    label: Text(_t(context, 'قبول الطلب', 'Accept')),
+                    label: Text(order.isDelivery
+                        ? _t(context, 'إرسال عرض سعر', 'Send price offer')
+                        : _t(context, 'قبول الطلب', 'Accept')),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -498,6 +498,58 @@ class PartnerOrderCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _offer(
+    BuildContext context,
+    PartnerOrdersController controller,
+  ) async {
+    final price = TextEditingController(
+      text: order.delivery?.deliveryPrice?.toString() ?? '',
+    );
+    final value = await showDialog<num>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_t(context, 'إرسال عرض سعر', 'Send price offer')),
+        content: TextField(
+          controller: price,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: _t(context, 'سعر التوصيل', 'Delivery price'),
+            suffixText: _t(context, 'جنيه', 'EGP'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(_t(context, 'إلغاء', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () {
+              final amount = num.tryParse(price.text.trim());
+              if (amount != null && amount > 0) {
+                Navigator.pop(dialogContext, amount);
+              }
+            },
+            child: Text(_t(context, 'إرسال العرض', 'Send offer')),
+          ),
+        ],
+      ),
+    );
+    price.dispose();
+    if (value == null || !context.mounted) return;
+    final ok = await controller.submitOffer(order, value);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? _t(context, 'تم إرسال عرض السعر للعميل', 'Price offer sent to customer')
+              : _t(context, 'تعذر إرسال عرض السعر', 'Could not send price offer'),
+        ),
       ),
     );
   }
