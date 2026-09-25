@@ -96,6 +96,18 @@ class PartnerOrdersRepository {
     );
   }
 
+  Future<void> submitDeliveryOffer(PartnerOrder order, num price) async {
+    if (!order.isDelivery || !order.isNew || price <= 0) {
+      throw const PartnerOrdersException(null);
+    }
+    _data(
+      await _post(
+        Urls.delegateShippingOffer(order.id),
+        body: FormData.fromMap({'price': price}),
+      ),
+    );
+  }
+
   Future<void> update(PartnerOrder order, PartnerOrderAction action) async {
     if (!order.allows(action)) throw const PartnerOrdersException(null);
     final String url;
