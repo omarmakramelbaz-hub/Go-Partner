@@ -483,6 +483,14 @@ class PartnerOrderCard extends StatelessWidget {
                 ),
               ],
             ),
+          if (current && order.isDelivery && !order.awaitingConfirmation) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: enabled ? () => _reviseOffer(context, controller) : null,
+              icon: const Icon(Icons.price_change_outlined),
+              label: Text(_t(context, 'إرسال عرض سعر جديد', 'Send a new price offer')),
+            ),
+          ],
           if (next != null)
             FilledButton.icon(
               key: ValueKey('advance-${order.key}'),
@@ -499,6 +507,52 @@ class PartnerOrderCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Future<void> _reviseOffer(
+    BuildContext context,
+    PartnerOrdersController controller,
+  ) async {
+    final price = TextEditingController(
+      text: order.delivery?.deliveryPrice?.toString() ?? '',
+    );
+    final value = await showDialog<num>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_t(context, 'عرض سعر جديد', 'New price offer')),
+        content: TextField(
+          controller: price,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: _t(context, 'السعر الجديد', 'New price'),
+            suffixText: _t(context, 'جنيه', 'EGP'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(_t(context, 'إلغاء', 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () {
+              final amount = num.tryParse(price.text.trim());
+              if (amount != null && amount > 0) Navigator.pop(dialogContext, amount);
+            },
+            child: Text(_t(context, 'إرسال', 'Send')),
+          ),
+        ],
+      ),
+    );
+    price.dispose();
+    if (value == null || !context.mounted) return;
+    final ok = await controller.reviseOffer(order, value);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(ok
+          ? _t(context, 'تم إرسال العرض الجديد للعميل', 'New offer sent to customer')
+          : _t(context, 'تعذر إرسال العرض', 'Could not send offer'))),
     );
   }
 
