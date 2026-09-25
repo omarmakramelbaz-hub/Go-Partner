@@ -221,6 +221,24 @@ class PartnerOrdersController extends ChangeNotifier {
     }
   }
 
+  Future<bool> reviseOffer(PartnerOrder order, num price) async {
+    if (_disposed || _busy.isNotEmpty || loading || stale(order) ||
+        !order.isDelivery || !order.isActive || price <= 0) {
+      return false;
+    }
+    _busy.add(order.key);
+    _notify();
+    try {
+      await _repository.reviseDeliveryOffer(order, price);
+      await _refreshFeeds();
+      return true;
+    } finally {
+      _busy.remove(order.key);
+      _notify();
+      await _drainQueuedRefresh();
+    }
+  }
+
   /// Keep a successful write separate from a failed subsequent refresh.
   /// A delivery acceptance may still await customer confirmation, so never
   /// invent its assigned status locally.
