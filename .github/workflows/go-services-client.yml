@@ -22,9 +22,11 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - name: Analyze new client code
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings lib/go_services test/go_services_test.dart
+      - name: Analyze new client code and integration
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings lib/go_services lib/view/layout/order/widget/partner_orders_board.dart test/go_services_test.dart
       - name: Run contract and widget checks
         run: flutter test test/go_services_test.dart
+      - name: Prepare web scaffold in disposable runner
+        run: flutter create . --platforms web --no-pub
       - name: Compile without deploying
         run: flutter build web --release --no-web-resources-cdn
