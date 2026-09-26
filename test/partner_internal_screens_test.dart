@@ -340,7 +340,13 @@ void main() {
             // The unchanged courier UI opens a quote dialog; opening it must
             // never silently accept an order or assign the courier.
             expect(find.byType(AlertDialog), findsOneWidget);
-            expect(find.text(language == 'ar' ? 'إرسال عرض سعر' : 'Send price offer'), findsOneWidget);
+            expect(
+              find.descendant(
+                of: find.byType(AlertDialog),
+                matching: find.text(language == 'ar' ? 'إرسال عرض سعر' : 'Send price offer'),
+              ),
+              findsOneWidget,
+            );
             expect(repository.writes, isEmpty);
             expect(controller.active.map((item) => item.key), isNot(contains('delivery:32')));
             await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text(language == 'ar' ? 'إلغاء' : 'Cancel')));
