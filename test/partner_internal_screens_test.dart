@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_partner/go_services/service_api.dart';
 import 'package:go_partner/helpers/networking/api_helper.dart';
 import 'package:go_partner/helpers/pusher_service/pusher_controller.dart';
 import 'package:go_partner/helpers/routes/app_routers_import.dart';
@@ -36,6 +37,15 @@ import 'package:go_partner/view/layout/notification/screen/notification_delegate
 import 'package:go_partner/view/layout/delegate_bottom_nav_bar.dart/controller/delegate_bottom_nav_bar_controller.dart';
 
 final translations = <String, Map<String, dynamic>>{};
+
+// This suite verifies the retained legacy screens, including professionals on
+// a server without the marketplace schema. New-marketplace tests have their own
+// explicit upgraded-server fixture in go_services_test.dart.
+class LegacyServiceApi extends ServiceApi {
+  @override
+  Future<ServiceCapabilities> capabilities() async =>
+      const ServiceCapabilities(ready: false, enabled: false);
+}
 
 class TestTranslations extends AssetLoader {
   const TestTranslations();
@@ -142,6 +152,10 @@ Widget harness(
   assetLoader: const TestTranslations(),
   child: MultiProvider(
     providers: [
+      Provider<ServiceApi>(
+        create: (_) => LegacyServiceApi(),
+        dispose: (_, api) => api.close(),
+      ),
       ChangeNotifierProvider(create: (_) => AppThemeController()),
       ChangeNotifierProvider<AuthController>(
         create: (_) => PreviewAuth(professional: professional),
