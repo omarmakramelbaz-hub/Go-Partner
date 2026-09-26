@@ -8,6 +8,7 @@ import '../controller/partner_orders_controller.dart';
 import '../model/partner_order.dart';
 import '../screen/order_details_delegate_screen.dart';
 import '../service/partner_orders_repository.dart';
+import 'partner_price_offer_dialog.dart';
 
 String _t(BuildContext context, String ar, String en) =>
     context.locale.languageCode == 'ar' ? ar : en;
@@ -513,99 +514,53 @@ class PartnerOrderCard extends StatelessWidget {
   Future<void> _reviseOffer(
     BuildContext context,
     PartnerOrdersController controller,
-  ) async {
-    final price = TextEditingController(
-      text: order.delivery?.deliveryPrice?.toString() ?? '',
-    );
-    final value = await showDialog<num>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_t(context, 'عرض سعر جديد', 'New price offer')),
-        content: TextField(
-          controller: price,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: _t(context, 'السعر الجديد', 'New price'),
-            suffixText: _t(context, 'جنيه', 'EGP'),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(_t(context, 'إلغاء', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () {
-              final amount = num.tryParse(price.text.trim());
-              if (amount != null && amount > 0) Navigator.pop(dialogContext, amount);
-            },
-            child: Text(_t(context, 'إرسال', 'Send')),
-          ),
-        ],
-      ),
-    );
-    price.dispose();
-    if (value == null || !context.mounted) return;
-    final ok = await controller.reviseOffer(order, value);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok
-          ? _t(context, 'تم إرسال العرض الجديد للعميل', 'New offer sent to customer')
-          : _t(context, 'تعذر إرسال العرض', 'Could not send offer'))),
-    );
-  }
+  ) => _sendPrice(context, controller, revision: true);
 
   Future<void> _offer(
     BuildContext context,
     PartnerOrdersController controller,
-  ) async {
-    final price = TextEditingController(
-      text: order.delivery?.deliveryPrice?.toString() ?? '',
-    );
+  ) => _sendPrice(context, controller);
+
+  Future<void> _sendPrice(
+    BuildContext context,
+    PartnerOrdersController controller, {
+    bool revision = false,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ar = context.locale.languageCode == 'ar';
+    final success = revision
+        ? _t(context, 'تم إرسال العرض الجديد للعميل', 'New offer sent to customer')
+        : _t(context, 'تم إرسال عرض السعر للعميل', 'Price offer sent to customer');
+    final failure = _t(context, 'تعذر إرسال عرض السعر', 'Could not send price offer');
     final value = await showDialog<num>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_t(context, 'إرسال عرض سعر', 'Send price offer')),
-        content: TextField(
-          controller: price,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: InputDecoration(
-            labelText: _t(context, 'سعر التوصيل', 'Delivery price'),
-            suffixText: _t(context, 'جنيه', 'EGP'),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(_t(context, 'إلغاء', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () {
-              final amount = num.tryParse(price.text.trim());
-              if (amount != null && amount > 0) {
-                Navigator.pop(dialogContext, amount);
-              }
-            },
-            child: Text(_t(context, 'إرسال العرض', 'Send offer')),
-          ),
-        ],
+      builder: (_) => PartnerPriceOfferDialog(
+        initialPrice: order.delivery?.deliveryPrice?.toString() ?? '',
+        ar: ar,
+        revision: revision,
       ),
     );
-    price.dispose();
+    // The dialog owns the controller through its closing animation. Never
+    // dispose a TextEditingController here after the route's pop future.
     if (value == null || !context.mounted) return;
-    final ok = await controller.submitOffer(order, value);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          ok
-              ? _t(context, 'تم إرسال عرض السعر للعميل', 'Price offer sent to customer')
-              : _t(context, 'تعذر إرسال عرض السعر', 'Could not send price offer'),
-        ),
-      ),
-    );
+    try {
+      final ok = revision
+          ? await controller.reviseOffer(order, value)
+          : await controller.submitOffer(order, value);
+      if (!messenger.mounted) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(ok ? success : failure)));
+    } catch (error) {
+      if (!messenger.mounted) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(
+          error is PartnerOrdersException && error.message?.isNotEmpty == true
+              ? error.message!
+              : failure,
+        )));
+    }
   }
 
   ButtonStyle _buttonStyle() => FilledButton.styleFrom(
