@@ -38,9 +38,8 @@ import 'package:go_partner/view/layout/delegate_bottom_nav_bar.dart/controller/d
 
 final translations = <String, Map<String, dynamic>>{};
 
-// This suite verifies the retained legacy screens, including professionals on
-// a server without the marketplace schema. New-marketplace tests have their own
-// explicit upgraded-server fixture in go_services_test.dart.
+// This suite verifies retained legacy screens against an explicit old server.
+// Upgraded marketplace behavior is tested separately in go_services_test.dart.
 class LegacyServiceApi extends ServiceApi {
   @override
   Future<ServiceCapabilities> capabilities() async =>
@@ -121,15 +120,9 @@ class PreviewOrders extends DelegateOrdersController {
   @override
   bool get completedOrdersHasPagination => false;
   @override
-  Future<void> getDelegateWaitingOrders({
-    int? pageNumber,
-    int? orderNo,
-  }) async {}
+  Future<void> getDelegateWaitingOrders({int? pageNumber, int? orderNo}) async {}
   @override
-  Future<void> getDelegateCompletedOrders({
-    int? pageNumber,
-    int? orderNo,
-  }) async {}
+  Future<void> getDelegateCompletedOrders({int? pageNumber, int? orderNo}) async {}
   @override
   Future<void> getDelegateOngoingOrders({
     int? pageNumber,
@@ -199,9 +192,7 @@ Future<void> capture(WidgetTester tester, String name) async {
     final image = await boundary.toImage(pixelRatio: 2);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     await Directory(directory).create(recursive: true);
-    await File(
-      '$directory/$name.png',
-    ).writeAsBytes(bytes!.buffer.asUint8List());
+    await File('$directory/$name.png').writeAsBytes(bytes!.buffer.asUint8List());
     image.dispose();
   });
 }
@@ -214,8 +205,7 @@ void main() {
     await EasyLocalization.ensureInitialized();
     for (final language in ['ar', 'en']) {
       translations[language] =
-          jsonDecode(File('i18n/$language.json').readAsStringSync())
-              as Map<String, dynamic>;
+          jsonDecode(File('i18n/$language.json').readAsStringSync()) as Map<String, dynamic>;
     }
     hiveDirectory = await Directory.systemTemp.createTemp('partner-ui-test');
     Hive.init(hiveDirectory.path);
@@ -224,14 +214,11 @@ void main() {
       ..addFont(rootBundle.load('assets/font/Tajawal/Tajawal-Regular.ttf'))
       ..addFont(rootBundle.load('assets/font/Tajawal/Tajawal-Bold.ttf'));
     await fonts.load();
-    await (FontLoader(
-      'MaterialIcons',
-    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          const MethodChannel('dev.fluttercommunity.plus/connectivity'),
-          (call) async => ['none'],
-        );
+    await (FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (call) async => ['none'],
+    );
   });
   tearDownAll(() async {
     await Hive.close();
@@ -246,20 +233,13 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
-        await tester.pumpWidget(
-          harness(
-            embedded
-                ? page('المحفظة', const WalletScreen(embedded: true))
-                : const WalletScreen(),
-          ),
-        );
+        await tester.pumpWidget(harness(
+          embedded ? page('المحفظة', const WalletScreen(embedded: true)) : const WalletScreen(),
+        ));
         await tester.pumpAndSettle();
         expect(find.byType(WalletContent), findsOneWidget);
         final context = tester.element(find.byType(WalletContent));
-        expect(
-          context.read<WalletController>().walletResponse.state,
-          ResponseState.offline,
-        );
+        expect(context.read<WalletController>().walletResponse.state, ResponseState.offline);
         expect(context.read<MyAccountController>(), isA<MyAccountController>());
         expect(find.text('تأكد من الاتصال بالإنترنت'), findsWidgets);
         expect(tester.takeException(), isNull);
@@ -269,31 +249,22 @@ void main() {
 
   for (final language in ['ar', 'en']) {
     for (final width in [320.0, 390.0]) {
-      testWidgets('wallet balance and actions fit $language at $width', (
-        tester,
-      ) async {
+      testWidgets('wallet balance and actions fit $language at $width', (tester) async {
         tester.view.physicalSize = Size(width, 844);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         final wallet = PreviewWallet();
-        await tester.pumpWidget(
-          harness(
-            page(
-              language == 'ar' ? 'المحفظة' : 'Wallet',
-              MultiProvider(
-                providers: [
-                  ChangeNotifierProvider<WalletController>.value(value: wallet),
-                  ChangeNotifierProvider<MyAccountController>(
-                    create: (_) => PreviewSettings(),
-                  ),
-                ],
-                child: const WalletContent(embedded: true),
-              ),
-            ),
-            language: language,
-          ),
-        );
+        await tester.pumpWidget(harness(
+          page(language == 'ar' ? 'المحفظة' : 'Wallet', MultiProvider(
+            providers: [
+              ChangeNotifierProvider<WalletController>.value(value: wallet),
+              ChangeNotifierProvider<MyAccountController>(create: (_) => PreviewSettings()),
+            ],
+            child: const WalletContent(embedded: true),
+          )),
+          language: language,
+        ));
         await tester.pumpAndSettle();
         expect(find.textContaining('1938.25'), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -307,31 +278,18 @@ void main() {
     }
   }
 
-  testWidgets('home branding fits and the bell opens notifications', (
-    tester,
-  ) async {
+  testWidgets('home branding fits and the bell opens notifications', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      harness(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => PartnerOrdersController(
-                isProfessional: false,
-                repository: MemoryOrdersRepository(),
-              ),
-            ),
-            ChangeNotifierProvider(
-              create: (_) => DelegateBottomNavBarController(),
-            ),
-          ],
-          child: const HomeDelegateScreen(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(harness(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PartnerOrdersController(isProfessional: false, repository: MemoryOrdersRepository())),
+        ChangeNotifierProvider(create: (_) => DelegateBottomNavBarController()),
+      ],
+      child: const HomeDelegateScreen(),
+    )));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await capture(tester, 'home');
@@ -351,50 +309,22 @@ void main() {
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.resetPhysicalSize);
           addTearDown(tester.view.resetDevicePixelRatio);
-          final repository = MemoryOrdersRepository()
-            ..items.addAll(
-              professional
-                  ? [
-                      serviceOrder(31, 'accepted'),
-                      serviceOrder(32, 'pending'),
-                      serviceOrder(33, 'pending'),
-                    ]
-                  : [
-                      deliveryOrder(31, 'shipped'),
-                      deliveryOrder(32, 'pending'),
-                      serviceOrder(33, 'pending'),
-                    ],
-            );
-          final controller = PartnerOrdersController(
-            isProfessional: professional,
-            repository: repository,
-          );
+          final repository = MemoryOrdersRepository()..items.addAll(professional
+            ? [serviceOrder(31, 'accepted'), serviceOrder(32, 'pending'), serviceOrder(33, 'pending')]
+            : [deliveryOrder(31, 'shipped'), deliveryOrder(32, 'pending'), serviceOrder(33, 'pending')]);
+          final controller = PartnerOrdersController(isProfessional: professional, repository: repository);
           await controller.refresh();
-          await tester.pumpWidget(
-            harness(
-              MultiProvider(
-                providers: [
-                  ChangeNotifierProvider.value(value: controller),
-                  ChangeNotifierProvider(
-                    create: (_) => DelegateBottomNavBarController(),
-                  ),
-                ],
-                child: const HomeDelegateScreen(),
-              ),
-              language: language,
-              professional: professional,
-            ),
-          );
+          await tester.pumpWidget(harness(MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: controller),
+              ChangeNotifierProvider(create: (_) => DelegateBottomNavBarController()),
+            ],
+            child: const HomeDelegateScreen(),
+          ), language: language, professional: professional));
           await tester.pumpAndSettle();
           expect(find.text('طلبات الخدمات والمهن'), findsNothing);
-          expect(
-            find.text(language == 'ar' ? 'طلبات العملاء' : 'Customer requests'),
-            findsOneWidget,
-          );
-          expect(
-            find.text(language == 'ar' ? 'طلبات جديدة' : 'New requests'),
-            findsOneWidget,
-          );
+          expect(find.text(language == 'ar' ? 'طلبات العملاء' : 'Customer requests'), findsOneWidget);
+          expect(find.text(language == 'ar' ? 'طلبات جديدة' : 'New requests'), findsOneWidget);
           expect(find.byType(PartnerOrderCard), findsNWidgets(3));
           expect(tester.takeException(), isNull);
           final source = professional ? 'service' : 'delivery';
@@ -403,11 +333,28 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(accept);
           await tester.pumpAndSettle();
-          expect(repository.writes, ['$source:32:accept']);
-          expect(
-            controller.active.map((item) => item.key),
-            contains('$source:32'),
-          );
+          if (professional) {
+            // Legacy direct service requests still accept immediately.
+            expect(repository.writes, ['$source:32:accept']);
+          } else {
+            // The unchanged courier UI opens a quote dialog; opening it must
+            // never silently accept an order or assign the courier.
+            expect(find.byType(AlertDialog), findsOneWidget);
+            expect(find.text(language == 'ar' ? 'إرسال عرض سعر' : 'Send price offer'), findsOneWidget);
+            expect(repository.writes, isEmpty);
+            expect(controller.active.map((item) => item.key), isNot(contains('delivery:32')));
+            await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.text(language == 'ar' ? 'إلغاء' : 'Cancel')));
+            await tester.pumpAndSettle();
+            expect(repository.writes, isEmpty);
+            // Explicitly inject a later server-confirmed assignment to test
+            // subsequent stage UI. No simulated customer action is performed
+            // by tapping the professional's quote dialog.
+            final index = repository.items.indexWhere((item) => item.key == 'delivery:32');
+            repository.items[index] = deliveryOrder(32, 'accepted');
+            await controller.refresh();
+            await tester.pumpAndSettle();
+          }
+          expect(controller.active.map((item) => item.key), contains('$source:32'));
           expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
           expect(tester.takeException(), isNull);
           final reject = find.byKey(const ValueKey('decline-service:33'));
@@ -417,7 +364,6 @@ void main() {
           await tester.pumpAndSettle();
           expect(controller.incoming, isEmpty);
           expect(repository.writes.last, 'service:33:decline');
-          // Finish the selected order; the dropdown must select a remaining order.
           final finish = find.byKey(ValueKey('advance-$source:31'));
           await tester.ensureVisible(finish);
           await tester.pumpAndSettle();
@@ -432,46 +378,28 @@ void main() {
     }
   }
 
-  testWidgets(
-    'notification entry creates a scoped inbox and handles unavailable network',
-    (tester) async {
-      await tester.pumpWidget(
-        harness(const PartnerServiceRequestsScreen(), professional: true),
-      );
-      await tester.pumpAndSettle();
-      final context = tester.element(find.byType(PartnerOrdersScreen));
-      final orders = context.read<PartnerOrdersController>();
-      expect(orders.isProfessional, isTrue);
-      expect(orders.errors, isNotEmpty);
-      expect(find.text('إعادة المحاولة'), findsOneWidget);
-      expect(find.text('لا توجد طلبات جديدة حاليًا'), findsNothing);
-      await tester.pumpWidget(const SizedBox());
-      expect(tester.takeException(), isNull);
-    },
-  );
+  testWidgets('notification entry creates a scoped inbox and handles unavailable network', (tester) async {
+    await tester.pumpWidget(harness(const PartnerServiceRequestsScreen(), professional: true));
+    await tester.pumpAndSettle();
+    final context = tester.element(find.byType(PartnerOrdersScreen));
+    final orders = context.read<PartnerOrdersController>();
+    expect(orders.isProfessional, isTrue);
+    expect(orders.errors, isNotEmpty);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
+    expect(find.text('لا توجد طلبات جديدة حاليًا'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
 
-  testWidgets('unified requests tab shows both sources and completed work', (
-    tester,
-  ) async {
-    final repository = MemoryOrdersRepository()
-      ..items.addAll([
-        deliveryOrder(1, 'pending'),
-        serviceOrder(1, 'pending'),
-        serviceOrder(2, 'completed'),
-      ]);
-    final controller = PartnerOrdersController(
-      isProfessional: false,
-      repository: repository,
-    );
+  testWidgets('unified requests tab shows both sources and completed work', (tester) async {
+    final repository = MemoryOrdersRepository()..items.addAll([
+      deliveryOrder(1, 'pending'), serviceOrder(1, 'pending'), serviceOrder(2, 'completed'),
+    ]);
+    final controller = PartnerOrdersController(isProfessional: false, repository: repository);
     await controller.refresh();
-    await tester.pumpWidget(
-      harness(
-        ChangeNotifierProvider.value(
-          value: controller,
-          child: page('الطلبات', const PartnerOrdersScreen()),
-        ),
-      ),
-    );
+    await tester.pumpWidget(harness(ChangeNotifierProvider.value(
+      value: controller, child: page('الطلبات', const PartnerOrdersScreen()),
+    )));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('order-delivery:1')), findsOneWidget);
     expect(find.byKey(const ValueKey('order-service:1')), findsOneWidget);
@@ -483,105 +411,61 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets(
-    'unified home previews keep current stages and new requests together',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 1250);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      for (final professional in [true, false]) {
-        final repository = MemoryOrdersRepository()
-          ..items.addAll(
-            professional
-                ? [serviceOrder(120, 'accepted'), serviceOrder(121, 'pending')]
-                : [
-                    deliveryOrder(120, 'shipped'),
-                    deliveryOrder(121, 'pending'),
-                  ],
-          );
-        final controller = PartnerOrdersController(
-          isProfessional: professional,
-          repository: repository,
-        );
-        await controller.refresh();
-        await tester.pumpWidget(
-          harness(
-            MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(value: controller),
-                ChangeNotifierProvider(
-                  create: (_) => DelegateBottomNavBarController(),
-                ),
-              ],
-              child: const HomeDelegateScreen(),
-            ),
-            professional: professional,
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byIcon(Icons.refresh_rounded), findsNothing);
-        expect(find.text('تحديث تلقائي'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await capture(
-          tester,
-          professional ? 'unified-service' : 'unified-delivery',
-        );
-        controller.startLiveUpdates();
-        await tester.pumpAndSettle();
-        repository.items.add(
-          professional
-              ? serviceOrder(122, 'pending')
-              : deliveryOrder(122, 'pending'),
-        );
-        await tester.pump(PartnerOrdersController.liveRefreshInterval);
-        await tester.pumpAndSettle();
-        expect(
-          find.byKey(ValueKey('order-${professional ? 'service' : 'delivery'}:122')),
-          findsOneWidget,
-        );
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-        controller.dispose();
-      }
-    },
-  );
+  testWidgets('unified home previews keep current stages and new requests together', (tester) async {
+    tester.view.physicalSize = const Size(390, 1250);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final professional in [true, false]) {
+      final repository = MemoryOrdersRepository()..items.addAll(professional
+        ? [serviceOrder(120, 'accepted'), serviceOrder(121, 'pending')]
+        : [deliveryOrder(120, 'shipped'), deliveryOrder(121, 'pending')]);
+      final controller = PartnerOrdersController(isProfessional: professional, repository: repository);
+      await controller.refresh();
+      await tester.pumpWidget(harness(MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: controller),
+          ChangeNotifierProvider(create: (_) => DelegateBottomNavBarController()),
+        ],
+        child: const HomeDelegateScreen(),
+      ), professional: professional));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+      expect(find.text('تحديث تلقائي'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await capture(tester, professional ? 'unified-service' : 'unified-delivery');
+      controller.startLiveUpdates();
+      await tester.pumpAndSettle();
+      repository.items.add(professional ? serviceOrder(122, 'pending') : deliveryOrder(122, 'pending'));
+      await tester.pump(PartnerOrdersController.liveRefreshInterval);
+      await tester.pumpAndSettle();
+      expect(find.byKey(ValueKey('order-${professional ? 'service' : 'delivery'}:122')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
+    }
+  });
 
   testWidgets('disabled charging remains unavailable', (tester) async {
-    await tester.pumpWidget(
-      harness(
-        page(
-          'المحفظة',
-          MultiProvider(
-            providers: [
-              ChangeNotifierProvider<WalletController>(
-                create: (_) => PreviewWallet(),
-              ),
-              ChangeNotifierProvider<MyAccountController>(
-                create: (_) => PreviewSettings(enabled: false),
-              ),
-            ],
-            child: const WalletContent(embedded: true),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(harness(page('المحفظة', MultiProvider(
+      providers: [
+        ChangeNotifierProvider<WalletController>(create: (_) => PreviewWallet()),
+        ChangeNotifierProvider<MyAccountController>(create: (_) => PreviewSettings(enabled: false)),
+      ],
+      child: const WalletContent(embedded: true),
+    ))));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.add_rounded), findsNothing);
     expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('orders and account keep readable Arabic layouts on a phone', (
-    tester,
-  ) async {
+  testWidgets('orders and account keep readable Arabic layouts on a phone', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      harness(page('الطلبات', const OrdersDelegateScreen())),
-    );
+    await tester.pumpWidget(harness(page('الطلبات', const OrdersDelegateScreen())));
     await tester.pumpAndSettle();
     expect(find.byType(TabBar), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -590,9 +474,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpWidget(
-      harness(page('حسابي', const MyAccountDelegateScreen())),
-    );
+    await tester.pumpWidget(harness(page('حسابي', const MyAccountDelegateScreen())));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.person_outline_rounded), findsWidgets);
     expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
