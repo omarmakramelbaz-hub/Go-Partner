@@ -166,12 +166,17 @@ void main() {
     final price = find.widgetWithText(TextFormField, 'السعر بالجنيه');
     await tester.ensureVisible(price);
     await tester.enterText(price, '٩٠٫٢٥');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
     final save = find.text('حفظ المنتج في الطلب');
     await tester.scrollUntilVisible(
       save,
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
     await tester.tap(save);
     await tester.pumpAndSettle();
     expect(saved!.price, '90.25');
