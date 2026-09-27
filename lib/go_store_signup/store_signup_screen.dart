@@ -266,7 +266,7 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                                 ),
                               ),
                               TextButton.icon(
-                                onPressed: draft.products.length >= 15
+                                onPressed: draft.products.length >= 60
                                     ? null
                                     : () => _product(),
                                 icon: const Icon(Icons.add),
@@ -275,7 +275,7 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                             ],
                           ),
                           const Text(
-                            'أضف حتى 15 منتجًا كبداية، وتقدر تكمل وتعدل بعد تفعيل الحساب. صور JPG أو PNG أو WEBP، حتى 1 ميجا للصورة.',
+                            'أضف حتى 60 منتجًا كبداية، وتقدر تكمل وتعدل بعد تفعيل الحساب. صور JPG أو PNG أو WEBP، حتى 1 ميجا للصورة.',
                             style: TextStyle(
                               color: Color(0xFF707985),
                               height: 1.5,
@@ -305,6 +305,7 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.memory(
                                       draft.products[i].image.bytes,
+                                      cacheWidth: 186,
                                       width: 62,
                                       height: 62,
                                       fit: BoxFit.cover,
@@ -380,6 +381,18 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                       ),
                     ),
                   ),
+                ValueListenableBuilder<String?>(
+                  valueListenable: draft.progress,
+                  builder: (context, progress, _) => progress == null
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Semantics(
+                            liveRegion: true,
+                            child: Text(progress),
+                          ),
+                        ),
+                ),
                 FilledButton.icon(
                   onPressed: _busy || _picking ? null : _submit,
                   style: FilledButton.styleFrom(

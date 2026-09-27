@@ -182,24 +182,26 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
 
   Future<bool> _sendApplication() async {
     final isStore = _profession == 'store_owner';
-    if (await _photo!.length() + (isStore ? _storeDraft.imageBytes : 0) >
-        6 * 1024 * 1024) {
-      throw const StoreSignupFailure(
-        'إجمالي الصور أكبر من 6 ميجا. قلّل حجم الصور أو عدد المنتجات.',
-      );
+    if (await _photo!.length() > 5 * 1024 * 1024) {
+      throw const StoreSignupFailure('الصورة الشخصية يجب ألا تتجاوز 5 ميجا.');
     }
     if (!mounted) return false;
-    final proof = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PartnerEmailVerificationScreen(
-          mobile: _phone.text.trim(),
-          email: _email.text.trim(),
-          purpose: 'application',
-        ),
-      ),
-    );
-    if (!mounted || proof == null) return false;
+    final resume =
+        isStore &&
+        _storeDraft.hasUploadSession(_phone.text.trim(), _email.text.trim());
+    final proof = resume
+        ? null
+        : await Navigator.push<String>(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PartnerEmailVerificationScreen(
+                mobile: _phone.text.trim(),
+                email: _email.text.trim(),
+                purpose: 'application',
+              ),
+            ),
+          );
+    if (!mounted || (!resume && proof == null)) return false;
     final api = PartnerApplicationApi(scope: 'go_partner');
     try {
       await api.submit(
