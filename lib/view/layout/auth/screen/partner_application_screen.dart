@@ -1,8 +1,11 @@
-import 'package:dio/dio.dart';
+import '../../../../go_store_signup/store_signup_draft.dart';
+import '../../../../go_store_signup/store_signup_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import 'partner_email_verification_screen.dart';
 import 'partner_password_screen.dart';
 
@@ -26,6 +29,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
   static const _bg = Color(0xFFF7F8FA);
 
   final _formKey = GlobalKey<FormState>();
+  final _storeDraft = StoreSignupDraft();
   final _name = TextEditingController();
   final _age = TextEditingController();
   final _phone = TextEditingController();
@@ -140,66 +144,87 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
       return;
     }
 
+    if (_busy) return;
     setState(() => _busy = true);
     try {
-      final proof = await Navigator.push<String>(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PartnerEmailVerificationScreen(
-            mobile: _phone.text.trim(),
-            email: _email.text.trim(),
-            purpose: 'application',
-          ),
-        ),
-      );
-      if (!mounted || proof == null) return;
-      final bytes = await _photo!.readAsBytes();
-      final body = FormData.fromMap({
-        'photo': MultipartFile.fromBytes(
-          bytes,
-          filename: _photo!.name.isEmpty ? 'partner.jpg' : _photo!.name,
-        ),
-        'email': _email.text.trim().toLowerCase(),
-        'email_verification_token': proof,
-        'source_app': 'go',
-        'partner_type': widget.partnerType,
-        'full_name': _name.text.trim(),
-        'age': int.parse(_age.text.trim()),
-        'profession_key': _profession,
-        'lat': _lat,
-        'lng': _lng,
-        'mobile': _phone.text.trim(),
-        'payment_method': _paymentMethod,
-        'payment_identifier': _payment.text.trim(),
-        'work_radius_km': _radius,
-        'terms_accepted': 1,
-      });
-
-      final response = await ApiHelper.instance.post(
-        Urls.partnerApplications,
-        body: body,
-        hasToken: false,
-      );
-
-      if (!mounted) return;
-      if (response.state == ResponseState.complete) {
+      final done = _profession == 'store_owner'
+          ? await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StoreSignupScreen(
+                  draft: _storeDraft,
+                  onSubmit: _sendApplication,
+                ),
+              ),
+            )
+          : await _sendApplication();
+      if (done == true && mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) =>
                 PartnerApplicationSubmittedScreen(mobile: _phone.text.trim()),
           ),
         );
-      } else {
-        _show(
-          response.data is Map
-              ? response.data['message']?.toString() ?? 'تعذر إرسال الطلب.'
-              : 'تعذر إرسال الطلب.',
-        );
       }
-    } catch (_) {
-      if (mounted) _show('تعذر إرسال الطلب. حاول مرة أخرى.');
+    } catch (error) {
+      if (mounted)
+        _show(
+          error is StoreSignupFailure
+              ? error.message
+              : 'تعذر إرسال الطلب. حاول مرة أخرى.',
+        );
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<bool> _sendApplication() async {
+    final isStore = _profession == 'store_owner';
+    if (await _photo!.length() + (isStore ? _storeDraft.imageBytes : 0) >
+        6 * 1024 * 1024) {
+      throw const StoreSignupFailure(
+        'إجمالي الصور أكبر من 6 ميجا. قلّل حجم الصور أو عدد المنتجات.',
+      );
+    }
+    if (!mounted) return false;
+    final proof = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PartnerEmailVerificationScreen(
+          mobile: _phone.text.trim(),
+          email: _email.text.trim(),
+          purpose: 'application',
+        ),
+      ),
+    );
+    if (!mounted || proof == null) return false;
+    final api = PartnerApplicationApi(scope: 'go_partner');
+    try {
+      await api.submit(
+        {
+          'source_app': 'go',
+          'partner_type': _profession == 'store_owner'
+              ? 'vendor'
+              : (_profession == 'delivery_courier' ? 'delegate' : 'profession'),
+          'full_name': _name.text.trim(),
+          'age': int.parse(_age.text.trim()),
+          'profession_key': _profession,
+          'lat': _lat,
+          'lng': _lng,
+          'mobile': _phone.text.trim(),
+          'payment_method': _paymentMethod,
+          'payment_identifier': _payment.text.trim(),
+          'work_radius_km': _radius,
+          'terms_accepted': 1,
+          'email': _email.text.trim().toLowerCase(),
+          'email_verification_token': proof,
+        },
+        _photo!,
+        store: isStore ? _storeDraft : null,
+      );
+      return true;
+    } finally {
+      api.close();
     }
   }
 
@@ -326,9 +351,8 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                           Icons.email_outlined,
                         ),
                         validator: (v) =>
-                            !RegExp(
-                              r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                            ).hasMatch((v ?? '').trim())
+                            !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                                .hasMatch((v ?? '').trim())
                             ? 'اكتب بريدًا إلكترونيًا صحيحًا لاستقبال كود التأكيد'
                             : null,
                       ),
@@ -501,7 +525,11 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                           )
                         : const Icon(Icons.send_rounded),
                     label: Text(
-                      _busy ? 'جاري الإرسال...' : 'إرسال طلب الانضمام',
+                      _busy
+                          ? 'جاري الإرسال...'
+                          : (_profession == 'store_owner'
+                                ? 'التالي: تجهيز المتجر'
+                                : 'إرسال طلب الانضمام'),
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w900,
