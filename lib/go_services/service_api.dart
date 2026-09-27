@@ -47,7 +47,7 @@ class ServiceApi {
   Future<Map<String, dynamic>> job(int id) => request('jobs/$id');
   Future<Map<String, dynamic>> quote(int id, Map<String, dynamic> data) => request('jobs/$id/offers', body: data);
   Future<Map<String, dynamic>> skip(int id) => request('jobs/$id/skip', body: <String, dynamic>{});
-  Future<Map<String, dynamic>> status(int id, String state, {String? reason}) => request('jobs/$id/status', body: {'status': state, if (reason != null) 'reason': reason});
+  Future<Map<String, dynamic>> status(int id, String state, {String? reason, String? cancellationFee}) => request('jobs/$id/status', body: {'status': state, if (reason != null) 'reason': reason, if (cancellationFee != null) 'cancellation_fee': cancellationFee});
   void close() => _dio.close();
 }
 List<Map<String, dynamic>> serviceMaps(dynamic data) => data is List ? data.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList() : <Map<String, dynamic>>[];

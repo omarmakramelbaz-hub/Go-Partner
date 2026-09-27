@@ -8,6 +8,33 @@ Widget pcard(Widget child) => Card(margin: const EdgeInsets.symmetric(vertical: 
 Widget ptext(String value) => Padding(padding: const EdgeInsets.symmetric(vertical: 5), child: Text(value, style: const TextStyle(height: 1.5)));
 String ptime(dynamic value) { final date = DateTime.tryParse('$value'); return date == null ? '—' : date.toLocal().toString().substring(0, 16); }
 
+/// Amounts and rates are supplied by the server from the offer/agreement snapshot.
+Widget partnerCommission(bool ar, Map<String, dynamic> data, {required String status}) {
+  final rate = data['commission_rate']?.toString();
+  final amount = data['commission']?.toString();
+  return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+    ptext(pst(ar, 'نسبة خدمة التطبيق: ${rate == null ? '—' : '$rate%'}', 'App service fee rate: ${rate == null ? '—' : '$rate%'}')),
+    if (amount != null) ptext(pst(ar, 'قيمة خدمة التطبيق: $amount ج.م', 'App service fee: EGP $amount')),
+    ptext(switch (status) {
+      'charged' => pst(ar, 'تم الخصم من محفظتك عند قبول العميل. لن تخصم مرة أخرى عند إتمام الطلب.', 'Debited from your wallet on customer acceptance. No second charge at completion.'),
+      'refunded' => pst(ar, 'تم رد خدمة التطبيق إلى محفظتك بعد إلغاء الطلب.', 'The app service fee was refunded to your wallet after cancellation.'),
+      'pending' => pst(ar, 'تخصم من محفظتك فقط عند قبول العميل لعرضك.', 'Debited from your wallet only when the customer accepts your quote.'),
+      'not_charged' => pst(ar, 'لم تخصم خدمة التطبيق لهذا العرض.', 'No app service fee was charged for this quote.'),
+      _ => pst(ar, 'حدّث الطلب للتحقق من حالة خصم خدمة التطبيق.', 'Refresh the job to verify the app service fee debit.'),
+    }),
+  ]);
+}
+Map<String, dynamic>? jobCommission(Map<String, dynamic> job) {
+  if (serviceSelected(job)) return job;
+  final offers = serviceMaps(job['offers']);
+  return offers.isEmpty ? null : offers.first;
+}
+String jobCommissionStatus(Map<String, dynamic> job) {
+  if (serviceSelected(job)) return job['commission_status']?.toString() ?? 'unconfirmed';
+  final offers = serviceMaps(job['offers']);
+  return job['status'] == 'searching' && offers.isNotEmpty && offers.first['status'] == 'offered' ? 'pending' : 'not_charged';
+}
+
 /// Occupies the existing Customer requests board, not a second service section.
 /// Couriers keep their original board; professionals retain legacy access.
 class PartnerServiceBoard extends StatefulWidget {
@@ -81,7 +108,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
     return Directionality(textDirection: widget.ar ? TextDirection.rtl : TextDirection.ltr, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [Expanded(child: Text(t('طلبات العملاء', 'Customer requests'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 21))), if (widget.onViewAll != null) TextButton(onPressed: widget.onViewAll, child: Text(t('عرض الكل', 'View all')))]),
       ptext(t('راجع الشغلانة وقدّم عرض مصنعية نهائي. العمولة تخصم بعد اختيار العميل لعرضك فقط.', 'Review each job and quote the final labour price. Commission is charged only when the customer selects your quote.')),
-      if (balance != null) ptext(t('رصيد المحفظة: $balance ج.م · عمولتك: ${rate ?? '—'}%', 'Wallet: EGP $balance · Your commission: ${rate ?? '—'}%')),
+      if (balance != null) ptext(t('رصيد المحفظة: $balance ج.م · نسبة خدمة التطبيق: ${rate ?? '—'}%', 'Wallet: EGP $balance · App service fee rate: ${rate ?? '—'}%')),
       if (loading && caps == null) const LinearProgressIndicator(),
       if (error != null) pcard(Column(children: [Text(error!), Text(t('البيانات قد تكون قديمة حتى نجاح التحديث.', 'Information may be stale until refreshed.')), TextButton(onPressed: loading ? null : () => load(), child: Text(t('إعادة المحاولة', 'Retry')))])),
       if (caps != null && !caps!.enabled) ptext(t('عروض جديدة متوقفة مؤقتًا، لكن متابعة الحجوزات القائمة متاحة.', 'New quotes are paused; existing bookings remain available.')),
@@ -89,6 +116,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
       for (final job in jobs) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text('#${job['id']} · ${serviceState(job['status']?.toString(), widget.ar)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
         ptext('${job['description'] ?? ''}'),
+        if (jobCommission(job) != null) partnerCommission(widget.ar, jobCommission(job)!, status: jobCommissionStatus(job)),
         if (job['recipient_status'] == 'quoted' && job['status'] == 'searching') ptext(t('أرسلت عرضك — بانتظار اختيار العميل', 'Quote sent — awaiting customer selection')),
         FilledButton(onPressed: () => open(job), child: Text(t('تفاصيل الشغلانة وعرضي', 'Job details and my quote'))),
       ])),
@@ -147,14 +175,21 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
   void dispose() { timer?.cancel(); WidgetsBinding.instance.removeObserver(this); super.dispose(); }
   Future<bool> confirm(String text) async => await showDialog<bool>(context: context, builder: (c) => AlertDialog(title: Text(t('تأكيد', 'Confirm')), content: Text(text), actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('رجوع', 'Back'))), FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(t('تأكيد', 'Confirm')))])) ?? false;
   Future<void> quote() async {
-    final data = await showDialog<Map<String, dynamic>>(context: context, builder: (_) => PartnerQuoteForm(ar: widget.ar, rate: widget.rate));
+    final data = await showDialog<Map<String, dynamic>>(context: context, builder: (_) => PartnerQuoteForm(ar: widget.ar, rate: job?['account_commission_rate']?.toString() ?? widget.rate));
     if (data != null && mounted) await run(() => widget.api.quote(widget.id, data));
   }
   Future<void> state(String value) async {
     String? reason;
+    String? cancellationFee;
+    if (value == 'cancelled' && job?['status'] == 'booked') {
+      final policy = job?['cancellation'];
+      if (policy is! Map || policy['fee'] == null) { setState(() => error = t('حدّث الطلب لعرض قيمة الإلغاء أولًا.', 'Refresh the job to load the cancellation fee first.')); return; }
+      cancellationFee = policy['fee'].toString();
+      if (!await confirm(t('الإلغاء بعد القبول يحمّلك خدمة التطبيق بنسبة ${policy['rate']}%، بقيمة $cancellationFee ج.م. العمولة المخصومة من محفظتك لن تُرد ولن تُخصم مرة ثانية. هل تؤكد الإلغاء؟', 'Cancelling after acceptance makes you responsible for the ${policy['rate']}% app service fee (EGP $cancellationFee). Your existing wallet debit will be retained, with no second charge. Confirm cancellation?'))) return;
+    }
     if (value == 'cancelled' || value == 'disputed') { reason = await showDialog<String>(context: context, builder: (_) => _ReasonForm(ar: widget.ar)); if (reason == null) return; }
     else if (!await confirm(value == 'in_progress' ? t('تأكيد بدء تنفيذ نطاق العمل المتفق عليه؟', 'Start the agreed work?') : t('سيتم طلب تأكيد الإتمام من العميل. لا تُصرف الأموال قبل تأكيده.', 'The customer will be asked to confirm completion. Funds are not released before their confirmation.'))) return;
-    if (mounted) await run(() => widget.api.status(widget.id, value, reason: reason));
+    if (mounted) await run(() => widget.api.status(widget.id, value, reason: reason, cancellationFee: cancellationFee));
   }
   Widget button(String label, VoidCallback callback) => Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: FilledButton(onPressed: busy || stale ? null : callback, child: Text(label)));
   @override
@@ -177,19 +212,20 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
           ptext(offer['materials_included'] == true ? t('الخامات المذكورة مشمولة', 'Specified materials included') : t('مصنعية فقط، بدون خامات', 'Labour only; no materials')),
           ptext(t('الوصول ${offer['arrival_minutes']} دقيقة · العمل ${offer['duration_minutes']} دقيقة', 'Arrival ${offer['arrival_minutes']} min · Work ${offer['duration_minutes']} min')),
           ptext(t('الصلاحية حتى ${ptime(offer['expires_at'])}', 'Valid until ${ptime(offer['expires_at'])}')),
-          if (offer['commission'] != null) ptext(t('عمولة العرض: ${offer['commission']} ج.م؛ لا تخصم عند الإرسال، بل عند قبول العميل.', 'Quote commission: EGP ${offer['commission']}; charged on acceptance, not submission.')),
+          if (!selected && offer['commission'] != null) partnerCommission(widget.ar, offer, status: jobCommissionStatus(data)),
         ])),
         if (status == 'searching' && ['invited', 'quoted'].contains(data['recipient_status'])) OutlinedButton(onPressed: busy || stale ? null : () async { if (await confirm(t('تخطي الشغلانة وسحب عرضك منها؟', 'Skip this job and withdraw your quote?')) && mounted) await run(() => widget.api.skip(widget.id)); }, child: Text(t('الشغلانة غير مناسبة لي', 'Job is not for me'))),
         if (selected) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(t('القيمة المتفق عليها: ${data['price']} ج.م', 'Agreed price: EGP ${data['price']}'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ptext(serviceState(data['payment_status']?.toString(), widget.ar)),
-          ptext(t('العمولة المسجلة: ${data['commission']} ج.م. لن تخصم مرة أخرى عند إتمام الشغل.', 'Recorded commission: EGP ${data['commission']}. It will not be charged again at completion.')),
+          partnerCommission(widget.ar, data, status: jobCommissionStatus(data)),
+          if (status == 'cancelled' && data['cancellation'] is Map && (data['cancellation'] as Map)['charged_to'] != null) ptext((data['cancellation'] as Map)['charged_to'] == 'partner' ? t('أنت ألغيت الطلب؛ خدمة التطبيق محسوبة عليك.', 'You cancelled the job; you bear the app service fee.') : t('العميل ألغى الطلب وتحمل خدمة التطبيق؛ تم رد العمولة لمحفظتك.', 'The customer cancelled and bears the app service fee; your commission was refunded.')),
           if (data['payment_status'] == 'unpaid') ptext(t('انتظر تأكيد دفع العميل قبل بدء العمل.', 'Wait for verified customer payment before starting.')),
         ])),
         if (selected && status == 'booked' && ['cash_due', 'held'].contains(data['payment_status'])) button(t('بدء الشغل', 'Start work'), () => state('in_progress')),
         if (selected && status == 'in_progress') button(t('أنهيت الشغل — اطلب تأكيد العميل', 'Finished — request customer confirmation'), () => state('awaiting_confirmation')),
         if (selected && status == 'awaiting_confirmation') ptext(t('في انتظار العميل. لا يمكنك إنهاء الطلب نيابة عنه.', 'Waiting for the customer. You cannot confirm completion on their behalf.')),
-        if (selected && status == 'booked') OutlinedButton(onPressed: busy || stale ? null : () => state('cancelled'), child: Text(t('إلغاء قبل بدء العمل', 'Cancel before starting'))),
+        if (selected && status == 'booked') OutlinedButton(onPressed: busy || stale ? null : () => state('cancelled'), child: Text(t('إلغاء وتحمل خدمة التطبيق', 'Cancel and bear the app fee'))),
         if (selected && ['in_progress', 'awaiting_confirmation'].contains(status)) OutlinedButton(onPressed: busy || stale ? null : () => state('disputed'), child: Text(t('تسجيل اعتراض', 'Open dispute'))),
         if (status == 'disputed') ptext(t('الاعتراض يحتاج مراجعة الدعم؛ التسوية التلقائية متوقفة.', 'Support review is required; automatic settlement is paused.')),
         if (caps != null && !caps!.enabled) ptext(t('إرسال عروض جديدة متوقف مؤقتًا.', 'New quotations are temporarily paused.')),
@@ -219,6 +255,7 @@ class _PartnerQuoteFormState extends State<PartnerQuoteForm> {
     TextFormField(controller: arrival, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: t('الوصول خلال (دقيقة)', 'Arrival in minutes')), validator: (v) => (int.tryParse(v ?? '') ?? 0) < 5 || (int.tryParse(v ?? '') ?? 0) > 10080 ? '5–10080' : null),
     TextFormField(controller: duration, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: t('مدة العمل (دقيقة)', 'Work duration in minutes')), validator: (v) => (int.tryParse(v ?? '') ?? 0) < 5 || (int.tryParse(v ?? '') ?? 0) > 43200 ? '5–43200' : null),
     ptext(t('عمولة حسابك${widget.rate == null ? '' : ' ${widget.rate}%'} تخصم بعد قبول العميل فقط. يجب توفر رصيد يغطي العمولة.', 'Your account commission${widget.rate == null ? '' : ' ${widget.rate}%'} is debited only on acceptance. Sufficient wallet balance is required.')),
+    ptext(t('بعد قبول العميل، الطرف الذي يلغي يتحمل خدمة التطبيق. إذا ألغيت أنت، لن تُرد العمولة المخصومة.', 'After acceptance, the cancelling party bears the app fee. If you cancel, your commission debit is retained.')),
     CheckboxListTile(value: agreed, onChanged: (v) => setState(() => agreed = v == true), title: Text(t('السعر نهائي لنطاق الشغل المذكور ولا يتغير من طرف واحد.', 'This is a final price for the stated scope; no unilateral changes.'))),
   ]))), actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(t('رجوع', 'Back'))), FilledButton(onPressed: agreed ? () { if (form.currentState!.validate()) Navigator.pop(context, <String, dynamic>{'price': normalizeServicePrice(price.text), 'scope': scope.text.trim(), 'materials_included': materials, 'arrival_minutes': int.parse(arrival.text), 'duration_minutes': int.parse(duration.text)}); } : null, child: Text(t('إرسال العرض', 'Send quote')))]);
 }
