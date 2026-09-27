@@ -1,9 +1,11 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../lib/go_services/service_api.dart';
+import '../lib/go_services/wallet_notice.dart';
 import '../lib/go_services/partner_service_board.dart';
 
 class MemoryAdapter implements HttpClientAdapter {
@@ -20,6 +22,57 @@ ServiceApi api(MemoryAdapter adapter) => ServiceApi(dio: Dio()..httpClientAdapte
 Map<String, dynamic> exampleJob() => {'id': 7, 'status': 'searching', 'recipient_status': 'invited', 'description': 'Repair kitchen sink', 'area': 'District', 'search_until': DateTime.now().add(const Duration(hours: 1)).toIso8601String(), 'offers': <dynamic>[]};
 void main() {
   for (final ar in [true, false]) {
+    testWidgets('wallet debt warning persists and clears after confirmed recharge ($ar)', (tester) async {
+      var toppedUp = false; var offline = false; var topups = 0;
+      final adapter = MemoryAdapter((_) => offline ? reply({}, 503) : reply({'balance': toppedUp ? '50.00' : '-10.00', 'minimum_balance': '50.00', 'top_up_required': toppedUp ? '0.00' : '60.00', 'can_accept_orders': toppedUp}));
+      final client = api(adapter);
+      Widget app(int? session) => MaterialApp(locale: Locale(ar ? 'ar' : 'en'), supportedLocales: const [Locale('ar'), Locale('en')], localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: GoWalletShell(api: client, sessionId: session, onTopUp: () async { toppedUp = true; topups++; }, child: const Scaffold(body: Text('Existing orders'))));
+      await tester.pumpWidget(app(1)); await tester.pumpAndSettle();
+      expect(find.textContaining('-10.00'), findsOneWidget); expect(find.textContaining('60.00'), findsOneWidget);
+      expect(find.text('Existing orders'), findsOneWidget);
+      expect(find.byIcon(Icons.close), findsNothing);
+      offline = true; await tester.pump(const Duration(seconds: 15)); await tester.pumpAndSettle();
+      expect(find.textContaining('-10.00'), findsOneWidget);
+      offline = false; await tester.tap(find.text(ar ? 'شحن' : 'Top up')); await tester.pumpAndSettle();
+      expect(topups, 1); expect(find.textContaining('-10.00'), findsNothing);
+      toppedUp = false; goWalletChanges.value++; await tester.pumpAndSettle(); expect(find.textContaining('-10.00'), findsOneWidget);
+      await tester.pumpWidget(app(null)); await tester.pumpAndSettle(); expect(find.textContaining('-10.00'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox()); client.close();
+    });
+  }
+
+  for (final ar in [true, false]) {
+    testWidgets('cancellation shows liability and posts only after fee consent and reason ($ar)', (tester) async {
+      final job = {...exampleJob(), 'status': 'booked', 'accepted_offer_id': 3, 'price': '100.00', 'payment_status': 'cash_due', 'payment_method': 'cash',
+        'commission': '12.50', 'commission_rate': '12.50', 'commission_status': 'charged',
+        'cancellation': {'allowed': true, 'requires_fee_confirmation': true, 'fee': '12.50', 'rate': '12.50'},
+        'offers': [{'id': 3, 'status': 'accepted', 'price': '100.00', 'scope': 'Repair pipe'}]};
+      final adapter = MemoryAdapter((r) => r.path.endsWith('capabilities') ? reply({'schema_ready': true, 'version': 1, 'enabled': true}) : reply(r.method == 'POST' ? {...job, 'status': 'cancelled'} : job));
+      final client = api(adapter);
+      await tester.pumpWidget(MaterialApp(home: PartnerServiceJobScreen(api: client, ar: ar, id: 7)));
+      await tester.pumpAndSettle();
+      final cancel = find.text(ar ? 'إلغاء وتحمل خدمة التطبيق' : 'Cancel and bear the app fee');
+      await tester.scrollUntilVisible(cancel, 200, scrollable: find.byType(Scrollable).first);
+      await tester.tap(cancel); await tester.pumpAndSettle();
+      expect(find.descendant(of: find.byType(AlertDialog), matching: find.textContaining('12.50')), findsOneWidget);
+      expect(adapter.requests.where((r) => r.method == 'POST'), isEmpty);
+      await tester.tap(find.widgetWithText(TextButton, ar ? 'رجوع' : 'Back')); await tester.pumpAndSettle();
+      expect(adapter.requests.where((r) => r.method == 'POST'), isEmpty);
+      await tester.tap(cancel); await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, ar ? 'تأكيد' : 'Confirm')); await tester.pumpAndSettle();
+      expect(adapter.requests.where((r) => r.method == 'POST'), isEmpty);
+      await tester.enterText(find.descendant(of: find.byType(AlertDialog), matching: find.byType(TextField)), 'Changed plans');
+      await tester.tap(find.widgetWithText(FilledButton, ar ? 'تأكيد' : 'Confirm')); await tester.pumpAndSettle();
+      final post = adapter.requests.singleWhere((r) => r.method == 'POST');
+      expect(post.data['cancellation_fee'], '12.50'); expect(post.data['reason'], 'Changed plans'); expect(post.data['status'], 'cancelled');
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox()); client.close();
+    });
+  }
+
+  for (final ar in [true, false]) {
     for (final permitted in [false, true]) {
       testWidgets('customer phone requires selected quote and server commission permission (Arabic=$ar, permitted=$permitted)', (tester) async {
         final job = {...exampleJob(), 'status': 'booked', 'accepted_offer_id': 3, 'phone': '01012345678', if (permitted) 'can_contact_customer': true, 'location': {'address': 'Building 4, apartment 3', 'lat': 30, 'lng': 31}, 'offers': [{'id': 3, 'status': 'accepted', 'price': '500.00'}]};
@@ -34,6 +87,46 @@ void main() {
       });
     }
   }
+  for (final ar in [true, false]) {
+    for (final feeStatus in ['charged', 'refunded']) {
+      testWidgets('agreed job shows saved percentage and fee ($ar, $feeStatus)', (tester) async {
+        final job = {...exampleJob(), 'status': feeStatus == 'refunded' ? 'cancelled' : 'booked', 'accepted_offer_id': 3,
+          'price': '101.01', 'commission': '12.63', 'commission_rate': '12.50', 'account_commission_rate': '30.00',
+          'commission_status': feeStatus, 'payment_status': 'cash_due',
+          'offers': [{'id': 3, 'status': 'accepted', 'price': '101.01', 'commission': '12.63', 'commission_rate': '12.50'}]};
+        final client = api(MemoryAdapter((r) => r.path.endsWith('capabilities') ? reply({'schema_ready': true, 'version': 1, 'enabled': true}) : reply(job)));
+        await tester.pumpWidget(MaterialApp(home: PartnerServiceJobScreen(api: client, ar: ar, id: 7, rate: '40.00')));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(find.textContaining(ar ? 'نسبة خدمة التطبيق: 12.50%' : 'App service fee rate: 12.50%'), 200, scrollable: find.byType(Scrollable).first);
+        expect(find.textContaining('12.63'), findsOneWidget);
+        expect(find.textContaining('30.00%'), findsNothing);
+        expect(find.textContaining('40.00%'), findsNothing);
+        final expected = feeStatus == 'refunded' ? (ar ? 'تم رد خدمة التطبيق' : 'The app service fee was refunded') : (ar ? 'تم الخصم من محفظتك' : 'Debited from your wallet on customer acceptance');
+        expect(find.textContaining(expected), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox()); client.close();
+      });
+    }
+    testWidgets('orders board shows quote percentage and expected debit before acceptance ($ar)', (tester) async {
+      final job = {...exampleJob(), 'recipient_status': 'quoted', 'offers': [{'id': 3, 'status': 'offered', 'price': '200.00', 'commission_rate': '7.50', 'commission': '15.00'}]};
+      final client = api(MemoryAdapter((r) => r.path.endsWith('capabilities') ? reply({'schema_ready': true, 'version': 1, 'enabled': true}) : reply({'items': [job], 'balance': '100.00', 'commission_rate': '10.00'})));
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: SingleChildScrollView(child: PartnerServiceBoard(api: client, ar: ar, legacyBuilder: (_) => const SizedBox())))));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(ar ? 'نسبة خدمة التطبيق: 7.50%' : 'App service fee rate: 7.50%'), findsOneWidget);
+      expect(find.textContaining('15.00'), findsOneWidget);
+      expect(find.textContaining(ar ? 'تخصم من محفظتك فقط عند قبول العميل' : 'Debited from your wallet only when'), findsOneWidget);
+      expect(find.textContaining(ar ? 'تم الخصم' : 'No second charge'), findsNothing);
+      await tester.pumpWidget(const SizedBox()); client.close();
+    });
+  }
+  testWidgets('explicit zero rate displays zero and missing historical rate stays unknown', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: partnerCommission(false, {'commission_rate': '0.00', 'commission': '0.00'}, status: 'charged'))));
+    expect(find.text('App service fee rate: 0.00%'), findsOneWidget);
+    expect(find.text('App service fee: EGP 0.00'), findsOneWidget);
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: partnerCommission(false, {'commission': '5.00'}, status: 'unconfirmed'))));
+    expect(find.text('App service fee rate: —'), findsOneWidget);
+    expect(find.textContaining('No second charge'), findsNothing);
+  });
   test('exact prices and Arabic digits; invalid or over-limit prices rejected', () {
     expect(normalizeServicePrice('١٢٣٫٤٥'), '123.45'); expect(normalizeServicePrice('1.2'), '1.20');
     for (final value in ['0', '-1', '0.99', '1.001', 'NaN', '1e3', '1000000.01']) { expect(normalizeServicePrice(value), isNull); }

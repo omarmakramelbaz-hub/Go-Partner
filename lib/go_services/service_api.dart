@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../helpers/hive/hive_methods.dart';
 import '../helpers/networking/urls.dart';
+
+final goWalletChanges = ValueNotifier<int>(0);
 
 class ServiceFailure implements Exception {
   const ServiceFailure(this.message, [this.status]);
@@ -36,6 +39,7 @@ class ServiceApi {
       final raw = response.data;
       if (response.statusCode != 200 && response.statusCode != 201) throw ServiceFailure(raw is Map ? raw['message']?.toString() ?? 'تعذر تنفيذ الطلب / Request failed.' : 'تعذر تنفيذ الطلب / Request failed.', response.statusCode);
       if (raw is! Map || raw['data'] is! Map || raw['status'] != 'Success') throw const ServiceFailure('استجابة غير متوقعة / Invalid response.');
+      if (body != null) goWalletChanges.value++;
       return Map<String, dynamic>.from(raw['data'] as Map);
     } on DioException { throw const ServiceFailure('تعذر الاتصال. حدّث حالة الشغلانة قبل إعادة المحاولة / Connection failed. Refresh the job before retrying.'); }
   }
@@ -43,11 +47,12 @@ class ServiceApi {
     try { return ServiceCapabilities.fromMap(await request('capabilities', public: true)); }
     on ServiceFailure catch (error) { if (error.status == 404) return const ServiceCapabilities(ready: false, enabled: false); rethrow; }
   }
+  Future<Map<String, dynamic>> walletStatus() => request('wallet-status');
   Future<Map<String, dynamic>> jobs({String scope = 'open', int page = 1}) => request('jobs', query: {'scope': scope, 'page': page});
   Future<Map<String, dynamic>> job(int id) => request('jobs/$id');
   Future<Map<String, dynamic>> quote(int id, Map<String, dynamic> data) => request('jobs/$id/offers', body: data);
   Future<Map<String, dynamic>> skip(int id) => request('jobs/$id/skip', body: <String, dynamic>{});
-  Future<Map<String, dynamic>> status(int id, String state, {String? reason}) => request('jobs/$id/status', body: {'status': state, if (reason != null) 'reason': reason});
+  Future<Map<String, dynamic>> status(int id, String state, {String? reason, String? cancellationFee}) => request('jobs/$id/status', body: {'status': state, if (reason != null) 'reason': reason, if (cancellationFee != null) 'cancellation_fee': cancellationFee});
   void close() => _dio.close();
 }
 List<Map<String, dynamic>> serviceMaps(dynamic data) => data is List ? data.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList() : <Map<String, dynamic>>[];
