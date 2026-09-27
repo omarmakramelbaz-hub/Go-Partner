@@ -23,8 +23,8 @@ class _PartnerTypeScreenState extends State<PartnerTypeScreen> {
       ),
       _choice(
         'vendor',
-        'صاحب مطعم / متجر',
-        'تقديم طلب انضمام لمتجرك',
+        'متجر',
+        'سوبر ماركت، مطعم أو صيدلية',
         Icons.storefront_outlined,
       ),
       _choice(

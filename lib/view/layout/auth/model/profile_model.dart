@@ -1,4 +1,7 @@
 class ProfileModel {
+  bool get isGoStore =>
+      appScope == 'go_partner' &&
+      (accountType == 'vendor' || partnerProfessionKey == 'store_owner');
   int? id;
   String? name;
   String? email;

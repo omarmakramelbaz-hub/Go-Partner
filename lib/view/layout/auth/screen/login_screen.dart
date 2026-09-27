@@ -319,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
       mobile: _mobileEc.text.removeZero(),
       password: _passwordEc.text,
       onSuccess: (accountType) {
-        if (accountType == 'delegate') {
+        if (accountType == 'delegate' || accountType == 'vendor') {
           NavigatorMethods.pushNamedAndRemoveUntil(
             context,
             DelegateBottomNavBarScreen.routeName,

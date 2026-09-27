@@ -1,3 +1,6 @@
+import '../../../../go_stores/store_shell.dart';
+import '../../../../helpers/networking/api_helper.dart';
+
 import 'dart:convert';
 import 'dart:developer';
 
@@ -94,6 +97,19 @@ class _DelegateBottomNavBarScreenState
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<AuthController>().profile;
+    if (profile == null) {
+      final auth = context.watch<AuthController>();
+      final loading = auth.profileResponse.state == ResponseState.loading;
+      return Scaffold(body: Center(child: loading
+          ? const CircularProgressIndicator()
+          : Column(mainAxisSize: MainAxisSize.min, children: [
+              const Text('تعذر تحميل الحساب / Could not load account'),
+              TextButton(onPressed: () => auth.getProfile(), child: const Text('إعادة المحاولة / Retry')),
+            ])));
+
+    }
+    if (profile.isGoStore) return const StoreShell();
     return PartnerOrdersScope(
       child: ChangeNotifierProvider(
         create: (_) => DelegateBottomNavBarController(),
