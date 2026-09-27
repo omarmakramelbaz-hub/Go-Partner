@@ -55,10 +55,29 @@ void main() {
     final adapter = MemoryAdapter((_) => reply({'schema_ready': true, 'version': 1, 'enabled': true})); final client = api(adapter);
     await client.capabilities(); expect(adapter.requests.single.headers.containsKey('Authorization'), isFalse); client.close();
   });
-  testWidgets('the original board is retained on a non-upgraded backend', (tester) async {
+  testWidgets('unavailable quotes are explicit and original requests stay on the board', (tester) async {
     final client = api(MemoryAdapter((_) => reply({}, 404)));
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: PartnerServiceBoard(api: client, ar: false, legacyBuilder: (_) => const Text('legacy board')))));
-    await tester.pumpAndSettle(); expect(find.text('legacy board'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('Labour quotations are currently unavailable'), findsOneWidget);
+    expect(find.text('legacy board'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox()); client.close();
+  });
+  testWidgets('board recovers after server activation without restarting the app', (tester) async {
+    var ready = false;
+    final adapter = MemoryAdapter((r) => r.path.endsWith('capabilities')
+      ? reply({'schema_ready': ready, 'version': 1, 'enabled': ready})
+      : reply({'items': [exampleJob()], 'balance': '100.00', 'commission_rate': '10.00'}));
+    final client = api(adapter);
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: SingleChildScrollView(child: PartnerServiceBoard(api: client, ar: false, legacyBuilder: (_) => const Text('legacy board'))))));
+    await tester.pumpAndSettle();
+    expect(find.text('Labour quotations are currently unavailable'), findsOneWidget);
+    ready = true;
+    await tester.pump(const Duration(seconds: 15)); await tester.pumpAndSettle();
+    expect(find.text('Repair kitchen sink'), findsOneWidget);
+    expect(find.text('Labour quotations are currently unavailable'), findsNothing);
+    expect(adapter.requests.where((r) => r.path.endsWith('capabilities')), hasLength(2));
+    expect(adapter.requests.where((r) => r.method == 'POST'), isEmpty);
     await tester.pumpWidget(const SizedBox()); client.close();
   });
   testWidgets('new jobs use the customer requests board and expose quote action', (tester) async {
