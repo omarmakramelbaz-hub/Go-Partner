@@ -88,7 +88,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
       if (caps != null && jobs.isEmpty && error == null) pcard(Text(t('لا توجد شغلانات في هذه القائمة حاليًا.', 'No jobs in this list yet.'))),
       for (final job in jobs) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text('#${job['id']} · ${serviceState(job['status']?.toString(), widget.ar)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-        ptext('${job['description'] ?? ''}'), ptext('${job['area'] ?? ''}'),
+        ptext('${job['description'] ?? ''}'),
         if (job['recipient_status'] == 'quoted' && job['status'] == 'searching') ptext(t('أرسلت عرضك — بانتظار اختيار العميل', 'Quote sent — awaiting customer selection')),
         FilledButton(onPressed: () => open(job), child: Text(t('تفاصيل الشغلانة وعرضي', 'Job details and my quote'))),
       ])),
@@ -166,10 +166,10 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
       if (data == null && error == null) const Center(child: CircularProgressIndicator()),
       if (data != null) ...[
         Text(serviceState(status?.toString(), widget.ar), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
-        ptext('${data['description'] ?? ''}'), ptext('${data['area'] ?? ''}'),
+        ptext('${data['description'] ?? ''}'),
         if (data['scheduled_at'] != null) ptext(t('الموعد المطلوب: ${ptime(data['scheduled_at'])}', 'Requested time: ${ptime(data['scheduled_at'])}')),
         if (data['photos'] is List && (data['photos'] as List).isNotEmpty) SizedBox(height: 160, child: ListView(scrollDirection: Axis.horizontal, children: [for (final photo in (data['photos'] as List).whereType<String>()) Padding(padding: const EdgeInsets.all(4), child: InkWell(onTap: () => showDialog<void>(context: context, builder: (_) => Dialog(child: InteractiveViewer(child: Image.network(photo, errorBuilder: (_, __, ___) => Text(t('حدّث الشغلانة لتحميل الصور.', 'Refresh the job to load photos.')))))), child: Image.network(photo, width: 160, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox(width: 160, child: Icon(Icons.broken_image_outlined)))))])),
-        if (data['location'] is Map) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ptext('${(data['location'] as Map)['address'] ?? ''}'), if (data['phone'] != null) ptext(t('رقم العميل: ${data['phone']}', 'Customer phone: ${data['phone']}')), TextButton(onPressed: () { final p = data['location'] as Map; launchUrl(Uri.https('www.google.com', '/maps', {'q': '${p['lat']},${p['lng']}'}), mode: LaunchMode.externalApplication); }, child: Text(t('افتح موقع التنفيذ', 'Open work location')))])) else ptext(t('العنوان التفصيلي ورقم العميل يظهران بعد اختيار عرضك.', 'Exact address and phone appear after your quote is selected.')),
+        if (data['location'] is Map) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ptext('${(data['location'] as Map)['address'] ?? ''}'), if (selected && data['can_contact_customer'] == true && data['phone'] != null) ptext(t('رقم العميل: ${data['phone']}', 'Customer phone: ${data['phone']}')), TextButton(onPressed: () { final p = data['location'] as Map; launchUrl(Uri.https('www.google.com', '/maps', {'q': '${p['lat']},${p['lng']}'}), mode: LaunchMode.externalApplication); }, child: Text(t('افتح موقع التنفيذ', 'Open work location')))])) else ptext(t('العنوان التفصيلي يظهر بعد اختيار عرضك. رقم العميل يظهر بعد قبول عرضك وخصم العمولة.', 'The exact address appears after your quote is selected. Customer contact unlocks after acceptance and commission debit.')),
         if (caps?.enabled == true && serviceCanQuote(data)) button(t('إرسال عرض مصنعية', 'Send labour quote'), quote),
         for (final offer in serviceMaps(data['offers'])) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text(t('عرضي: ${offer['price']} ج.م', 'My quote: EGP ${offer['price']}'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
