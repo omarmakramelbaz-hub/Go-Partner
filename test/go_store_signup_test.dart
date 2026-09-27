@@ -59,6 +59,21 @@ class CaptureAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+Future<void> revealProductSave(WidgetTester tester) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
+  final button = find.text('حفظ المنتج في الطلب');
+  for (var i = 0; i < 20 && button.hitTestable().evaluate().isEmpty; i++) {
+    await tester.drag(
+      find.byType(SingleChildScrollView).first,
+      const Offset(0, -250),
+    );
+    await tester.pumpAndSettle();
+  }
+  expect(button.hitTestable(), findsOneWidget);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
@@ -166,9 +181,7 @@ void main() {
     final price = find.widgetWithText(TextFormField, 'السعر بالجنيه');
     await tester.ensureVisible(price);
     await tester.enterText(price, '0');
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.ensureVisible(find.text('حفظ المنتج في الطلب'));
-    await tester.pumpAndSettle();
+    await revealProductSave(tester);
     await tester.tap(find.text('حفظ المنتج في الطلب'));
     await tester.pumpAndSettle();
     expect(saved, isNull);
@@ -180,18 +193,8 @@ void main() {
     await tester.ensureVisible(price);
     await tester.pumpAndSettle();
     await tester.enterText(price, '٩٠٫٢٥');
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
-    final save = find.text('حفظ المنتج في الطلب');
-    await tester.scrollUntilVisible(
-      save,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(save);
-    await tester.pumpAndSettle();
-    await tester.tap(save);
+    await revealProductSave(tester);
+    await tester.tap(find.text('حفظ المنتج في الطلب').hitTestable());
     await tester.pumpAndSettle();
     expect(saved!.price, '90.25');
     expect(saved!.options[1]['price'], '23.25');
