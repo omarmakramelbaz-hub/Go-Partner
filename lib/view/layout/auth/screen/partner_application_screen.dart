@@ -52,7 +52,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
 
   static const _professions = <Map<String, String>>[
     {'key': 'delivery_courier', 'title': 'مندوب توصيل'},
-    {'key': 'store_owner', 'title': 'صاحب مطعم أو متجر'},
+    {'key': 'store_owner', 'title': 'متجر — سوبر ماركت / مطعم / صيدلية'},
     {'key': 'appliance_technician', 'title': 'فني صيانة ثلاجات وغسالات'},
     {'key': 'plumber', 'title': 'سباك'},
     {'key': 'painter', 'title': 'نقاش'},
