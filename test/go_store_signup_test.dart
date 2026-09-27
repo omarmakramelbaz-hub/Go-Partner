@@ -165,6 +165,20 @@ void main() {
     await tester.pumpAndSettle();
     final price = find.widgetWithText(TextFormField, 'السعر بالجنيه');
     await tester.ensureVisible(price);
+    await tester.enterText(price, '0');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.ensureVisible(find.text('حفظ المنتج في الطلب'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('حفظ المنتج في الطلب'));
+    await tester.pumpAndSettle();
+    expect(saved, isNull);
+    expect(
+      find.text('اكتب سعرًا صحيحًا من 0.01 إلى 1000000 ج'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(price);
+    await tester.pumpAndSettle();
     await tester.enterText(price, '٩٠٫٢٥');
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();

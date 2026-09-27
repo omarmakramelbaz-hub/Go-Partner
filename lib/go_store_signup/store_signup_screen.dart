@@ -126,232 +126,238 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
             absorbing: _busy || _picking,
             child: Form(
               key: _form,
-              child: ListView(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  _card(
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '٢ من ٢ • المتجر والمنتجات',
-                          style: TextStyle(
-                            color: _orange,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'ابدأ بمتجر جاهز من أول يوم',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: _navy,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'جهّز اللوجو والمنتجات والأسعار. هيتراجعوا مع طلب انضمامك، وتقدر تديرهم بعد الموافقة وتفعيل حسابك.',
-                          style: TextStyle(height: 1.6),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'بيانات المتجر',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: InkWell(
-                            onTap: _logo,
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              width: 112,
-                              height: 112,
-                              clipBehavior: Clip.antiAlias,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF1E7),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: _picking
-                                  ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : draft.logo == null
-                                  ? const Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                      size: 38,
-                                      color: _orange,
-                                    )
-                                  : Image.memory(
-                                      draft.logo!.bytes,
-                                      fit: BoxFit.contain,
-                                    ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _card(
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '٢ من ٢ • المتجر والمنتجات',
+                            style: TextStyle(
+                              color: _orange,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: _logo,
-                          child: Text(
-                            draft.logo == null
-                                ? 'إضافة لوجو المتجر'
-                                : 'تغيير اللوجو',
+                          SizedBox(height: 8),
+                          Text(
+                            'ابدأ بمتجر جاهز من أول يوم',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: _navy,
+                            ),
                           ),
-                        ),
-                        TextFormField(
-                          controller: _name,
-                          decoration: _field('اسم المتجر'),
-                          maxLength: 150,
-                          onChanged: (v) => draft.name = v,
-                          validator: (v) => (v ?? '').trim().length < 2
-                              ? 'اكتب اسم المتجر'
-                              : null,
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: draft.kind,
-                          isExpanded: true,
-                          decoration: _field('نوع النشاط'),
-                          items: signupKinds.entries
-                              .map(
-                                (e) => DropdownMenuItem(
-                                  value: e.key,
-                                  child: Text(e.value),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(() => draft.kind = v),
-                          validator: (v) => v == null ? 'اختر النشاط' : null,
-                        ),
-                        const SizedBox(height: 18),
-                        TextFormField(
-                          controller: _address,
-                          decoration: _field('العنوان بالتفصيل'),
-                          maxLength: 500,
-                          minLines: 2,
-                          maxLines: 3,
-                          onChanged: (v) => draft.address = v,
-                          validator: (v) => (v ?? '').trim().length < 5
-                              ? 'اكتب العنوان بالتفصيل'
-                              : null,
-                        ),
-                      ],
+                          SizedBox(height: 8),
+                          Text(
+                            'جهّز اللوجو والمنتجات والأسعار. هيتراجعوا مع طلب انضمامك، وتقدر تديرهم بعد الموافقة وتفعيل حسابك.',
+                            style: TextStyle(height: 1.6),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'المنتجات (${draft.products.length})',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
+                    const SizedBox(height: 12),
+                    _card(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'بيانات المتجر',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: InkWell(
+                              onTap: _logo,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                width: 112,
+                                height: 112,
+                                clipBehavior: Clip.antiAlias,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF1E7),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
+                                child: _picking
+                                    ? const Center(
+                                        child: CircularProgressIndicator(),
+                                      )
+                                    : draft.logo == null
+                                    ? const Icon(
+                                        Icons.add_photo_alternate_outlined,
+                                        size: 38,
+                                        color: _orange,
+                                      )
+                                    : Image.memory(
+                                        draft.logo!.bytes,
+                                        fit: BoxFit.contain,
+                                      ),
                               ),
                             ),
-                            TextButton.icon(
-                              onPressed: draft.products.length >= 15
-                                  ? null
-                                  : () => _product(),
-                              icon: const Icon(Icons.add),
-                              label: const Text('إضافة منتج'),
-                            ),
-                          ],
-                        ),
-                        const Text(
-                          'أضف حتى 15 منتجًا كبداية، وتقدر تكمل وتعدل بعد تفعيل الحساب. صور JPG أو PNG أو WEBP، حتى 1 ميجا للصورة.',
-                          style: TextStyle(
-                            color: Color(0xFF707985),
-                            height: 1.5,
                           ),
-                        ),
-                        if (draft.products.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.inventory_2_outlined,
-                                  color: _orange,
-                                  size: 40,
-                                ),
-                                SizedBox(height: 10),
-                                Text('أضف أول منتج بصورته وسعره'),
-                              ],
+                          TextButton(
+                            onPressed: _logo,
+                            child: Text(
+                              draft.logo == null
+                                  ? 'إضافة لوجو المتجر'
+                                  : 'تغيير اللوجو',
                             ),
                           ),
-                        for (var i = 0; i < draft.products.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 14),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.memory(
-                                    draft.products[i].image.bytes,
-                                    width: 62,
-                                    height: 62,
-                                    fit: BoxFit.cover,
+                          TextFormField(
+                            controller: _name,
+                            decoration: _field('اسم المتجر'),
+                            maxLength: 150,
+                            onChanged: (v) => draft.name = v,
+                            validator: (v) => (v ?? '').trim().length < 2
+                                ? 'اكتب اسم المتجر'
+                                : null,
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            value: draft.kind,
+                            isExpanded: true,
+                            decoration: _field('نوع النشاط'),
+                            items: signupKinds.entries
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.key,
+                                    child: Text(e.value),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (v) => setState(() => draft.kind = v),
+                            validator: (v) => v == null ? 'اختر النشاط' : null,
+                          ),
+                          const SizedBox(height: 18),
+                          TextFormField(
+                            controller: _address,
+                            decoration: _field('العنوان بالتفصيل'),
+                            maxLength: 500,
+                            minLines: 2,
+                            maxLines: 3,
+                            onChanged: (v) => draft.address = v,
+                            validator: (v) => (v ?? '').trim().length < 5
+                                ? 'اكتب العنوان بالتفصيل'
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _card(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'المنتجات (${draft.products.length})',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        draft.products[i].name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${draft.products[i].price} ج / ${draft.products[i].unit}',
-                                      ),
-                                      if (draft.products[i].options.isNotEmpty)
+                              ),
+                              TextButton.icon(
+                                onPressed: draft.products.length >= 15
+                                    ? null
+                                    : () => _product(),
+                                icon: const Icon(Icons.add),
+                                label: const Text('إضافة منتج'),
+                              ),
+                            ],
+                          ),
+                          const Text(
+                            'أضف حتى 15 منتجًا كبداية، وتقدر تكمل وتعدل بعد تفعيل الحساب. صور JPG أو PNG أو WEBP، حتى 1 ميجا للصورة.',
+                            style: TextStyle(
+                              color: Color(0xFF707985),
+                              height: 1.5,
+                            ),
+                          ),
+                          if (draft.products.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    color: _orange,
+                                    size: 40,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text('أضف أول منتج بصورته وسعره'),
+                                ],
+                              ),
+                            ),
+                          for (var i = 0; i < draft.products.length; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 14),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.memory(
+                                      draft.products[i].image.bytes,
+                                      width: 62,
+                                      height: 62,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
-                                          '${draft.products[i].options.length} خيارات بيع',
+                                          draft.products[i].name,
                                           style: const TextStyle(
-                                            color: Color(0xFF707985),
+                                            fontWeight: FontWeight.w800,
                                           ),
                                         ),
-                                    ],
+                                        Text(
+                                          '${draft.products[i].price} ج / ${draft.products[i].unit}',
+                                        ),
+                                        if (draft
+                                            .products[i]
+                                            .options
+                                            .isNotEmpty)
+                                          Text(
+                                            '${draft.products[i].options.length} خيارات بيع',
+                                            style: const TextStyle(
+                                              color: Color(0xFF707985),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  tooltip: 'تعديل المنتج',
-                                  onPressed: () => _product(i),
-                                  icon: const Icon(Icons.edit_outlined),
-                                ),
-                                IconButton(
-                                  tooltip: 'حذف المنتج',
-                                  onPressed: () => setState(
-                                    () => draft.products.removeAt(i),
+                                  IconButton(
+                                    tooltip: 'تعديل المنتج',
+                                    onPressed: () => _product(i),
+                                    icon: const Icon(Icons.edit_outlined),
                                   ),
-                                  icon: const Icon(Icons.delete_outline),
-                                ),
-                              ],
+                                  IconButton(
+                                    tooltip: 'حذف المنتج',
+                                    onPressed: () => setState(
+                                      () => draft.products.removeAt(i),
+                                    ),
+                                    icon: const Icon(Icons.delete_outline),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -506,129 +512,132 @@ class _SignupProductScreenState extends State<SignupProductScreen> {
       body: SafeArea(
         child: Form(
           key: _form,
-          child: ListView(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
-            children: [
-              if (_image != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: Image.memory(
-                    _image!.bytes,
-                    height: 180,
-                    fit: BoxFit.contain,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_image != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.memory(
+                      _image!.bytes,
+                      height: 180,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                OutlinedButton.icon(
+                  onPressed: _picking ? null : _pick,
+                  icon: const Icon(Icons.add_photo_alternate_outlined),
+                  label: Text(
+                    _picking
+                        ? 'جارٍ تحميل الصورة…'
+                        : _image == null
+                        ? 'إضافة صورة المنتج'
+                        : 'تغيير الصورة',
                   ),
                 ),
-              OutlinedButton.icon(
-                onPressed: _picking ? null : _pick,
-                icon: const Icon(Icons.add_photo_alternate_outlined),
-                label: Text(
-                  _picking
-                      ? 'جارٍ تحميل الصورة…'
-                      : _image == null
-                      ? 'إضافة صورة المنتج'
-                      : 'تغيير الصورة',
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _name,
+                  decoration: _field('اسم المنتج'),
+                  maxLength: 150,
+                  validator: (v) =>
+                      (v ?? '').trim().length < 2 ? 'اكتب اسم المنتج' : null,
                 ),
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _name,
-                decoration: _field('اسم المنتج'),
-                maxLength: 150,
-                validator: (v) =>
-                    (v ?? '').trim().length < 2 ? 'اكتب اسم المنتج' : null,
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _unit,
-                decoration: _field('الوحدة الأساسية: كيلو / عبوة / قطعة'),
-                maxLength: 40,
-                validator: (v) =>
-                    (v ?? '').trim().isEmpty ? 'اكتب الوحدة' : null,
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _price,
-                decoration: _field('السعر بالجنيه'),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _unit,
+                  decoration: _field('الوحدة الأساسية: كيلو / عبوة / قطعة'),
+                  maxLength: 40,
+                  validator: (v) =>
+                      (v ?? '').trim().isEmpty ? 'اكتب الوحدة' : null,
                 ),
-                validator: _money,
-              ),
-              const SizedBox(height: 14),
-              TextFormField(
-                controller: _description,
-                decoration: _field('وصف المنتج (اختياري)'),
-                maxLength: 2000,
-                maxLines: 3,
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                'خيارات البيع',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-              ),
-              const Text(
-                'مثل نصف كيلو أو ربع كيلو، مع السعر الكامل لكل اختيار.',
-              ),
-              for (final option in _options)
-                Padding(
-                  key: ObjectKey(option),
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: option.label,
-                        decoration: _field('اسم الاختيار'),
-                        maxLength: 60,
-                        validator: (v) => (v ?? '').trim().isEmpty
-                            ? 'اكتب اسم الاختيار'
-                            : null,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: option.price,
-                              decoration: _field('سعر الاختيار بالجنيه'),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              validator: _money,
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _price,
+                  decoration: _field('السعر بالجنيه'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: _money,
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: _description,
+                  decoration: _field('وصف المنتج (اختياري)'),
+                  maxLength: 2000,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'خيارات البيع',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+                const Text(
+                  'مثل نصف كيلو أو ربع كيلو، مع السعر الكامل لكل اختيار.',
+                ),
+                for (final option in _options)
+                  Padding(
+                    key: ObjectKey(option),
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: option.label,
+                          decoration: _field('اسم الاختيار'),
+                          maxLength: 60,
+                          validator: (v) => (v ?? '').trim().isEmpty
+                              ? 'اكتب اسم الاختيار'
+                              : null,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: option.price,
+                                decoration: _field('سعر الاختيار بالجنيه'),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                validator: _money,
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            tooltip: 'حذف الاختيار',
-                            onPressed: () => setState(() {
-                              _options.remove(option);
-                              option.dispose();
-                            }),
-                            icon: const Icon(Icons.delete_outline),
-                          ),
-                        ],
-                      ),
-                    ],
+                            IconButton(
+                              tooltip: 'حذف الاختيار',
+                              onPressed: () => setState(() {
+                                _options.remove(option);
+                                option.dispose();
+                              }),
+                              icon: const Icon(Icons.delete_outline),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                TextButton.icon(
+                  onPressed: _options.length >= 20
+                      ? null
+                      : () => setState(() => _options.add(_Option())),
+                  icon: const Icon(Icons.add),
+                  label: const Text('إضافة اختيار'),
                 ),
-              TextButton.icon(
-                onPressed: _options.length >= 20
-                    ? null
-                    : () => setState(() => _options.add(_Option())),
-                icon: const Icon(Icons.add),
-                label: const Text('إضافة اختيار'),
-              ),
-              if (_error != null)
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: _picking ? null : _save,
-                style: FilledButton.styleFrom(
-                  backgroundColor: _orange,
-                  minimumSize: const Size.fromHeight(52),
+                if (_error != null)
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _picking ? null : _save,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _orange,
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                  child: const Text('حفظ المنتج في الطلب'),
                 ),
-                child: const Text('حفظ المنتج في الطلب'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
