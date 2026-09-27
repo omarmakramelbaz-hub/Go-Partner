@@ -161,13 +161,20 @@ void main() {
       baseUrl: 'https://example.test/api',
       token: () => 'test-token',
     );
-    await api.saveProduct({
-      'name': 'Rice',
-      'available': true,
-      'options': [
-        {'label': 'Half kilo', 'price': '42.75'},
-      ],
-    }, image: XFile.fromData(Uint8List.fromList([1, 2, 3]), name: 'rice.png'));
+    await api.saveProduct(
+      {
+        'name': 'Rice',
+        'available': true,
+        'options': [
+          {'label': 'Half kilo', 'price': '42.75'},
+        ],
+      },
+      image: XFile.fromData(
+        Uint8List.fromList([1, 2, 3]),
+        name: 'rice.png',
+        path: 'rice.png',
+      ),
+    );
     expect(
       adapter.request!.path,
       'https://example.test/api/go-stores/products',

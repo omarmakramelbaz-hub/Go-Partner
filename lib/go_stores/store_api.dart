@@ -86,7 +86,8 @@ class StoreApi {
         throw const ServiceFailure(
           'حجم الصورة أكبر من 5 ميجا / Image exceeds 5 MB.',
         );
-      final ext = image.name.split('.').last.toLowerCase();
+      final filename = image.name.trim().isEmpty ? 'product.jpg' : image.name;
+      final ext = filename.split('.').last.toLowerCase();
       final subtype = ext == 'png'
           ? 'png'
           : ext == 'webp'
@@ -94,7 +95,7 @@ class StoreApi {
           : 'jpeg';
       fields['image'] = MultipartFile.fromBytes(
         bytes,
-        filename: image.name,
+        filename: filename,
         contentType: MediaType('image', subtype),
       );
     }
