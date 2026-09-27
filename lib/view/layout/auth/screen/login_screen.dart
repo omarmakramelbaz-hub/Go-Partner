@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../helpers/extension/string_extension.dart';
 import '../../../../helpers/identity/partner_app_identity.dart';
+import '../../../../helpers/theme/go_design_tokens.dart';
 import '../../../../helpers/pusher_service/pusher_controller.dart';
 import '../../../../helpers/utils/country_code_methods.dart';
 import '../../../../helpers/utils/navigator_methods.dart';
@@ -54,9 +55,9 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
 
   @override
   Widget build(BuildContext context) {
-    const charcoal = Color(0xff171A1F);
-    const muted = Color(0xff737B86);
-    const orange = Color(0xffFD7201);
+    const charcoal = GoDesign.ink;
+    const muted = GoDesign.authMuted;
+    const orange = GoDesign.orange;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -67,10 +68,10 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
             final compact = viewport.maxHeight < 700;
             return SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.fromLTRB(24, compact ? 20 : 42, 24, 28),
+              padding: EdgeInsets.fromLTRB(GoDesign.authPadding, compact ? 20 : 42, GoDesign.authPadding, 28),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
+                  constraints: const BoxConstraints(maxWidth: GoDesign.authMaxWidth),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -111,8 +112,8 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: const Color(0xffF4F5F7),
-                            borderRadius: BorderRadius.circular(12),
+                            color: const GoDesign.segmented,
+                            borderRadius: BorderRadius.circular(GoDesign.radius),
                           ),
                           child: Row(
                             children: [
@@ -164,10 +165,10 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                           keyboardType: TextInputType.phone,
                           textDirection: ui.TextDirection.ltr,
                           hintText: '10X XXX XXXX',
-                          radius: 12,
+                          radius: GoDesign.radius,
                           hasShadow: false,
                           fillColor: Colors.white,
-                          unFocusColor: const Color(0xffE3E6EA),
+                          unFocusColor: const GoDesign.fieldBorder,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 16,
                             horizontal: 14,
@@ -192,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                                   height: 22,
                                   child: VerticalDivider(
                                     width: 1,
-                                    color: Color(0xffE3E6EA),
+                                    color: GoDesign.fieldBorder,
                                   ),
                                 ),
                               ],
@@ -210,10 +211,10 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                           title: _isArabic ? 'كلمة المرور' : 'Password',
                           isPassword: true,
                           textDirection: ui.TextDirection.ltr,
-                          radius: 12,
+                          radius: GoDesign.radius,
                           hasShadow: false,
                           fillColor: Colors.white,
-                          unFocusColor: const Color(0xffE3E6EA),
+                          unFocusColor: const GoDesign.fieldBorder,
                           passwordColor: muted,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 16,
@@ -228,8 +229,8 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                         ),
                         const SizedBox(height: 26),
                         CustomButton(
-                          height: 54,
-                          radius: 12,
+                          height: GoDesign.controlHeight,
+                          radius: GoDesign.radius,
                           hasShadow: false,
                           color: orange,
                           text: _isArabic ? 'تسجيل الدخول' : 'Sign in',

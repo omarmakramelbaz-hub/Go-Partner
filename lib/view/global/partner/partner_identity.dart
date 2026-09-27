@@ -3,12 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../helpers/identity/partner_app_identity.dart';
+import '../../../helpers/theme/go_design_tokens.dart';
 
 /// Shared identity for the signed-in GO Partner screens.
 class PartnerIdentity {
-  static const ink = Color(0xff171A1F);
-  static const orange = Color(0xffFD7201);
-  static const muted = Color(0xff7D8490);
+  static const ink = GoDesign.ink;
+  static const orange = GoDesign.orange;
+  static const muted = GoDesign.muted;
   static const border = Color(0xffECEEF1);
 }
 
