@@ -68,13 +68,15 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
   Widget build(BuildContext context) {
     if (caps?.ready == false) return Directionality(
       textDirection: widget.ar ? TextDirection.rtl : TextDirection.ltr,
-      child: pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(t('عروض المصنعية غير متاحة حاليًا', 'Labour quotations are currently unavailable'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19)),
-        ptext(t('عند إتاحتها، هتراجع وصف الشغلانة وترسل عرضك. العمولة تخصم بعد قبول العميل فقط.', 'When available, review the job and send your quote. Commission is charged only after customer acceptance.')),
-        if (error != null) ptext(error!),
-        TextButton(onPressed: loading ? null : () => load(), child: Text(t('إعادة المحاولة', 'Retry'))),
-        legacyRequestsButton(),
-      ])),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(t('عروض المصنعية غير متاحة حاليًا', 'Labour quotations are currently unavailable'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19)),
+          ptext(t('عند إتاحتها، هتراجع وصف الشغلانة وترسل عرضك. العمولة تخصم بعد قبول العميل فقط.', 'When available, review the job and send your quote. Commission is charged only after customer acceptance.')),
+          if (error != null) ptext(error!),
+          TextButton(onPressed: loading ? null : () => load(), child: Text(t('تحديث حالة العروض', 'Check quotation availability'))),
+        ])),
+        widget.legacyBuilder(context),
+      ]),
     );
     return Directionality(textDirection: widget.ar ? TextDirection.rtl : TextDirection.ltr, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [Expanded(child: Text(t('طلبات العملاء', 'Customer requests'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 21))), if (widget.onViewAll != null) TextButton(onPressed: widget.onViewAll, child: Text(t('عرض الكل', 'View all')))]),
