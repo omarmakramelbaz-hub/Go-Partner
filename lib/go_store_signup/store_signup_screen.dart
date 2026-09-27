@@ -351,14 +351,6 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                       ],
                     ),
                   ),
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -367,22 +359,39 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: FilledButton.icon(
-              onPressed: _busy || _picking ? null : _submit,
-              style: FilledButton.styleFrom(
-                backgroundColor: _orange,
-                minimumSize: const Size.fromHeight(54),
-              ),
-              icon: _busy
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.verified_user_outlined),
-              label: Text(
-                _busy ? 'جارٍ إكمال الطلب…' : 'تأكيد البريد وإرسال الطلب',
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
+                FilledButton.icon(
+                  onPressed: _busy || _picking ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _orange,
+                    minimumSize: const Size.fromHeight(54),
+                  ),
+                  icon: _busy
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.verified_user_outlined),
+                  label: Text(
+                    _busy ? 'جارٍ إكمال الطلب…' : 'تأكيد البريد وإرسال الطلب',
+                  ),
+                ),
+              ],
             ),
           ),
         ),

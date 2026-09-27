@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../../../go_store_signup/store_signup_draft.dart';
 import '../../../../go_store_signup/store_signup_screen.dart';
 
