@@ -143,11 +143,28 @@ class _StoreCatalogState extends State<StoreCatalog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.storefront_outlined,
-                            color: storeOrange,
-                            size: 40,
-                          ),
+                          if (store is Map &&
+                              (store['logo_url']?.toString() ?? '').isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                '${store['logo_url']}',
+                                width: 76,
+                                height: 76,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.storefront_outlined,
+                                  color: storeOrange,
+                                  size: 40,
+                                ),
+                              ),
+                            )
+                          else
+                            const Icon(
+                              Icons.storefront_outlined,
+                              color: storeOrange,
+                              size: 40,
+                            ),
                           const SizedBox(height: 14),
                           Text(
                             store is Map
