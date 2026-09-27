@@ -1,9 +1,11 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../lib/go_services/service_api.dart';
+import '../lib/go_services/wallet_notice.dart';
 import '../lib/go_services/partner_service_board.dart';
 
 class MemoryAdapter implements HttpClientAdapter {
@@ -19,6 +21,28 @@ ResponseBody reply(Map<String, dynamic> data, [int code = 200]) => ResponseBody.
 ServiceApi api(MemoryAdapter adapter) => ServiceApi(dio: Dio()..httpClientAdapter = adapter, baseUrl: 'https://example.invalid/api/', token: () => 'test-token-not-real');
 Map<String, dynamic> exampleJob() => {'id': 7, 'status': 'searching', 'recipient_status': 'invited', 'description': 'Repair kitchen sink', 'area': 'District', 'search_until': DateTime.now().add(const Duration(hours: 1)).toIso8601String(), 'offers': <dynamic>[]};
 void main() {
+  for (final ar in [true, false]) {
+    testWidgets('wallet debt warning persists and clears after confirmed recharge ($ar)', (tester) async {
+      var toppedUp = false; var offline = false; var topups = 0;
+      final adapter = MemoryAdapter((_) => offline ? reply({}, 503) : reply({'balance': toppedUp ? '50.00' : '-10.00', 'minimum_balance': '50.00', 'top_up_required': toppedUp ? '0.00' : '60.00', 'can_accept_orders': toppedUp}));
+      final client = api(adapter);
+      Widget app(int? session) => MaterialApp(locale: Locale(ar ? 'ar' : 'en'), supportedLocales: const [Locale('ar'), Locale('en')], localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: GoWalletShell(api: client, sessionId: session, onTopUp: () async { toppedUp = true; topups++; }, child: const Scaffold(body: Text('Existing orders'))));
+      await tester.pumpWidget(app(1)); await tester.pumpAndSettle();
+      expect(find.textContaining('-10.00'), findsOneWidget); expect(find.textContaining('60.00'), findsOneWidget);
+      expect(find.text('Existing orders'), findsOneWidget);
+      expect(find.byIcon(Icons.close), findsNothing);
+      offline = true; await tester.pump(const Duration(seconds: 15)); await tester.pumpAndSettle();
+      expect(find.textContaining('-10.00'), findsOneWidget);
+      offline = false; await tester.tap(find.text(ar ? 'شحن' : 'Top up')); await tester.pumpAndSettle();
+      expect(topups, 1); expect(find.textContaining('-10.00'), findsNothing);
+      toppedUp = false; goWalletChanges.value++; await tester.pumpAndSettle(); expect(find.textContaining('-10.00'), findsOneWidget);
+      await tester.pumpWidget(app(null)); await tester.pumpAndSettle(); expect(find.textContaining('-10.00'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox()); client.close();
+    });
+  }
+
   for (final ar in [true, false]) {
     testWidgets('cancellation shows liability and posts only after fee consent and reason ($ar)', (tester) async {
       final job = {...exampleJob(), 'status': 'booked', 'accepted_offer_id': 3, 'price': '100.00', 'payment_status': 'cash_due', 'payment_method': 'cash',

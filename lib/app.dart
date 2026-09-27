@@ -1,3 +1,5 @@
+import 'go_services/wallet_notice.dart';
+import 'view/layout/wallet/screen/wallet_screen.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -56,7 +58,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           locale: context.locale,
           debugShowCheckedModeBanner: false,
           theme: appThemeData(context),
-          builder: BotToastInit(),
+          builder: (context, child) => BotToastInit()(context, Consumer<AuthController>(builder: (_, auth, __) => GoWalletShell(sessionId: auth.profile?.id, onTopUp: () async { await AppRouters.navigatorKey.currentState?.pushNamed(WalletScreen.routeName); }, child: child ?? const SizedBox()))),
           navigatorObservers: [BotToastNavigatorObserver(), AppRouteObserver()],
           initialRoute: SplashScreen.routeName,
           onGenerateRoute: AppRouters.onGenerateRoute,
