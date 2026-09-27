@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,7 @@ Widget harness(Widget child, [String language = 'ar']) => EasyLocalization(
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Tajawal'),
       home: child,
     ),
   ),
@@ -118,6 +119,13 @@ void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     await EasyLocalization.ensureInitialized();
+    await (FontLoader('Tajawal')
+          ..addFont(rootBundle.load('assets/font/Tajawal/Tajawal-Regular.ttf'))
+          ..addFont(rootBundle.load('assets/font/Tajawal/Tajawal-Bold.ttf')))
+        .load();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
   test('store prices preserve decimal cents and normalize Arabic digits', () {
