@@ -19,6 +19,21 @@ ResponseBody reply(Map<String, dynamic> data, [int code = 200]) => ResponseBody.
 ServiceApi api(MemoryAdapter adapter) => ServiceApi(dio: Dio()..httpClientAdapter = adapter, baseUrl: 'https://example.invalid/api/', token: () => 'test-token-not-real');
 Map<String, dynamic> exampleJob() => {'id': 7, 'status': 'searching', 'recipient_status': 'invited', 'description': 'Repair kitchen sink', 'area': 'District', 'search_until': DateTime.now().add(const Duration(hours: 1)).toIso8601String(), 'offers': <dynamic>[]};
 void main() {
+  for (final ar in [true, false]) {
+    for (final permitted in [false, true]) {
+      testWidgets('customer phone requires selected quote and server commission permission (Arabic=$ar, permitted=$permitted)', (tester) async {
+        final job = {...exampleJob(), 'status': 'booked', 'accepted_offer_id': 3, 'phone': '01012345678', if (permitted) 'can_contact_customer': true, 'location': {'address': 'Building 4, apartment 3', 'lat': 30, 'lng': 31}, 'offers': [{'id': 3, 'status': 'accepted', 'price': '500.00'}]};
+        final client = api(MemoryAdapter((r) => r.path.endsWith('capabilities') ? reply({'schema_ready': true, 'version': 1, 'enabled': true}) : reply(job)));
+        await tester.pumpWidget(MaterialApp(home: PartnerServiceJobScreen(api: client, ar: ar, id: 7)));
+        await tester.pumpAndSettle();
+        expect(find.text('Building 4, apartment 3'), findsOneWidget);
+        expect(find.textContaining('01012345678'), permitted ? findsOneWidget : findsNothing);
+        expect(find.text(ar ? 'افتح موقع التنفيذ' : 'Open work location'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox()); client.close();
+      });
+    }
+  }
   test('exact prices and Arabic digits; invalid or over-limit prices rejected', () {
     expect(normalizeServicePrice('١٢٣٫٤٥'), '123.45'); expect(normalizeServicePrice('1.2'), '1.20');
     for (final value in ['0', '-1', '0.99', '1.001', 'NaN', '1e3', '1000000.01']) { expect(normalizeServicePrice(value), isNull); }
