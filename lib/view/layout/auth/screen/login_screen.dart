@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: const GoDesign.segmented,
+                            color: GoDesign.segmented,
                             borderRadius: BorderRadius.circular(GoDesign.radius),
                           ),
                           child: Row(
@@ -168,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                           radius: GoDesign.radius,
                           hasShadow: false,
                           fillColor: Colors.white,
-                          unFocusColor: const GoDesign.fieldBorder,
+                          unFocusColor: GoDesign.fieldBorder,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 16,
                             horizontal: 14,
@@ -214,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidationMixin {
                           radius: GoDesign.radius,
                           hasShadow: false,
                           fillColor: Colors.white,
-                          unFocusColor: const GoDesign.fieldBorder,
+                          unFocusColor: GoDesign.fieldBorder,
                           passwordColor: muted,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 16,
