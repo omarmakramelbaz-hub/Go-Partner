@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '../extension/context_extension.dart';
 import 'app_colors.dart';
 import 'app_theme.dart';
+import 'go_design_tokens.dart';
 
 ThemeData appThemeData(BuildContext context) {
-  const navy = Color(0xFF171A1F);
-  const orange = Color(0xffFD7201);
-  const softText = Color(0xff7D8490);
-  const border = Color(0xffE6E8EC);
+  const navy = GoDesign.ink;
+  const orange = GoDesign.orange;
+  const softText = GoDesign.muted;
+  const border = GoDesign.border;
 
   final brightness = AppTheme.getByTheme(context, light: Brightness.light, dark: Brightness.dark);
 
@@ -34,7 +35,7 @@ ThemeData appThemeData(BuildContext context) {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(GoDesign.cardRadius),
         side: const BorderSide(color: border),
       ),
     ),
@@ -48,13 +49,13 @@ ThemeData appThemeData(BuildContext context) {
       modalBackgroundColor: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(GoDesign.sheetRadius)),
       ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: Colors.white,
       elevation: 18,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(GoDesign.dialogRadius)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
