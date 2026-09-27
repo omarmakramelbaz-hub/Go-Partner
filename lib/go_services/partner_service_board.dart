@@ -46,7 +46,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
     final requested = more ? next! : 1;
     setState(() => loading = true);
     try {
-      final capabilities = caps ?? await api.capabilities();
+      final capabilities = await api.capabilities();
       if (!capabilities.ready) { if (mounted) setState(() { caps = capabilities; error = null; }); return; }
       var page = await api.jobs(scope: scope, page: requested);
       final items = serviceMaps(page['items']); var loaded = requested;
@@ -66,7 +66,16 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
   void dispose() { timer?.cancel(); WidgetsBinding.instance.removeObserver(this); if (widget.api == null) api.close(); super.dispose(); }
   @override
   Widget build(BuildContext context) {
-    if (caps?.ready == false) return widget.legacyBuilder(context);
+    if (caps?.ready == false) return Directionality(
+      textDirection: widget.ar ? TextDirection.rtl : TextDirection.ltr,
+      child: pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(t('عروض المصنعية غير متاحة حاليًا', 'Labour quotations are currently unavailable'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19)),
+        ptext(t('عند إتاحتها، هتراجع وصف الشغلانة وترسل عرضك. العمولة تخصم بعد قبول العميل فقط.', 'When available, review the job and send your quote. Commission is charged only after customer acceptance.')),
+        if (error != null) ptext(error!),
+        TextButton(onPressed: loading ? null : () => load(), child: Text(t('إعادة المحاولة', 'Retry'))),
+        legacyRequestsButton(),
+      ])),
+    );
     return Directionality(textDirection: widget.ar ? TextDirection.rtl : TextDirection.ltr, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [Expanded(child: Text(t('طلبات العملاء', 'Customer requests'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 21))), if (widget.onViewAll != null) TextButton(onPressed: widget.onViewAll, child: Text(t('عرض الكل', 'View all')))]),
       ptext(t('راجع الشغلانة وقدّم عرض مصنعية نهائي. العمولة تخصم بعد اختيار العميل لعرضك فقط.', 'Review each job and quote the final labour price. Commission is charged only when the customer selects your quote.')),
@@ -82,9 +91,16 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
         FilledButton(onPressed: () => open(job), child: Text(t('تفاصيل الشغلانة وعرضي', 'Job details and my quote'))),
       ])),
       if (next != null) TextButton(onPressed: loading ? null : () => load(more: true), child: Text(t('عرض المزيد', 'Load more'))),
-      if (caps?.ready == true) TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => Scaffold(appBar: AppBar(title: Text(t('الطلبات السابقة للنظام الجديد', 'Legacy requests'))), body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: widget.legacyBuilder(context))))), child: Text(t('عرض الطلبات المسجلة بالنظام السابق', 'View requests in the previous system'))),
+      if (caps?.ready == true) legacyRequestsButton(),
     ]));
   }
+  Widget legacyRequestsButton() => TextButton(
+    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) => Scaffold(
+      appBar: AppBar(title: Text(t('الطلبات السابقة للنظام الجديد', 'Legacy requests'))),
+      body: SingleChildScrollView(padding: const EdgeInsets.all(16), child: widget.legacyBuilder(context)),
+    ))),
+    child: Text(t('عرض الطلبات المسجلة بالنظام السابق', 'View requests in the previous system')),
+  );
 }
 
 class PartnerServiceJobScreen extends StatefulWidget {
