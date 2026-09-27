@@ -36,6 +36,10 @@ StoreSignupDraft draft() => StoreSignupDraft()
 
 class CaptureAdapter implements HttpClientAdapter {
   final requests = <RequestOptions>[];
+  int? failBatch;
+  bool failed = false;
+  int batches = 0;
+  bool rejectSession = false;
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -43,10 +47,35 @@ class CaptureAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     requests.add(options);
+    if (options.path.endsWith('/catalog-images')) {
+      batches++;
+      if (batches == failBatch && !failed) {
+        failed = true;
+        throw DioException(
+          requestOptions: options,
+          type: DioExceptionType.connectionError,
+        );
+      }
+    }
+    if (rejectSession && options.path.endsWith('/catalog-images')) {
+      return ResponseBody.fromString(
+        jsonEncode({
+          'errors': {
+            'catalog_upload_token': ['انتهت الجلسة'],
+          },
+        }),
+        422,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      );
+    }
     return ResponseBody.fromString(
       jsonEncode({
         'status': 'Success',
-        'data': {'application_id': 23},
+        'data': options.path.endsWith('/catalog-upload')
+            ? {'upload_token': 'fixture-upload-token', 'expires_in': 7200}
+            : {'application_id': 23},
       }),
       200,
       headers: {
@@ -93,33 +122,162 @@ void main() {
     expect(store.validate(), isNotNull);
     expect(draft().validate(), isNull);
   });
-  test('multipart catalog ties each image to its product and uses fresh data on retry', () async {
-    final adapter = CaptureAdapter();
-    final client = Dio()..httpClientAdapter = adapter;
-    final api = PartnerApplicationApi(client: client, scope: 'go');
-    final photo = XFile.fromData(pixel, name: 'portrait.png');
-    for (var i = 0; i < 2; i++) {
-      await api.submit(
-        {'mobile': '01012345678', 'email_verification_token': 'fixture-proof'},
-        photo,
-        store: draft(),
+  test(
+    '60 products use small batches and a metadata-only final catalog',
+    () async {
+      final adapter = CaptureAdapter();
+      final api = PartnerApplicationApi(
+        client: Dio()..httpClientAdapter = adapter,
+        scope: 'go',
       );
-    }
-    final request = adapter.requests.first;
-    expect(request.headers['X-App-Scope'], 'go');
-    expect(request.headers.containsKey('Authorization'), isFalse);
-    final body = request.data as FormData;
-    expect(body.files.map((e) => e.key), [
-      'photo',
-      'store_logo',
-      'product_images[0]',
-    ]);
-    final store = jsonDecode(
-      body.fields.firstWhere((e) => e.key == 'storefront').value,
+      final store = draft();
+      final first = store.products.single;
+      store.products.addAll(
+        List.generate(
+          59,
+          (i) => SignupProduct(
+            name: 'منتج ${i + 1}',
+            unit: 'كيلو',
+            price: '${i + 1}.00',
+            image: SignupImage(pixel, 'png'),
+          ),
+        ),
+      );
+      expect(store.validate(), isNull);
+      store.products.add(first);
+      expect(store.validate(), isNotNull);
+      store.products.removeLast();
+      final progress = <String>[];
+      store.progress.addListener(() {
+        if (store.progress.value != null) progress.add(store.progress.value!);
+      });
+      await api.submit(
+        {
+          'mobile': '01012345678',
+          'email': 'owner@example.com',
+          'email_verification_token': 'proof',
+        },
+        XFile.fromData(pixel, name: 'portrait.png'),
+        store: store,
+      );
+      final uploads = adapter.requests
+          .where((r) => r.path.endsWith('/catalog-images'))
+          .toList();
+      expect(uploads.length, 13);
+      final slots = <String>[];
+      for (final request in uploads) {
+        expect(request.headers['X-App-Scope'], 'go');
+        expect(request.headers.containsKey('Authorization'), isFalse);
+        final data = request.data as FormData;
+        expect(data.files.length, lessThanOrEqualTo(5));
+        slots.addAll(data.files.map((e) => e.key));
+      }
+      expect(slots, [
+        'images[logo]',
+        for (var i = 0; i < 60; i++) 'images[p$i]',
+      ]);
+      final body = adapter.requests.last.data as FormData;
+      expect(body.files.map((e) => e.key), ['photo']);
+      final fields = Map.fromEntries(body.fields);
+      expect(fields.containsKey('email_verification_token'), isFalse);
+      expect(fields['catalog_upload_token'], 'fixture-upload-token');
+      final catalog = jsonDecode(fields['storefront']!);
+      expect(catalog['products'].length, 60);
+      expect(catalog['products'][0]['options'][0]['price'], '42.75');
+      expect(progress, contains('جارٍ رفع الصور: 60 من 61'));
+      expect(store.progress.value, isNull);
+      api.close();
+    },
+  );
+
+  test(
+    'interrupted uploads resume with fresh bodies and only changed image slots',
+    () async {
+      final adapter = CaptureAdapter()..failBatch = 2;
+      final api = PartnerApplicationApi(
+        client: Dio()..httpClientAdapter = adapter,
+      );
+      final store = draft();
+      store.products.addAll(
+        List.generate(
+          6,
+          (i) => SignupProduct(
+            name: 'منتج $i',
+            unit: 'كيلو',
+            price: '10',
+            image: SignupImage(pixel, 'png'),
+          ),
+        ),
+      );
+      final fields = {
+        'mobile': '01012345678',
+        'email': 'owner@example.com',
+        'email_verification_token': 'proof',
+      };
+      final photo = XFile.fromData(pixel, name: 'portrait.png');
+      await expectLater(
+        api.submit(fields, photo, store: store),
+        throwsA(isA<StoreSignupFailure>()),
+      );
+      expect(
+        store.hasUploadSession('01012345678', 'owner@example.com'),
+        isTrue,
+      );
+      expect(
+        store.hasUploadSession('01099999999', 'owner@example.com'),
+        isFalse,
+      );
+      final failedBody = adapter.requests.last.data;
+      await api.submit(fields, photo, store: store);
+      expect(
+        adapter.requests
+            .where((r) => r.path.endsWith('/catalog-upload'))
+            .length,
+        1,
+      );
+      final batches = adapter.requests
+          .where((r) => r.path.endsWith('/catalog-images'))
+          .toList();
+      expect(batches.length, 3);
+      expect(identical(failedBody, batches.last.data), isFalse);
+      expect((batches.last.data as FormData).files.map((e) => e.key), [
+        'images[p4]',
+        'images[p5]',
+        'images[p6]',
+      ]);
+      store.logo = SignupImage(pixel, 'png');
+      await api.submit(fields, photo, store: store);
+      final changed =
+          adapter.requests
+                  .where((r) => r.path.endsWith('/catalog-images'))
+                  .last
+                  .data
+              as FormData;
+      expect(changed.files.map((e) => e.key), ['images[logo]']);
+      api.close();
+    },
+  );
+
+  test('expired upload sessions require email verification again and retain products', () async {
+    final adapter = CaptureAdapter()..rejectSession = true;
+    final api = PartnerApplicationApi(
+      client: Dio()..httpClientAdapter = adapter,
     );
-    expect(store['products'][0]['options'][0]['price'], '42.75');
-    expect(store.containsKey('user_id'), isFalse);
-    expect(identical(body, adapter.requests.last.data), isFalse);
+    final store = draft();
+    await expectLater(
+      api.submit(
+        {
+          'mobile': '01012345678',
+          'email': 'owner@example.com',
+          'email_verification_token': 'proof',
+        },
+        XFile.fromData(pixel, name: 'portrait.png'),
+        store: store,
+      ),
+      throwsA(isA<StoreSignupFailure>()),
+    );
+    expect(store.hasUploadSession('01012345678', 'owner@example.com'), isFalse);
+    expect(store.products.length, 1);
     api.close();
   });
   testWidgets(

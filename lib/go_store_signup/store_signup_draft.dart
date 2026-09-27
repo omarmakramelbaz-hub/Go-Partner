@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -74,6 +75,21 @@ class StoreSignupDraft {
   String? kind;
   SignupImage? logo;
   final products = <SignupProduct>[];
+  final progress = ValueNotifier<String?>(null);
+  String? _uploadToken, _uploadIdentity;
+  DateTime? _uploadExpires;
+  final _uploaded = <String, SignupImage>{};
+  bool hasUploadSession(String mobile, String email) =>
+      _uploadToken != null &&
+      _uploadIdentity == '$mobile|${email.trim().toLowerCase()}' &&
+      _uploadExpires!.isAfter(DateTime.now());
+  void clearUploadSession() {
+    _uploadToken = null;
+    _uploadIdentity = null;
+    _uploadExpires = null;
+    _uploaded.clear();
+  }
+
   int get imageBytes =>
       (logo?.bytes.length ?? 0) +
       products.fold<int>(0, (total, p) => total + p.image.bytes.length);
@@ -84,32 +100,17 @@ class StoreSignupDraft {
       return 'أكمل اسم المتجر ونشاطه وعنوانه.';
     if (logo == null) return 'أضف لوجو المتجر.';
     if (products.isEmpty) return 'أضف منتجًا واحدًا على الأقل.';
-    if (products.length > 15)
-      return 'يمكن إضافة حتى 15 منتجًا مع طلب الانضمام.';
+    if (products.length > 60)
+      return 'يمكن إضافة حتى 60 منتجًا مع طلب الانضمام.';
     return null;
   }
 
-  void attach(FormData body) {
-    final error = validate();
-    if (error != null) throw StoreSignupFailure(error);
-    body.fields.add(
-      MapEntry(
-        'storefront',
-        jsonEncode({
-          'name': name.trim(),
-          'kind': kind,
-          'address': address.trim(),
-          'products': products.map((p) => p.toJson()).toList(),
-        }),
-      ),
-    );
-    body.files.add(MapEntry('store_logo', logo!.upload('store-logo')));
-    for (var i = 0; i < products.length; i++) {
-      body.files.add(
-        MapEntry('product_images[$i]', products[i].image.upload('product-$i')),
-      );
-    }
-  }
+  String get catalogJson => jsonEncode({
+    'name': name.trim(),
+    'kind': kind,
+    'address': address.trim(),
+    'products': products.map((p) => p.toJson()).toList(),
+  });
 }
 
 const signupKinds = {
@@ -153,57 +154,131 @@ class PartnerApplicationApi {
     StoreSignupDraft? store,
   }) async {
     final bytes = await photo.readAsBytes();
-    if (bytes.length + (store?.imageBytes ?? 0) > 6 * 1024 * 1024) {
-      throw const StoreSignupFailure(
-        'إجمالي الصور أكبر من 6 ميجا. قلّل حجم الصور أو عدد المنتجات.',
-      );
+    if (bytes.length > 5 * 1024 * 1024) {
+      throw const StoreSignupFailure('الصورة الشخصية يجب ألا تتجاوز 5 ميجا.');
     }
-    final body = FormData.fromMap({
-      ...fields,
-      'photo': MultipartFile.fromBytes(
-        bytes,
-        filename: photo.name.isEmpty ? 'partner.jpg' : photo.name,
-      ),
-    });
-    store?.attach(body);
+    if (store != null) {
+      final error = store.validate();
+      if (error != null) throw StoreSignupFailure(error);
+    }
     try {
-      final result = await _client.post<dynamic>(
-        Urls.partnerApplications,
-        data: body,
-        options: Options(
-          followRedirects: false,
-          validateStatus: (_) => true,
-          headers: {
-            'Accept': 'application/json',
-            'Lang': 'ar',
-            'X-App-Scope': scope,
-          },
+      if (store != null) {
+        final mobile = fields['mobile'].toString();
+        final email = fields['email'].toString();
+        if (!store.hasUploadSession(mobile, email)) {
+          store.clearUploadSession();
+          store.progress.value = 'جارٍ تجهيز رفع الصور…';
+          final data = await _post(
+            '${Urls.partnerApplications}/catalog-upload',
+            FormData.fromMap({
+              'mobile': mobile,
+              'email': email,
+              'email_verification_token': fields['email_verification_token'],
+            }),
+          );
+          store._uploadToken = data['upload_token'] as String;
+          store._uploadIdentity = '$mobile|${email.trim().toLowerCase()}';
+          store._uploadExpires = DateTime.now().add(
+            Duration(seconds: (data['expires_in'] as num).toInt() - 10),
+          );
+        }
+        final images = <String, SignupImage>{
+          'logo': store.logo!,
+          for (var i = 0; i < store.products.length; i++)
+            'p$i': store.products[i].image,
+        };
+        final pending = images.entries
+            .where((e) => !identical(store._uploaded[e.key], e.value))
+            .toList();
+        var completed = images.length - pending.length;
+        for (var offset = 0; offset < pending.length; offset += 5) {
+          final batch = pending.skip(offset).take(5).toList();
+          store.progress.value =
+              'جارٍ رفع الصور: $completed من ${images.length}';
+          final upload = FormData.fromMap({
+            'catalog_upload_token': store._uploadToken,
+          });
+          for (final entry in batch) {
+            upload.files.add(
+              MapEntry('images[${entry.key}]', entry.value.upload(entry.key)),
+            );
+          }
+          await _post(
+            '${Urls.partnerApplications}/catalog-images',
+            upload,
+            store: store,
+          );
+          for (final entry in batch) {
+            store._uploaded[entry.key] = entry.value;
+          }
+          completed += batch.length;
+        }
+        store.progress.value = 'اكتمل رفع الصور. جارٍ إرسال الطلب…';
+      }
+      final values = Map<String, dynamic>.from(fields);
+      if (store != null) {
+        values.remove('email_verification_token');
+        values['catalog_upload_token'] = store._uploadToken;
+        values['storefront'] = store.catalogJson;
+      }
+      final body = FormData.fromMap({
+        ...values,
+        'photo': MultipartFile.fromBytes(
+          bytes,
+          filename: photo.name.isEmpty ? 'partner.jpg' : photo.name,
         ),
+      });
+      await _post(Urls.partnerApplications, body, store: store);
+    } on DioException {
+      throw const StoreSignupFailure(
+        'تعذر الاتصال. بياناتك ما زالت موجودة؛ حاول الإرسال مرة أخرى لاستكمال رفع الصور.',
       );
-      final data = result.data;
-      if (result.statusCode != 200 ||
-          data is! Map ||
-          data['status'] != 'Success') {
-        String? message;
-        if (data is Map) {
-          final errors = data['errors'];
-          if (errors is Map &&
-              errors.isNotEmpty &&
+    } finally {
+      store?.progress.value = null;
+    }
+  }
+
+  Future<Map<dynamic, dynamic>> _post(
+    String url,
+    FormData body, {
+    StoreSignupDraft? store,
+  }) async {
+    final result = await _client.post<dynamic>(
+      url,
+      data: body,
+      options: Options(
+        followRedirects: false,
+        validateStatus: (_) => true,
+        headers: {
+          'Accept': 'application/json',
+          'Lang': 'ar',
+          'X-App-Scope': scope,
+        },
+      ),
+    );
+    final data = result.data;
+    if (result.statusCode != 200 ||
+        data is! Map ||
+        data['status'] != 'Success') {
+      String? message;
+      if (data is Map) {
+        final errors = data['errors'];
+        if (errors is Map) {
+          if (errors.containsKey('catalog_upload_token'))
+            store?.clearUploadSession();
+          if (errors.isNotEmpty &&
               errors.values.first is List &&
               (errors.values.first as List).isNotEmpty) {
             message = (errors.values.first as List).first.toString();
           }
-          message ??= data['message']?.toString();
         }
-        throw StoreSignupFailure(
-          message ?? 'تعذر إرسال الطلب. راجع البيانات وحاول مرة أخرى.',
-        );
+        message ??= data['message']?.toString();
       }
-    } on DioException {
-      throw const StoreSignupFailure(
-        'تعذر الاتصال. بياناتك ما زالت موجودة؛ راجع حالة الطلب قبل إعادة الإرسال.',
+      throw StoreSignupFailure(
+        message ?? 'تعذر إرسال الطلب. راجع البيانات وحاول مرة أخرى.',
       );
     }
+    return data['data'] is Map ? data['data'] as Map : <dynamic, dynamic>{};
   }
 
   void close() => _client.close();
