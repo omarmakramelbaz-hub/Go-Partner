@@ -705,29 +705,8 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: SafeArea(
-          top: false,
-          child: Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'شروط الانضمام إلى شركاء GO',
-                  style: TextStyle(
-                    color: _navy,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 14),
+      builder: (sheetContext) => GoSheet(title: 'شروط الانضمام إلى شركاء GO', icon: Icons.description_outlined,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 ...terms.map(
                   (term) => Padding(
                     padding: const EdgeInsets.only(bottom: 9),
@@ -761,11 +740,8 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                     child: const Text('موافق'),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              
+        ])),
     );
   }
 }

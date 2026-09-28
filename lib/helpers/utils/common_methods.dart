@@ -118,74 +118,20 @@ class CommonMethods {
   ].map((e) => CustomSelectItem(value: int.tryParse(e['id'].toString()), name: e['value']?.toString() ?? '')).toList();
 
   static void changeLanguage(BuildContext context, {required VoidCallback onTap}) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          tr(AppLocaleKey.language),
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            fontFamily: context.fontFamily(),
-          ),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            isDefaultAction: true,
-            onPressed: () {
-              HiveMethods.updateLang(const Locale('ar'));
-              context.setLocale(const Locale('ar'));
-              onTap.call();
-              MyApp.setMyAppState(context);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'العربية',
-              style: TextStyle(
-                fontFamily: context.fontFamilyAr(),
-                color: context.locale == const Locale('ar')
-                    ? AppColor.mainAppColor(context)
-                    : AppColor.darkTextColor(context),
-              ),
-            ),
-          ),
-          CupertinoActionSheetAction(
-            isDefaultAction: true,
-            onPressed: () {
-              HiveMethods.updateLang(const Locale('en'));
-              context.setLocale(const Locale('en'));
-              onTap.call();
-              MyApp.setMyAppState(context);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'English',
-              style: TextStyle(
-                fontFamily: context.fontFamilyEn(),
-                color: context.locale == const Locale('en')
-                    ? AppColor.mainAppColor(context)
-                    : AppColor.darkTextColor(context),
-              ),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(
-            tr(AppLocaleKey.cancel),
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              fontFamily: context.fontFamily(),
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-    );
+    showGoModalBottomSheet<void>(context: context,
+      builder: (context) => GoSheet(title: tr(AppLocaleKey.language), icon: Icons.language_rounded,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          for (final language in ['ar', 'en']) Padding(padding: const EdgeInsets.only(bottom: 10),
+            child: GoPopupChoice(label: language == 'ar' ? 'العربية' : 'English',
+              selected: context.locale.languageCode == language,
+              onTap: () {
+                HiveMethods.updateLang(Locale(language));
+                context.setLocale(Locale(language));
+                onTap.call();
+                MyApp.setMyAppState(context);
+                Navigator.pop(context);
+              })),
+        ])));
   }
 
   static bool endScroll(ScrollEndNotification t, VoidCallback onEnd) {

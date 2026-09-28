@@ -159,10 +159,7 @@ void main() {
           expect(edits, 2);
           expect(tester.takeException(), isNull);
           if (width == 390 && ar) {
-            await tester.drag(
-              find.byType(SingleChildScrollView).first,
-              const Offset(0, 1000),
-            );
+            await tester.ensureVisible(find.byType(GoPopupHeader));
             await tester.pumpAndSettle();
             await screenshot(tester, boundary, 'transfer-ar');
           }

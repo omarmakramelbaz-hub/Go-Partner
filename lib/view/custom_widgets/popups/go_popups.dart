@@ -44,7 +44,7 @@ class GoPopupTheme extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(GoDesign.dialogRadius),
         ),
-        constraints: const BoxConstraints(maxWidth: 440),
+        constraints: const BoxConstraints(minWidth: 320, maxWidth: 440),
         titleTextStyle: TextStyle(
           fontFamily: font,
           color: GoDesign.ink,
