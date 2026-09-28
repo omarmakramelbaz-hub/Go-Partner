@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,7 @@ void main() {
           Directionality.of(
             tester.element(find.byKey(const ValueKey('language'))),
           ),
-          next == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          next == 'ar' ? ui.TextDirection.rtl : ui.TextDirection.ltr,
         );
         expect(tester.takeException(), isNull);
       },
