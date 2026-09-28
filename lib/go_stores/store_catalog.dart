@@ -477,7 +477,7 @@ class _StoreProfileEditorState extends State<StoreProfileEditor> {
             Text(
               _t(
                 'سوبر ماركت، مطعم أو صيدلية',
-                'Supermarket, restaurant or pharmacy',
+                'Supermarket, restaurant, pharmacy or clinic',
               ),
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
@@ -499,7 +499,7 @@ class _StoreProfileEditorState extends State<StoreProfileEditor> {
               decoration: InputDecoration(
                 labelText: _t('نوع النشاط', 'Store category'),
               ),
-              items: ['supermarket', 'restaurant', 'pharmacy']
+              items: ['supermarket', 'restaurant', 'pharmacy', 'clinic']
                   .map(
                     (key) => DropdownMenuItem(
                       value: key,

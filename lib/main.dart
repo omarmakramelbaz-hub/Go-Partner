@@ -17,6 +17,7 @@ import 'helpers/networking/http_overrides_stub.dart'
 import 'helpers/networking/notification_helper.dart';
 import 'helpers/theme/app_theme_controller.dart';
 import 'helpers/theme/theme_enum.dart';
+import 'helpers/hive/hive_methods.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,7 @@ Future<void> main() async {
       supportedLocales: const [Locale('en'), Locale('ar')],
       path: 'i18n',
       fallbackLocale: const Locale('ar'),
-      startLocale: const Locale('ar'),
+      startLocale: Locale(HiveMethods.getLang() == 'en' ? 'en' : 'ar'),
       saveLocale: true,
       child: ChangeNotifierProvider(
         create: (context) => AppThemeController()..initial(),

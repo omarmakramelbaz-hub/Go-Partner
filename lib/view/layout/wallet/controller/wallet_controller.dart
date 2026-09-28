@@ -55,6 +55,7 @@ class WalletController extends ChangeNotifier {
   String? _selectedPayment;
   String? get selectedPayment => _selectedPayment;
   void setSelectedPayment(String value) {
+    if (!const ['v_cash', 'online'].contains(value)) return;
     _selectedPayment = value;
     notifyListeners();
   }
@@ -66,13 +67,7 @@ class WalletController extends ChangeNotifier {
   }) async {
     NavigatorMethods.loading();
     try {
-      // Apple Pay / Google Pay are visible as distinct UX choices now. Until
-      // Paymob activates dedicated integration IDs, route them through the
-      // existing online checkout instead of sending unsupported method names.
-      final String? gatewayPaymentMethod =
-          (_selectedPayment == 'apple_pay' || _selectedPayment == 'google_pay')
-          ? 'online'
-          : _selectedPayment;
+      final String? gatewayPaymentMethod = _selectedPayment;
       final FormData body = FormData.fromMap({
         'amount': amount,
         'payment_method': gatewayPaymentMethod,

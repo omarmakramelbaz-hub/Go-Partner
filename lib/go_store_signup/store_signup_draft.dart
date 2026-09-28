@@ -117,6 +117,7 @@ const signupKinds = {
   'supermarket': 'سوبر ماركت',
   'restaurant': 'مطعم',
   'pharmacy': 'صيدلية',
+  'clinic': 'عيادات',
 };
 String? signupPrice(String input) {
   input = input.trim().replaceAll('٫', '.');
