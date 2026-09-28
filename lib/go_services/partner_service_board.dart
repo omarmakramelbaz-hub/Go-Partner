@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'service_api.dart';
+import '../helpers/networking/sound_notification.dart';
 
 String pst(bool ar, String a, String e) => ar ? a : e;
 Widget pcard(Widget child) => Card(margin: const EdgeInsets.symmetric(vertical: 8), child: Padding(padding: const EdgeInsets.all(16), child: child));
@@ -39,13 +40,14 @@ String jobCommissionStatus(Map<String, dynamic> job) {
 /// Occupies the existing Customer requests board, not a second service section.
 /// Couriers keep their original board; professionals retain legacy access.
 class PartnerServiceBoard extends StatefulWidget {
-  const PartnerServiceBoard({super.key, required this.ar, required this.legacyBuilder, this.scope = 'open', this.api, this.onChanged, this.onViewAll});
+  const PartnerServiceBoard({super.key, required this.ar, required this.legacyBuilder, this.scope = 'open', this.api, this.onChanged, this.onViewAll, this.onIncomingOrder});
   final bool ar;
   final WidgetBuilder legacyBuilder;
   final String scope;
   final ServiceApi? api;
   final VoidCallback? onChanged;
   final VoidCallback? onViewAll;
+  final void Function(String key)? onIncomingOrder;
   @override
   State<PartnerServiceBoard> createState() => _PartnerServiceBoardState();
 }
@@ -55,6 +57,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
   List<Map<String, dynamic>> jobs = [];
   int? next;
   int pages = 1;
+  Set<String>? knownInvitations;
   String? rate;
   String? balance;
   String? error;
@@ -65,7 +68,7 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
   @override
   void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); load(); timer = Timer.periodic(const Duration(seconds: 15), (_) { if (mounted && foreground && TickerMode.of(context) && (ModalRoute.of(context)?.isCurrent ?? true)) load(); }); }
   @override
-  void didUpdateWidget(covariant PartnerServiceBoard oldWidget) { super.didUpdateWidget(oldWidget); if (oldWidget.scope != widget.scope) { pages = 1; jobs = []; load(); } }
+  void didUpdateWidget(covariant PartnerServiceBoard oldWidget) { super.didUpdateWidget(oldWidget); if (oldWidget.scope != widget.scope) { pages = 1; jobs = []; knownInvitations = null; load(); } }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) { foreground = state == AppLifecycleState.resumed; if (foreground) load(); }
   Future<void> load({bool more = false}) async {
@@ -82,11 +85,21 @@ class _PartnerServiceBoardState extends State<PartnerServiceBoard> with WidgetsB
       if (!mounted || widget.scope != scope) return;
       final changedBalance = balance != null && balance != page['balance']?.toString();
       setState(() { caps = capabilities; jobs = more ? [...jobs, ...items] : items; pages = loaded; next = page['next_page'] == null ? null : serviceId(page['next_page']); balance = page['balance']?.toString(); rate = page['commission_rate']?.toString(); error = null; });
+      final invitations = jobs.where((job) => job['status'] == 'searching' && job['recipient_status'] == 'invited').map((job) => 'job:${job['id']}').toSet();
+      final previous = knownInvitations;
+      knownInvitations = invitations;
+      if (previous != null && foreground && TickerMode.of(context) && (ModalRoute.of(context)?.isCurrent ?? true)) {
+        for (final key in invitations.difference(previous)) {
+          if (widget.onIncomingOrder != null) { widget.onIncomingOrder!(key); }
+          else { SoundNotification.instance.playSound(key: key); }
+        }
+      }
       if (changedBalance) widget.onChanged?.call();
     } catch (e) { if (mounted && scope == widget.scope) setState(() => error = '$e'); }
     finally { if (mounted) { setState(() => loading = false); if (scope != widget.scope) load(); } }
   }
   Future<void> open(Map<String, dynamic> job) async {
+    SoundNotification.instance.acknowledge('job:${job["id"]}');
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => PartnerServiceJobScreen(api: api, ar: widget.ar, id: serviceId(job['id']), rate: rate)));
     if (mounted) { widget.onChanged?.call(); await load(); }
   }
@@ -167,6 +180,7 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
   }
   Future<void> run(Future<Map<String, dynamic>> Function() action) async {
     if (busy || stale) return;
+    SoundNotification.instance.acknowledge('job:${widget.id}');
     revision++; setState(() { busy = true; error = null; });
     try { final data = await action(); if (mounted) setState(() { job = data; stale = false; }); }
     catch (e) { if (mounted) setState(() { error = '$e'; stale = true; }); }
@@ -176,10 +190,12 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
   void dispose() { timer?.cancel(); WidgetsBinding.instance.removeObserver(this); super.dispose(); }
   Future<bool> confirm(String text) async => await showGoDialog<bool>(context: context, builder: (c) => AlertDialog(title: Text(t('تأكيد', 'Confirm')), content: Text(text), actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('رجوع', 'Back'))), FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(t('تأكيد', 'Confirm')))])) ?? false;
   Future<void> quote() async {
+    SoundNotification.instance.acknowledge('job:${widget.id}');
     final data = await showGoDialog<Map<String, dynamic>>(context: context, builder: (_) => PartnerQuoteForm(ar: widget.ar, rate: job?['account_commission_rate']?.toString() ?? widget.rate));
     if (data != null && mounted) await run(() => widget.api.quote(widget.id, data));
   }
   Future<void> state(String value) async {
+    SoundNotification.instance.acknowledge('job:${widget.id}');
     String? reason;
     String? cancellationFee;
     if (value == 'cancelled' && job?['status'] == 'booked') {

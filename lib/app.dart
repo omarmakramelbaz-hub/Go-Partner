@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'helpers/identity/partner_app_identity.dart';
-import 'helpers/networking/notification_helper.dart';
+import 'helpers/networking/notification_sound_interaction.dart';
 import 'helpers/pusher_service/pusher_controller.dart';
 import 'helpers/routes/app_routers_import.dart';
 import 'helpers/theme/style.dart';
@@ -47,10 +47,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (_) => AdminChatController()),
         ChangeNotifierProvider(create: (_) => PusherController()),
       ],
-      child: GestureDetector(
-        onTap: () {
-          SoundNotification.instance.stopSound();
-        },
+      child: NotificationSoundInteraction(
         child: MaterialApp(
           title: PartnerAppIdentity.displayName,
           localizationsDelegates: [...context.localizationDelegates, CountryLocalizations.delegate],

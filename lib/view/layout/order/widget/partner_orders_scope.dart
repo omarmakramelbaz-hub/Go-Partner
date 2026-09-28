@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 import '../../../../helpers/pusher_service/pusher_controller.dart';
+import '../../../../helpers/networking/sound_notification.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../controller/partner_orders_controller.dart';
 
@@ -25,7 +26,12 @@ class PartnerOrdersScope extends StatelessWidget {
         profile?.partnerProfessionKey != 'delivery_courier';
     return ChangeNotifierProvider(
       key: ValueKey('orders-${profile?.id}-$professional'),
-      create: (_) => PartnerOrdersController(isProfessional: professional),
+      create: (_) => PartnerOrdersController(
+        isProfessional: professional,
+        onIncomingOrder: (key) =>
+            SoundNotification.instance.playSound(key: key),
+        onOrderAction: SoundNotification.instance.acknowledge,
+      ),
       child: _OrderUpdates(child: child),
     );
   }
