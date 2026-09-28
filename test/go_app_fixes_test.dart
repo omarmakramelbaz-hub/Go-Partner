@@ -9,13 +9,13 @@ import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../lib/helpers/hive/hive_methods.dart';
-import '../lib/helpers/theme/app_theme_controller.dart';
-import '../lib/view/layout/auth/bottom_sheet/change_lang_bottom_sheet.dart';
-import '../lib/view/layout/my_account/controller/my_account_controller.dart';
-import '../lib/view/layout/my_account/model/setting_model.dart';
-import '../lib/view/layout/wallet/controller/wallet_controller.dart';
-import '../lib/view/layout/wallet/widget/chooseVCashOrVisaWidget.dart';
+import 'package:go_partner/helpers/hive/hive_methods.dart';
+import 'package:go_partner/helpers/theme/app_theme_controller.dart';
+import 'package:go_partner/view/layout/auth/bottom_sheet/change_lang_bottom_sheet.dart';
+import 'package:go_partner/view/layout/my_account/controller/my_account_controller.dart';
+import 'package:go_partner/view/layout/my_account/model/setting_model.dart';
+import 'package:go_partner/view/layout/wallet/controller/wallet_controller.dart';
+import 'package:go_partner/view/layout/wallet/widget/chooseVCashOrVisaWidget.dart';
 
 class PaymentSettings extends MyAccountController {
   @override
