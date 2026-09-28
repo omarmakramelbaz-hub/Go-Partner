@@ -740,7 +740,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
                     child: const Text('موافق'),
                   ),
                 ),
-              
+
         ])),
     );
   }
