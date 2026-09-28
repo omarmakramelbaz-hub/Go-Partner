@@ -75,7 +75,10 @@ Future<void> initNativeServices() async {
     ).timeout(const Duration(seconds: 8));
 
     FirebaseMessaging.onBackgroundMessage(onAppBackground);
-    NotificationHelper().initialize();
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: false, badge: false, sound: false,
+    );
+    await NotificationHelper().initialize();
   } catch (error, stackTrace) {
     // Startup must remain usable even if Firebase is temporarily unavailable.
     debugPrint('Native Firebase startup skipped: $error');
@@ -83,5 +86,15 @@ Future<void> initNativeServices() async {
   }
 }
 
-Future<void> onAppBackground(RemoteMessage message) async =>
-    SoundNotification.instance.playSound();
+@pragma('vm:entry-point')
+Future<void> onAppBackground(RemoteMessage message) async {
+  // FCM notification payloads are already presented by the operating system.
+  // A second player in Android's background isolate cannot be stopped by the
+  // foreground order button, so never start duplicate media playback here.
+  if (message.notification != null) return;
+  final helper = NotificationHelper();
+  await helper.initialize();
+  await helper.display(message);
+  await Future<void>.delayed(SoundNotification.duration);
+  await SoundNotification.instance.stopSound();
+}

@@ -1,6 +1,7 @@
 import '../../../../go_stores/store_shell.dart';
 import '../../../../helpers/networking/api_helper.dart';
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -46,6 +47,8 @@ class _DelegateBottomNavBarScreenState
   PusherController? _pusherController;
   FirebaseMessaging? _messaging;
   NotificationHelper? _notificationHelper;
+  StreamSubscription<RemoteMessage>? _messages;
+  StreamSubscription<RemoteMessage>? _openedMessages;
 
   @override
   void initState() {
@@ -70,7 +73,8 @@ class _DelegateBottomNavBarScreenState
         final orderNo = jsonData['order_id']['order_no']?.toString();
         log(jsonData.toString());
         if (status == 'pending') {
-          SoundNotification.instance.playLongSound();
+          final id = jsonData['order_id']['id'];
+          SoundNotification.instance.playSound(key: id == null ? null : 'delivery:$id');
           CommonMethods.showToast(
             message: '${AppLocaleKey.thereIsANewOrder.tr()} $orderNo',
           );
@@ -92,6 +96,9 @@ class _DelegateBottomNavBarScreenState
       'delegate.updated',
       _handleDelegateUpdated,
     );
+    _messages?.cancel();
+    _openedMessages?.cancel();
+    SoundNotification.instance.resetSession();
     super.dispose();
   }
 
@@ -216,7 +223,7 @@ class _DelegateBottomNavBarScreenState
     if (messaging == null) return;
 
     messaging.getInitialMessage().then((message) {
-      if (message != null) {
+      if (mounted && message != null) {
         log('${message.notification?.title}');
         log('${message.notification?.body}');
         log(message.data.toString());
@@ -224,13 +231,13 @@ class _DelegateBottomNavBarScreenState
         _onNotificationTaped(message);
       }
     });
-    FirebaseMessaging.onMessage.listen((message) {
+    _messages = FirebaseMessaging.onMessage.listen((message) {
       log('${message.notification?.title}');
       log('${message.notification?.body}');
       log(message.data.toString());
       _notificationHelper?.display(message);
     });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    _openedMessages = FirebaseMessaging.onMessageOpenedApp.listen((message) {
       SoundNotification.instance.stopSound();
       _onNotificationTaped(message);
     });

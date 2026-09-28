@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../helpers/networking/api_helper.dart';
+import '../../../../helpers/networking/sound_notification.dart';
 import '../../../../helpers/networking/urls.dart';
 import '../../../../helpers/routes/app_routers_import.dart';
 import '../../../../helpers/utils/common_methods.dart';
@@ -209,6 +210,7 @@ class DelegateOrdersController extends ChangeNotifier {
     required String status,
     required VoidCallback onSuccess,
   }) async {
+    SoundNotification.instance.acknowledge('delivery:$orderId');
     NavigatorMethods.loading();
 
     FormData body = FormData.fromMap({'status': status});
@@ -270,6 +272,7 @@ class DelegateOrdersController extends ChangeNotifier {
 
   //==================================================== complete order ============================================================
   Future<void> completeOrderDelegate({required int orderId, required VoidCallback onSuccess}) async {
+    SoundNotification.instance.acknowledge('delivery:$orderId');
     NavigatorMethods.loading();
     final response = await ApiHelper.instance.post('${Urls.compleatOrderDelegate}$orderId/completed');
     NavigatorMethods.loadingOff();
@@ -287,6 +290,7 @@ class DelegateOrdersController extends ChangeNotifier {
 
   //======================================================
   Future<void> receivedOrderDelegate({required int orderId, required VoidCallback onSuccess}) async {
+    SoundNotification.instance.acknowledge('delivery:$orderId');
     NavigatorMethods.loading();
 
     FormData body = FormData.fromMap({'status': 'shipped'});
@@ -303,6 +307,7 @@ class DelegateOrdersController extends ChangeNotifier {
 
   // =========================================== delegate transfer order price =================================
   Future<void> delegateTransferOrderPrice({required int orderId, required VoidCallback onSuccess}) async {
+    SoundNotification.instance.acknowledge('delivery:$orderId');
     NavigatorMethods.loading();
 
     final response = await ApiHelper.instance.post('${Urls.delegateTransferOrderPrice}$orderId/price');

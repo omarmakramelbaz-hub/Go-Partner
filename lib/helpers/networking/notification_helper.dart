@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -16,15 +14,19 @@ import '../../view/layout/wallet/screen/wallet_screen.dart';
 import '../routes/app_routers_import.dart';
 import '../utils/navigator_methods.dart';
 
-class NotificationHelper {
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+import 'sound_notification.dart';
+export 'sound_notification.dart';
 
-  void initialize() {
+class NotificationHelper {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> initialize() async {
     const InitializationSettings settings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(),
     );
-    _flutterLocalNotificationsPlugin.initialize(
+    await _flutterLocalNotificationsPlugin.initialize(
       settings,
       onDidReceiveNotificationResponse: (notificationResponse) {
         _handleNotificationTap(notificationResponse);
@@ -33,40 +35,38 @@ class NotificationHelper {
     );
   }
 
-  void display(RemoteMessage message) async {
+  Future<void> display(RemoteMessage message) async {
+    // Sound is independent of whether a visual notification can be displayed.
+    final data = message.data;
+    if (data['notification_sound'] == 'long' ||
+        incomingOrderSoundKey(data) != null) {
+      await SoundNotification.instance.playSound(
+        key:
+            incomingOrderSoundKey(data) ??
+            data['event_id']?.toString() ??
+            message.messageId,
+      );
+    }
     try {
       var android = const AndroidNotificationDetails(
-        'faskhaninja',
-        'faskhaninja chanel',
+        'go_partner_foreground_v2',
+        'GO Partner in-app notifications',
         importance: Importance.high,
         priority: Priority.high,
-        channelDescription: 'faskhaninja description',
+        channelDescription: 'GO Partner alerts while the app is open',
         colorized: true,
         color: Color(0xff469D8F),
         playSound: false, // تعطيل الصوت الافتراضي
       );
-      var iOS = const DarwinNotificationDetails();
+      var iOS = const DarwinNotificationDetails(presentSound: false);
       var platform = NotificationDetails(android: android, iOS: iOS);
-      _flutterLocalNotificationsPlugin.show(
+      await _flutterLocalNotificationsPlugin.show(
         0,
-        message.notification!.title,
-        message.notification!.body,
+        message.notification?.title ?? data['title']?.toString(),
+        message.notification?.body ?? data['text']?.toString(),
         platform,
         payload: json.encode(message.data),
       );
-
-      if (message.data['notification_sound'] == 'long') {
-        switch (message.data['notificationType'].toString()) {
-          case '1':
-            SoundNotification.instance.playLongSound();
-            break;
-          case '10':
-            SoundNotification.instance.playLongSound();
-            break;
-          default:
-            SoundNotification.instance.playSound();
-        }
-      }
     } catch (e) {
       log(e.toString());
     }
@@ -83,39 +83,12 @@ void _handleNotificationTap(NotificationResponse notificationResponse) {
   }
 }
 
-class SoundNotification {
-  static SoundNotification? _instance;
-
-  SoundNotification._();
-
-  static SoundNotification get instance {
-    _instance ??= SoundNotification._();
-
-    return _instance!;
-  }
-
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
-  void playSound() {
-    _audioPlayer.play(AssetSource('sound/lastSound.mp3'));
-  }
-
-  void playLongSound() {
-    _audioPlayer.setReleaseMode(ReleaseMode.loop);
-
-    _audioPlayer.play(AssetSource('sound/lastSound.mp3'));
-    Timer(const Duration(minutes: 1), () {
-      stopSound();
-    });
-  }
-
-  void stopSound() {
-    _audioPlayer.stop();
-  }
-}
-
 void _navigateToScreenIfNotCurrent(String routeName, {Object? arguments}) {
-  NavigatorMethods.pushNamed(AppRouters.navigatorKey.currentContext!, routeName, arguments: arguments);
+  NavigatorMethods.pushNamed(
+    AppRouters.navigatorKey.currentContext!,
+    routeName,
+    arguments: arguments,
+  );
   log('Navigating to From Helper $routeName');
 }
 
@@ -130,7 +103,10 @@ void _onNotificationTapedDelegate(RemoteMessage message) {
     case '1':
       _navigateToScreenIfNotCurrent(
         OrderDetailsDelegateScreen.routeName,
-        arguments: OrderDetailsDelegateScreenArgs(fromHome: false, orderId: int.parse(data.orderId.toString())),
+        arguments: OrderDetailsDelegateScreenArgs(
+          fromHome: false,
+          orderId: int.parse(data.orderId.toString()),
+        ),
       );
       break;
     case '3':

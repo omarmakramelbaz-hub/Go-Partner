@@ -17,9 +17,14 @@ class PartnerOrdersController extends ChangeNotifier {
   PartnerOrdersController({
     required this.isProfessional,
     PartnerOrdersRepository? repository,
+    this.onIncomingOrder,
+    this.onOrderAction,
   }) : _repository = repository ?? PartnerOrdersRepository();
 
   final bool isProfessional;
+  final void Function(String key)? onIncomingOrder;
+  final void Function(String key)? onOrderAction;
+  final Map<PartnerOrderFeed, Set<String>> _knownIncoming = {};
   final PartnerOrdersRepository _repository;
   final Map<PartnerOrderFeed, PartnerOrderPage> _pages = {};
   final Map<PartnerOrderFeed, int> _loadedPages = {};
@@ -63,10 +68,10 @@ class PartnerOrdersController extends ChangeNotifier {
     PartnerOrderFeed.deliveryNew,
     PartnerOrderFeed.services,
   ]).where((order) => order.isActive).toList();
-  List<PartnerOrder> get incoming => _items([
-    PartnerOrderFeed.deliveryNew,
-    PartnerOrderFeed.services,
-  ]).where((order) => order.isNew).toList();
+  List<PartnerOrder> get incoming =>
+      _items([PartnerOrderFeed.deliveryNew, PartnerOrderFeed.services])
+          .where((order) => order.isNew)
+          .toList();
   List<PartnerOrder> get history => _items([
     PartnerOrderFeed.deliveryHistory,
     PartnerOrderFeed.serviceHistory,
@@ -120,6 +125,21 @@ class PartnerOrdersController extends ChangeNotifier {
             ], nextPage: result.nextPage)
           : result;
       errors.remove(feed);
+      if (feed == PartnerOrderFeed.deliveryNew ||
+          feed == PartnerOrderFeed.services) {
+        final incoming = _pages[feed]!.items
+            .where((item) => item.isNew)
+            .map((item) => item.key)
+            .toSet();
+        final previous = _knownIncoming[feed];
+        _knownIncoming[feed] = incoming;
+        // First load is a baseline; repeated polling is silent for old orders.
+        if (previous != null && _liveUpdatesEnabled) {
+          for (final key in incoming.difference(previous)) {
+            onIncomingOrder?.call(key);
+          }
+        }
+      }
     } catch (e) {
       if (_disposed) return;
       errors[feed] = e is PartnerOrdersException ? e.message : null;
@@ -204,10 +224,16 @@ class PartnerOrdersController extends ChangeNotifier {
   }
 
   Future<bool> submitOffer(PartnerOrder order, num price) async {
-    if (_disposed || _busy.isNotEmpty || loading || stale(order) ||
-        !order.isDelivery || !order.isNew || price <= 0) {
+    if (_disposed ||
+        _busy.isNotEmpty ||
+        loading ||
+        stale(order) ||
+        !order.isDelivery ||
+        !order.isNew ||
+        price <= 0) {
       return false;
     }
+    onOrderAction?.call(order.key);
     _busy.add(order.key);
     _notify();
     try {
@@ -222,10 +248,16 @@ class PartnerOrdersController extends ChangeNotifier {
   }
 
   Future<bool> reviseOffer(PartnerOrder order, num price) async {
-    if (_disposed || _busy.isNotEmpty || loading || stale(order) ||
-        !order.isDelivery || !order.isActive || price <= 0) {
+    if (_disposed ||
+        _busy.isNotEmpty ||
+        loading ||
+        stale(order) ||
+        !order.isDelivery ||
+        !order.isActive ||
+        price <= 0) {
       return false;
     }
+    onOrderAction?.call(order.key);
     _busy.add(order.key);
     _notify();
     try {
@@ -251,6 +283,7 @@ class PartnerOrdersController extends ChangeNotifier {
         !order.allows(action)) {
       return false;
     }
+    onOrderAction?.call(order.key);
     _busy.add(order.key);
     _notify();
     try {
