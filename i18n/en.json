@@ -182,5 +182,15 @@
   "yourAccountIsCurrentlySuspended": "Your account is now suspended. The wallet must be charged with a minimum of {} EGP in order to activate the account and receive requests.",
   "theMaximumTransferIs5000EGP": "The maximum transfer is 5000 EGP.",
   "changePhoneNumber": "Change Phone Number",
-  "delegateSubscriptionFee": "Delegate Subscription Fee"
+  "delegateSubscriptionFee": "Delegate Subscription Fee",
+  "walletGoCustomer": "GO user wallet",
+  "walletGoPartner": "GO partner wallet",
+  "walletFasakhanstaCustomer": "Fasakhansta user wallet",
+  "recipientWallet": "Recipient wallet",
+  "chooseRecipientWallet": "Choose the recipient wallet first",
+  "walletTransferUnavailable": "Could not confirm the selected wallet. Update the app and try again.",
+  "reviewWalletTransfer": "Review transfer",
+  "walletRecipientName": "Recipient name",
+  "walletTransferAmount": "Amount",
+  "walletTransferFailed": "Could not confirm the transfer result. Retry with the same confirmation."
 }

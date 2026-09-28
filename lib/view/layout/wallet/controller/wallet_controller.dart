@@ -6,6 +6,9 @@ import '../../../../helpers/networking/urls.dart';
 import '../../../../helpers/utils/common_methods.dart';
 import '../../../../helpers/utils/navigator_methods.dart';
 import '../model/wallet_model.dart';
+import '../model/wallet_transfer.dart';
+
+import 'package:easy_localization/easy_localization.dart';
 
 class WalletController extends ChangeNotifier {
   void initialWallet() {
@@ -14,7 +17,10 @@ class WalletController extends ChangeNotifier {
     notifyListeners();
   }
 
-  ApiResponse _walletResponse = ApiResponse(state: ResponseState.sleep, data: null);
+  ApiResponse _walletResponse = ApiResponse(
+    state: ResponseState.sleep,
+    data: null,
+  );
   ApiResponse get walletResponse => _walletResponse;
   WalletModel? _wallet;
   WalletModel? get wallet => _wallet;
@@ -35,7 +41,9 @@ class WalletController extends ChangeNotifier {
     if (_disposed) return;
     try {
       if (response.state == ResponseState.complete) {
-        _wallet = WalletModel.fromJson(Map<String, dynamic>.from(response.data['data']));
+        _wallet = WalletModel.fromJson(
+          Map<String, dynamic>.from(response.data['data']),
+        );
       }
       _walletResponse = response;
     } catch (_) {
@@ -52,95 +60,144 @@ class WalletController extends ChangeNotifier {
   }
 
   //=============>  charging wallet  <================
-  Future<void> chargingWallet({required dynamic amount, required Function(String paymentUrl) onSuccess}) async {
+  Future<void> chargingWallet({
+    required dynamic amount,
+    required Function(String paymentUrl) onSuccess,
+  }) async {
     NavigatorMethods.loading();
     try {
       // Apple Pay / Google Pay are visible as distinct UX choices now. Until
       // Paymob activates dedicated integration IDs, route them through the
       // existing online checkout instead of sending unsupported method names.
       final String? gatewayPaymentMethod =
-          (_selectedPayment == 'apple_pay' || _selectedPayment == 'google_pay') ? 'online' : _selectedPayment;
-      final FormData body = FormData.fromMap({'amount': amount, 'payment_method': gatewayPaymentMethod});
-      final response = await ApiHelper.instance.post(Urls.chargingWallet, body: body);
+          (_selectedPayment == 'apple_pay' || _selectedPayment == 'google_pay')
+          ? 'online'
+          : _selectedPayment;
+      final FormData body = FormData.fromMap({
+        'amount': amount,
+        'payment_method': gatewayPaymentMethod,
+      });
+      final response = await ApiHelper.instance.post(
+        Urls.chargingWallet,
+        body: body,
+      );
 
       if (response.state == ResponseState.complete) {
         final dynamic payload = response.data;
         final dynamic data = payload is Map ? payload['data'] : null;
-        final String link = data is Map ? (data['link']?.toString().trim() ?? '') : '';
+        final String link = data is Map
+            ? (data['link']?.toString().trim() ?? '')
+            : '';
         final Uri? uri = link.isEmpty ? null : Uri.tryParse(link);
         final bool validLink =
-            uri != null && uri.hasScheme && (uri.scheme.toLowerCase() == 'http' || uri.scheme.toLowerCase() == 'https');
+            uri != null &&
+            uri.hasScheme &&
+            (uri.scheme.toLowerCase() == 'http' ||
+                uri.scheme.toLowerCase() == 'https');
 
         if (!validLink) {
-          final String serverMessage = payload is Map ? (payload['message']?.toString().trim() ?? '') : '';
+          final String serverMessage = payload is Map
+              ? (payload['message']?.toString().trim() ?? '')
+              : '';
           CommonMethods.showError(
-            message: serverMessage.isNotEmpty ? serverMessage : 'تعذر إنشاء رابط الدفع. حاول مرة أخرى.',
+            message: serverMessage.isNotEmpty
+                ? serverMessage
+                : 'تعذر إنشاء رابط الدفع. حاول مرة أخرى.',
           );
           return;
         }
 
-        final String serverMessage = payload is Map ? (payload['message']?.toString().trim() ?? '') : '';
+        final String serverMessage = payload is Map
+            ? (payload['message']?.toString().trim() ?? '')
+            : '';
         if (serverMessage.isNotEmpty) {
           CommonMethods.showToast(message: serverMessage);
         }
         onSuccess.call(link);
       } else {
         final dynamic payload = response.data;
-        final String serverMessage = payload is Map ? (payload['message']?.toString().trim() ?? '') : '';
+        final String serverMessage = payload is Map
+            ? (payload['message']?.toString().trim() ?? '')
+            : '';
         CommonMethods.showError(
-          message: serverMessage.isNotEmpty ? serverMessage : 'تعذر بدء عملية الشحن. حاول مرة أخرى.',
+          message: serverMessage.isNotEmpty
+              ? serverMessage
+              : 'تعذر بدء عملية الشحن. حاول مرة أخرى.',
           apiResponse: response,
         );
       }
     } catch (_) {
-      CommonMethods.showError(message: 'حدث خطأ أثناء بدء عملية الشحن. حاول مرة أخرى.');
+      CommonMethods.showError(
+        message: 'حدث خطأ أثناء بدء عملية الشحن. حاول مرة أخرى.',
+      );
     } finally {
       NavigatorMethods.loadingOff();
     }
   }
 
   //=============> Mony transfer  <================
-  Future<void> checkMonyTransfer({
+  Future<WalletTransferPreview?> checkMonyTransfer({
     required String mobile,
     required num amount,
-    required String accountType,
-    required VoidCallback onSuccess,
+    required TransferWallet wallet,
   }) async {
-    NavigatorMethods.loading();
-    FormData body = FormData.fromMap({'mobile': mobile, 'amount': amount, 'account_type': accountType});
-    final response = await ApiHelper.instance.post(Urls.checkMonyTransfer, body: body);
-    //  NavigatorMethods.loadingOff();
+    final response = await ApiHelper.instance.post(
+      Urls.checkMonyTransfer,
+      body: FormData.fromMap({
+        'mobile': mobile,
+        'amount': amount,
+        'target_wallet': wallet.value,
+      }),
+    );
     if (response.state == ResponseState.complete) {
-      onSuccess.call();
-      //  CommonMethods.showToast(message: response.data['message']);
-    } else {
-      NavigatorMethods.loadingOff();
-      CommonMethods.showError(message: response.data['message'], apiResponse: response);
+      try {
+        return WalletTransferPreview.fromJson(
+          Map<String, dynamic>.from(response.data['data']),
+          wallet: wallet,
+          mobile: mobile,
+          amount: amount,
+        );
+      } catch (_) {
+        CommonMethods.showError(message: 'walletTransferUnavailable'.tr());
+        return null;
+      }
     }
+    CommonMethods.showError(
+      message: response.data is Map && response.data['message'] is String
+          ? response.data['message'] as String
+          : 'walletTransferFailed'.tr(),
+      apiResponse: response,
+    );
+    return null;
   }
 
-  Future<void> chargingMonyTransfer({
-    required String mobile,
-    required num amount,
-    required String accountType,
-    required VoidCallback onSuccess,
-  }) async {
-    //  NavigatorMethods.loading();
-    FormData body = FormData.fromMap({'mobile': mobile, 'amount': amount, 'account_type': accountType});
-    final response = await ApiHelper.instance.post(Urls.transferWallet, body: body);
-    NavigatorMethods.loadingOff();
+  // null means an uncertain network result: retain the confirmation for a safe retry.
+  Future<bool?> chargingMonyTransfer(WalletTransferPreview preview) async {
+    final response = await ApiHelper.instance.post(
+      Urls.transferWallet,
+      body: FormData.fromMap(preview.payload),
+    );
     if (response.state == ResponseState.complete) {
-      // CommonMethods.showToast(message: response.data['message']);
-      onSuccess.call();
-    } else {
-      CommonMethods.showError(message: response.data['message'], apiResponse: response);
+      CommonMethods.showToast(message: response.data['message']);
+      return true;
     }
+    CommonMethods.showError(
+      message: response.data is Map && response.data['message'] is String
+          ? response.data['message'] as String
+          : 'walletTransferFailed'.tr(),
+      apiResponse: response,
+    );
+    return response.data is Map && response.data['transfer_rejected'] == true
+        ? false
+        : null;
   }
 
   //==============================================================================
 
   Future<void> getRedirect() async {
-    await ApiHelper.instance.get('https://fasakhaninja.com/api/pament/callback');
+    await ApiHelper.instance.get(
+      'https://fasakhaninja.com/api/pament/callback',
+    );
     notifyListeners();
   }
 }
