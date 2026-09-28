@@ -104,7 +104,14 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('English'), findsOneWidget);
         expect(find.text('العربية'), findsOneWidget);
-        await tester.tap(find.text(next == 'en' ? 'English' : 'العربية'));
+        // Locale changes persist to the real Hive file; perform the tap and
+        // await the write outside Flutter's fake async clock.
+        await tester.runAsync(() async {
+          final changed = Hive.box('app').watch(key: 'lang').first;
+          await tester.tap(find.text(next == 'en' ? 'English' : 'العربية'));
+          await changed.timeout(const Duration(seconds: 10));
+          await Hive.box('app').flush();
+        });
         await tester.pumpAndSettle();
         expect(HiveMethods.getLang(), next);
         expect(
