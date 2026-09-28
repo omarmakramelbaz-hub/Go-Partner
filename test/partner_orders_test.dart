@@ -11,6 +11,18 @@ import 'package:go_partner/view/layout/order/service/partner_orders_repository.d
 import 'support/partner_orders_fixtures.dart';
 
 void main() {
+  test('unpaid courier cannot start or complete until server confirmation', () {
+    final order = deliveryOrder(1, 'accepted');
+    order.delivery!.paymentRequired = true;
+    expect(order.allows(PartnerOrderAction.pickup), isFalse);
+    expect(order.statusLabel(false), 'Awaiting verified payment');
+    order.delivery!.paymentRequired = false;
+    expect(order.allows(PartnerOrderAction.pickup), isTrue);
+    order.delivery!.status = 'shipped';
+    order.delivery!.paymentRequired = true;
+    expect(order.allows(PartnerOrderAction.complete), isFalse);
+  });
+
   test(
     'courier inbox combines both sources without colliding IDs or hiding older active orders',
     () async {

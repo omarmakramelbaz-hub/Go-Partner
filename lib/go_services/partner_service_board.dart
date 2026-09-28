@@ -239,7 +239,7 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
           if (status == 'cancelled' && data['cancellation'] is Map && (data['cancellation'] as Map)['charged_to'] != null) ptext((data['cancellation'] as Map)['charged_to'] == 'partner' ? t('أنت ألغيت الطلب؛ خدمة التطبيق محسوبة عليك.', 'You cancelled the job; you bear the app service fee.') : t('العميل ألغى الطلب وتحمل خدمة التطبيق؛ تم رد العمولة لمحفظتك.', 'The customer cancelled and bears the app service fee; your commission was refunded.')),
           if (data['payment_status'] == 'unpaid') ptext(t('انتظر تأكيد دفع العميل قبل بدء العمل.', 'Wait for verified customer payment before starting.')),
         ])),
-        if (selected && status == 'booked' && ['cash_due', 'held'].contains(data['payment_status'])) button(t('بدء الشغل', 'Start work'), () => state('in_progress')),
+        if (selected && status == 'booked' && ['cash_due', 'held', 'paid'].contains(data['payment_status'])) button(t('بدء الشغل', 'Start work'), () => state('in_progress')),
         if (selected && status == 'in_progress') button(t('أنهيت الشغل — اطلب تأكيد العميل', 'Finished — request customer confirmation'), () => state('awaiting_confirmation')),
         if (selected && status == 'awaiting_confirmation') ptext(t('في انتظار العميل. لا يمكنك إنهاء الطلب نيابة عنه.', 'Waiting for the customer. You cannot confirm completion on their behalf.')),
         if (selected && status == 'booked') OutlinedButton(onPressed: busy || stale ? null : () => state('cancelled'), child: Text(t('إلغاء وتحمل خدمة التطبيق', 'Cancel and bear the app fee'))),
