@@ -10,8 +10,8 @@ class HiveMethods {
     return _box.get('lang', defaultValue: 'ar');
   }
 
-  static void updateLang(Locale locale) {
-    _box.put('lang', locale.languageCode);
+  static Future<void> updateLang(Locale locale) async {
+    await _box.put('lang', locale.languageCode);
   }
 
   static String? getToken() {

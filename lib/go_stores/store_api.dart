@@ -129,5 +129,6 @@ String storeKind(String? value, bool ar) =>
       'supermarket': ['سوبر ماركت', 'Supermarket'],
       'restaurant': ['مطعم', 'Restaurant'],
       'pharmacy': ['صيدلية', 'Pharmacy'],
+      'clinic': ['عيادات', 'Clinics'],
     }[value]?[ar ? 0 : 1] ??
     (ar ? 'متجر' : 'Store');

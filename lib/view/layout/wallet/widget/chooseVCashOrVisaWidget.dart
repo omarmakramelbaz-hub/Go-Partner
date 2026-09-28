@@ -18,43 +18,25 @@ class ChooseVCashOrVisaWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final methods = <Widget>[];
+    final ar = context.locale.languageCode == 'ar';
+    final liveSettings = context.watch<MyAccountController>();
+    final settings = liveSettings.setting ?? myAccountController.setting;
 
-    if (myAccountController.setting?.walletCardActivate == 'true') {
+    if (settings?.walletCardActivate == 'true') {
       methods.add(PaymentMethodWidget(
         icon: AppImages.digitalWallet,
-        label: 'محفظة إلكترونية',
-        subtitle: 'Vodafone Cash والمحافظ الإلكترونية',
+        label: ar ? 'محافظ إلكترونية' : 'Electronic wallets',
+        subtitle: ar ? 'فودافون كاش وجميع المحافظ الإلكترونية' : 'Vodafone Cash and other electronic wallets',
         selectedPayment: 'v_cash',
         isSvg: false,
       ));
     }
-    if (myAccountController.setting?.paymentCardActivate == 'true') {
+    if (settings?.paymentCardActivate == 'true') {
       methods.add(PaymentMethodWidget(
         icon: AppImages.visaIcon,
-        label: AppLocaleKey.creditCard.tr(),
+        label: ar ? 'بطاقات بنكية' : 'Bank cards',
         subtitle: 'Visa / Mastercard',
         selectedPayment: 'online',
-      ));
-    }
-
-    // Apple Pay and Google Pay are intentionally presented as separate choices.
-    // Until Paymob provides/activates their dedicated integration IDs, both use
-    // the existing online checkout route so no unverified gateway identifiers
-    // are hard-coded in the app.
-    if (myAccountController.setting?.paymentCardActivate == 'true') {
-      methods.add(const PaymentMethodWidget(
-        icon: '',
-        label: 'Apple Pay',
-        subtitle: 'الدفع السريع والآمن',
-        selectedPayment: 'apple_pay',
-        fallbackIcon: Icons.apple,
-      ));
-      methods.add(const PaymentMethodWidget(
-        icon: '',
-        label: 'Google Pay',
-        subtitle: 'الدفع باستخدام Google Pay',
-        selectedPayment: 'google_pay',
-        fallbackIcon: Icons.account_balance_wallet_outlined,
       ));
     }
 
