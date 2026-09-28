@@ -120,7 +120,7 @@ class WalletTransferSheetView extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          '🇪🇬 +20',
+                          '+20',
                           style: TextStyle(
                             color: GoDesign.ink,
                             fontSize: 14,
