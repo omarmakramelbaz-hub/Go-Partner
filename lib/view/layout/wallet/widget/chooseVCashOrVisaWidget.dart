@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -60,8 +61,6 @@ class ChooseVCashOrVisaWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('اختر طريقة الدفع', style: AppTextStyle.text16MS(context)),
-        const SizedBox(height: 12),
         for (var i = 0; i < methods.length; i++) ...[
           methods[i],
           if (i != methods.length - 1) const SizedBox(height: 12),
@@ -104,72 +103,7 @@ class PaymentMethodWidget extends StatelessWidget {
           : Image.asset(icon, height: 27, width: 27, fit: BoxFit.contain);
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => walletController.setSelectedPayment(selectedPayment),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: isSelected ? mainColor.withOpacity(.07) : AppColor.whiteColor(context),
-            border: Border.all(
-              color: isSelected ? mainColor : AppColor.borderColor(context),
-              width: isSelected ? 1.5 : 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(13),
-                  color: isSelected ? mainColor.withOpacity(.12) : AppColor.greyColor(context).withOpacity(.08),
-                ),
-                alignment: Alignment.center,
-                child: leading,
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label, style: AppTextStyle.text16MS(context)),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle!,
-                        style: TextStyle(fontSize: 12, color: AppColor.greyColor(context)),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                height: 22,
-                width: 22,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    width: 1.5,
-                    color: isSelected ? mainColor : AppColor.borderColor(context),
-                  ),
-                ),
-                child: isSelected
-                    ? DecoratedBox(
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: mainColor),
-                      )
-                    : null,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return GoPopupChoice(label: label, subtitle: subtitle, leading: leading,
+      selected: isSelected, onTap: () => walletController.setSelectedPayment(selectedPayment));
   }
 }

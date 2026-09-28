@@ -53,9 +53,17 @@ ThemeData appThemeData(BuildContext context) {
       ),
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: Colors.white,
-      elevation: 18,
+      backgroundColor: GoDesign.paper, surfaceTintColor: Colors.transparent, elevation: 0,
+      barrierColor: const Color(0x990E1219), constraints: const BoxConstraints(minWidth: 320, maxWidth: 440),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(GoDesign.dialogRadius)),
+      titleTextStyle: TextStyle(fontFamily: context.fontFamily(), color: GoDesign.ink, fontSize: 21, fontWeight: FontWeight.w800, height: 1.4),
+      contentTextStyle: TextStyle(fontFamily: context.fontFamily(), color: GoDesign.authMuted, fontSize: 15, height: 1.6),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: GoDesign.paper, surfaceTintColor: Colors.transparent, elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      textStyle: TextStyle(fontFamily: context.fontFamily(), color: GoDesign.ink, fontSize: 14),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

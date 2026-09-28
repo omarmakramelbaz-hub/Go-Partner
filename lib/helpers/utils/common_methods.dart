@@ -1,7 +1,7 @@
+import '../../view/custom_widgets/popups/go_popups.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,104 +24,24 @@ import 'navigator_methods.dart';
 
 class CommonMethods {
   static void showAlertDialog({String? title, required String message}) {
-    showCupertinoDialog(
-      context: AppRouters.navigatorKey.currentContext!,
-      builder: (context) => CupertinoAlertDialog(
-        title: title != null
-            ? Text(
-                title,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: context.fontFamily(),
-                ),
-              )
-            : null,
-        content: Text(
-          message,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            fontFamily: context.fontFamily(),
-          ),
-        ),
-        actions: <Widget>[
-          CupertinoDialogAction(
-            child: Text(
-              tr(AppLocaleKey.ok),
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                fontFamily: context.fontFamily(),
-              ),
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    );
+    showGoDialog(context: AppRouters.navigatorKey.currentContext!, barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: title == null ? null : Text(title),
+        content: Text(message),
+        actions: [FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text('ok'.tr()))],
+      ));
   }
 
-  static void showChooseDialog(
-    BuildContext context, {
-    String? title,
-    required String message,
-    required VoidCallback onPressed,
-  }) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: title != null
-            ? Text(
-                title,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: context.fontFamily(),
-                ),
-              )
-            : null,
-        content: Text(
-          message,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            fontFamily: context.fontFamily(),
-          ),
-        ),
+  static void showChooseDialog(BuildContext context, {String? title, required String message, required VoidCallback onPressed}) {
+    showGoDialog(context: context, barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: title == null ? null : Text(title),
+        content: Text(message),
         actions: [
-          CupertinoDialogAction(
-            child: Text(
-              tr(AppLocaleKey.no),
-              style: TextStyle(
-                color: AppColor.darkTextColor(context),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                fontFamily: context.fontFamily(),
-              ),
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          CupertinoDialogAction(
-            onPressed: onPressed,
-            child: Text(
-              tr(AppLocaleKey.yes),
-              style: TextStyle(
-                color: AppColor.darkTextColor(context),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                fontFamily: context.fontFamily(),
-              ),
-            ),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('no'.tr())),
+          FilledButton(onPressed: onPressed, child: Text('yes'.tr())),
         ],
-      ),
-    );
+      ));
   }
 
   static void showToast({
@@ -198,74 +118,20 @@ class CommonMethods {
   ].map((e) => CustomSelectItem(value: int.tryParse(e['id'].toString()), name: e['value']?.toString() ?? '')).toList();
 
   static void changeLanguage(BuildContext context, {required VoidCallback onTap}) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          tr(AppLocaleKey.language),
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            fontFamily: context.fontFamily(),
-          ),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            isDefaultAction: true,
-            onPressed: () {
-              HiveMethods.updateLang(const Locale('ar'));
-              context.setLocale(const Locale('ar'));
-              onTap.call();
-              MyApp.setMyAppState(context);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'العربية',
-              style: TextStyle(
-                fontFamily: context.fontFamilyAr(),
-                color: context.locale == const Locale('ar')
-                    ? AppColor.mainAppColor(context)
-                    : AppColor.darkTextColor(context),
-              ),
-            ),
-          ),
-          CupertinoActionSheetAction(
-            isDefaultAction: true,
-            onPressed: () {
-              HiveMethods.updateLang(const Locale('en'));
-              context.setLocale(const Locale('en'));
-              onTap.call();
-              MyApp.setMyAppState(context);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'English',
-              style: TextStyle(
-                fontFamily: context.fontFamilyEn(),
-                color: context.locale == const Locale('en')
-                    ? AppColor.mainAppColor(context)
-                    : AppColor.darkTextColor(context),
-              ),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(
-            tr(AppLocaleKey.cancel),
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              fontFamily: context.fontFamily(),
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-    );
+    showGoModalBottomSheet<void>(context: context,
+      builder: (context) => GoSheet(title: tr(AppLocaleKey.language), icon: Icons.language_rounded,
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          for (final language in ['ar', 'en']) Padding(padding: const EdgeInsets.only(bottom: 10),
+            child: GoPopupChoice(label: language == 'ar' ? 'العربية' : 'English',
+              selected: context.locale.languageCode == language,
+              onTap: () {
+                HiveMethods.updateLang(Locale(language));
+                context.setLocale(Locale(language));
+                onTap.call();
+                MyApp.setMyAppState(context);
+                Navigator.pop(context);
+              })),
+        ])));
   }
 
   static bool endScroll(ScrollEndNotification t, VoidCallback onEnd) {
@@ -276,7 +142,7 @@ class CommonMethods {
   }
 
   static void showCompleteInfoDialog({required BuildContext context}) {
-    showDialog(
+    showGoDialog(
       useSafeArea: true,
       context: context,
       builder: (context) => StatefulBuilder(
