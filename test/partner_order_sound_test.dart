@@ -8,7 +8,7 @@ import 'package:go_partner/helpers/networking/notification_sound_interaction.dar
 import 'package:go_partner/helpers/networking/sound_notification.dart';
 import 'package:go_partner/view/layout/order/controller/partner_orders_controller.dart';
 import 'package:go_partner/view/layout/order/model/partner_order.dart';
-import 'package:go_partner/go_services/partner_service_board.dart';
+import '../lib/go_services/partner_service_board.dart';
 
 import 'support/partner_orders_fixtures.dart';
 import 'go_services_test.dart' as services;
