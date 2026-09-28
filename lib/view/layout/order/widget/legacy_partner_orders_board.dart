@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -532,7 +533,7 @@ class PartnerOrderCard extends StatelessWidget {
         ? _t(context, 'تم إرسال العرض الجديد للعميل', 'New offer sent to customer')
         : _t(context, 'تم إرسال عرض السعر للعميل', 'Price offer sent to customer');
     final failure = _t(context, 'تعذر إرسال عرض السعر', 'Could not send price offer');
-    final value = await showDialog<num>(
+    final value = await showGoDialog<num>(
       context: context,
       builder: (_) => PartnerPriceOfferDialog(
         initialPrice: order.delivery?.deliveryPrice?.toString() ?? '',
@@ -753,7 +754,7 @@ class PartnerOrderCard extends StatelessWidget {
       if (context.mounted) await controller.refresh();
       return;
     }
-    await showModalBottomSheet<void>(
+    await showGoModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

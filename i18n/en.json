@@ -192,5 +192,18 @@
   "reviewWalletTransfer": "Review transfer",
   "walletRecipientName": "Recipient name",
   "walletTransferAmount": "Amount",
-  "walletTransferFailed": "Could not confirm the transfer result. Retry with the same confirmation."
+  "walletTransferFailed": "Could not confirm the transfer result. Retry with the same confirmation.",
+  "walletTransferTitle": "Transfer money",
+  "walletTransferIntro": "Choose a wallet and enter the recipient details.",
+  "walletTransferClose": "Close",
+  "walletTransferPhone": "Recipient mobile number",
+  "walletTransferCurrency": "EGP",
+  "walletTransferLimit": "Maximum transfer: EGP 5,000",
+  "walletTransferReviewHint": "Check the recipient details before confirming",
+  "walletTransferConfirm": "Confirm transfer",
+  "walletTransferEdit": "Edit details",
+  "walletChargeIntro": "Add funds to your wallet in a few simple steps.",
+  "walletChargeMinimum": "Minimum top-up: EGP 50",
+  "walletChargeMethod": "Payment method",
+  "popupChoosePhoto": "Add a photo"
 }

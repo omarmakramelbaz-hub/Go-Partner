@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../go_store_signup/store_signup_draft.dart';
@@ -700,7 +701,7 @@ class _PartnerApplicationScreenState extends State<PartnerApplicationScreen> {
       'تعالج البيانات اللازمة لتشغيل الحساب وفق سياسة الخصوصية، ولا تعرض بيانات Vodafone Cash أو Instapay للعملاء.',
     ];
 
-    showModalBottomSheet<void>(
+    showGoModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

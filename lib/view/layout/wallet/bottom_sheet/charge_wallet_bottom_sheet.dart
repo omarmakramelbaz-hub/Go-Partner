@@ -8,22 +8,25 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/utils/common_methods.dart';
-import '../../../custom_widgets/buttons/custom_button.dart';
-import '../../../custom_widgets/custom_form_field/custom_form_field.dart';
 import '../../../custom_widgets/custom_payment_web_view/custom_payment_web_view.dart';
-import '../../../global/bottom_sheet/app_bottom_sheet.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../my_account/controller/my_account_controller.dart';
 import '../controller/wallet_controller.dart';
 import '../widget/chooseVCashOrVisaWidget.dart';
+import '../widget/wallet_charge_view.dart';
 
 class ChargeWalletBottomSheet extends StatefulWidget {
-  const ChargeWalletBottomSheet({super.key, required this.walletController, required this.myAccountController});
+  const ChargeWalletBottomSheet({
+    super.key,
+    required this.walletController,
+    required this.myAccountController,
+  });
   final WalletController walletController;
   final MyAccountController myAccountController;
 
   @override
-  State<ChargeWalletBottomSheet> createState() => _ChargeWalletBottomSheetState();
+  State<ChargeWalletBottomSheet> createState() =>
+      _ChargeWalletBottomSheetState();
 }
 
 class _ChargeWalletBottomSheetState extends State<ChargeWalletBottomSheet> {
@@ -35,8 +38,11 @@ class _ChargeWalletBottomSheetState extends State<ChargeWalletBottomSheet> {
     final uri = Uri.tryParse(link.trim());
     if (uri == null ||
         !uri.hasScheme ||
-        (uri.scheme.toLowerCase() != 'http' && uri.scheme.toLowerCase() != 'https')) {
-      CommonMethods.showError(message: 'تعذر فتح صفحة الدفع. رابط الدفع غير صالح.');
+        (uri.scheme.toLowerCase() != 'http' &&
+            uri.scheme.toLowerCase() != 'https')) {
+      CommonMethods.showError(
+        message: 'تعذر فتح صفحة الدفع. رابط الدفع غير صالح.',
+      );
       return;
     }
 
@@ -80,76 +86,41 @@ class _ChargeWalletBottomSheetState extends State<ChargeWalletBottomSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Form(
-              key: chargeWalletFormKey,
-              child: AppBottomSheet(
-                title: AppLocaleKey.walletCharging.tr(),
-                children: [
-                  CustomFormField(
-                    title: AppLocaleKey.chargeAmount.tr(),
-                    controller: chargeAmountEc,
-                    keyboardType: TextInputType.number,
-                    focusNode: chargeAmountFocusNode,
-                    onFieldSubmitted: (p0) {
-                      chargeAmountFocusNode.unfocus();
-                    },
-                    validator: (p0) {
-                      if (p0 == null || p0.isEmpty) {
-                        return AppLocaleKey.enterAmount.tr();
-                      } else if (p0.contains('.') ||
-                          p0.contains(',') ||
-                          p0.contains('-') ||
-                          p0.contains('+') ||
-                          p0.contains(' ') ||
-                          p0.contains('*') ||
-                          p0.contains('/')) {
-                        return AppLocaleKey.enterAmount.tr();
-                      } else if (double.tryParse(p0)! < 50) {
-                        return AppLocaleKey.minimumChargeAmount.tr().replaceAll('{}', '50');
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 21),
-                  ChooseVCashOrVisaWidget(myAccountController: widget.myAccountController),
-                  const SizedBox(height: 21),
-                  Builder(
-                    builder: (context) {
-                      return CustomButton(
-                        text: AppLocaleKey.payNow.tr(),
-                        onPressed: () {
-                          final valid = chargeWalletFormKey.currentState?.validate() ?? false;
-                          if (!valid) return;
-
-                          if (widget.walletController.selectedPayment == null) {
-                            CommonMethods.showError(message: AppLocaleKey.youMustChoosePaymentMethod.tr());
-                            return;
-                          }
-
-                          context.read<WalletController>().chargingWallet(
-                            amount: chargeAmountEc.text,
-                            onSuccess: (link) {
-                              _openPaymentPage(context, link);
-                            },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 30),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void dispose() {
+    chargeAmountEc.dispose();
+    chargeAmountFocusNode.dispose();
+    super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) => WalletChargeSheetView(
+    translate: (key) => key.tr(),
+    formKey: chargeWalletFormKey,
+    amountController: chargeAmountEc,
+    amountFocusNode: chargeAmountFocusNode,
+    validator: (value) {
+      if (value == null || value.isEmpty) return 'enterAmount'.tr();
+      final amount = num.tryParse(value);
+      if (amount == null || amount < 50)
+        return 'minimumChargeAmount'.tr().replaceAll('{}', '50');
+      return null;
+    },
+    paymentMethods: ChooseVCashOrVisaWidget(
+      myAccountController: widget.myAccountController,
+    ),
+    onPay: () {
+      final valid = chargeWalletFormKey.currentState?.validate() ?? false;
+      if (!valid) return;
+      if (widget.walletController.selectedPayment == null) {
+        CommonMethods.showError(
+          message: AppLocaleKey.youMustChoosePaymentMethod.tr(),
+        );
+        return;
+      }
+      context.read<WalletController>().chargingWallet(
+        amount: chargeAmountEc.text,
+        onSuccess: (link) => _openPaymentPage(context, link),
+      );
+    },
+  );
 }

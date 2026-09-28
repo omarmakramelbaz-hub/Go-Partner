@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,86 +19,12 @@ class ChangeLangBottomSheet extends StatefulWidget {
 
 class _MenuBottomSheetWidgetState extends State<ChangeLangBottomSheet> {
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      // height: MediaQuery.of(context).size.height * .320,
-      decoration: BoxDecoration(
-        color: AppColor.whiteColor(context),
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(36), topRight: Radius.circular(36)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 33, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(AppLocaleKey.changeLanguage.tr(), style: AppTextStyle.text16MS(context)),
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: Card(
-                    elevation: 10,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColor.whiteColor(context),
-                      child: SvgPicture.asset(AppImages.closeIcon),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Divider(thickness: 0.7, color: AppColor.greyColor(context)),
-            const SizedBox(height: 15),
-            CustomButton(
-              gradient: LinearGradient(
-                colors: [AppColor.gridOneButtonColor(context), AppColor.gridTwoButtonColor(context)],
-              ),
-              onPressed: () {
-                context.setLocale(const Locale('ar'));
-                HiveMethods.updateLang(const Locale('ar'));
-                Navigator.pop(context);
-              },
-              style: context.locale == const Locale('ar')
-                  ? AppTextStyle.text18BW(context)
-                  : AppTextStyle.text18BS(context),
-              color: context.locale == const Locale('ar')
-                  ? AppColor.mainAppColor(context)
-                  : AppColor.whiteColor(context),
-              borderColor: context.locale == const Locale('ar') ? null : AppColor.mainAppColor(context),
-              text: 'العربية',
-            ),
-            // const SizedBox(height: 15),
-            // CustomButton(
-            //   gradient: LinearGradient(
-            //     colors: [
-            //       AppColor.gridOneButtonColor(context),
-            //       AppColor.gridTwoButtonColor(context),
-            //     ],
-            //   ),
-            //   onPressed: () {
-            //     context.setLocale(const Locale("en"));
-            //     HiveMethods.updateLang(
-            //       const Locale("en"),
-            //     );
-            //     Navigator.pop(context);
-            //   },
-            //   style: context.locale == const Locale('en')
-            //       ? AppTextStyle.text18BW(context)
-            //       : AppTextStyle.text18BS(context),
-            //   color: context.locale == const Locale('en')
-            //       ? AppColor.mainAppColor(context)
-            //       : AppColor.whiteColor(context),
-            //   borderColor: context.locale == const Locale('en')
-            //       ? null
-            //       : AppColor.mainAppColor(context),
-            //   text: 'English',
-            // ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => GoSheet(title: AppLocaleKey.changeLanguage.tr(),
+    icon: Icons.language_rounded,
+    child: GoPopupChoice(label: 'العربية', subtitle: 'Arabic', selected: context.locale.languageCode == 'ar',
+      leading: const Text('AR'), onTap: () {
+        context.setLocale(const Locale('ar'));
+        HiveMethods.updateLang(const Locale('ar'));
+        Navigator.pop(context);
+      }));
 }

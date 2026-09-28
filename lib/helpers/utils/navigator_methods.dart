@@ -1,3 +1,4 @@
+import '../../view/custom_widgets/popups/go_popups.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
@@ -42,7 +43,7 @@ class NavigatorMethods {
   }
 
   static void showAppDialog(BuildContext context, Widget dialog, {bool willPop = true}) {
-    showDialog(
+    showGoDialog(
       context: context,
       barrierDismissible: willPop,
       builder: (context) {
@@ -58,7 +59,7 @@ class NavigatorMethods {
     bool? isScrollControlled,
     bool enableDrag = true,
   }) {
-    showModalBottomSheet(
+    showGoModalBottomSheet(
       backgroundColor: Colors.transparent,
       elevation: 0,
       isScrollControlled: isScrollControlled ?? false,

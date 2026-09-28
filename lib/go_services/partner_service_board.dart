@@ -1,3 +1,4 @@
+import '../view/custom_widgets/popups/go_popups.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -173,9 +174,9 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
   }
   @override
   void dispose() { timer?.cancel(); WidgetsBinding.instance.removeObserver(this); super.dispose(); }
-  Future<bool> confirm(String text) async => await showDialog<bool>(context: context, builder: (c) => AlertDialog(title: Text(t('تأكيد', 'Confirm')), content: Text(text), actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('رجوع', 'Back'))), FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(t('تأكيد', 'Confirm')))])) ?? false;
+  Future<bool> confirm(String text) async => await showGoDialog<bool>(context: context, builder: (c) => AlertDialog(title: Text(t('تأكيد', 'Confirm')), content: Text(text), actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('رجوع', 'Back'))), FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(t('تأكيد', 'Confirm')))])) ?? false;
   Future<void> quote() async {
-    final data = await showDialog<Map<String, dynamic>>(context: context, builder: (_) => PartnerQuoteForm(ar: widget.ar, rate: job?['account_commission_rate']?.toString() ?? widget.rate));
+    final data = await showGoDialog<Map<String, dynamic>>(context: context, builder: (_) => PartnerQuoteForm(ar: widget.ar, rate: job?['account_commission_rate']?.toString() ?? widget.rate));
     if (data != null && mounted) await run(() => widget.api.quote(widget.id, data));
   }
   Future<void> state(String value) async {
@@ -187,7 +188,7 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
       cancellationFee = policy['fee'].toString();
       if (!await confirm(t('الإلغاء بعد القبول يحمّلك خدمة التطبيق بنسبة ${policy['rate']}%، بقيمة $cancellationFee ج.م. العمولة المخصومة من محفظتك لن تُرد ولن تُخصم مرة ثانية. هل تؤكد الإلغاء؟', 'Cancelling after acceptance makes you responsible for the ${policy['rate']}% app service fee (EGP $cancellationFee). Your existing wallet debit will be retained, with no second charge. Confirm cancellation?'))) return;
     }
-    if (value == 'cancelled' || value == 'disputed') { reason = await showDialog<String>(context: context, builder: (_) => _ReasonForm(ar: widget.ar)); if (reason == null) return; }
+    if (value == 'cancelled' || value == 'disputed') { reason = await showGoDialog<String>(context: context, builder: (_) => _ReasonForm(ar: widget.ar)); if (reason == null) return; }
     else if (!await confirm(value == 'in_progress' ? t('تأكيد بدء تنفيذ نطاق العمل المتفق عليه؟', 'Start the agreed work?') : t('سيتم طلب تأكيد الإتمام من العميل. لا تُصرف الأموال قبل تأكيده.', 'The customer will be asked to confirm completion. Funds are not released before their confirmation.'))) return;
     if (mounted) await run(() => widget.api.status(widget.id, value, reason: reason, cancellationFee: cancellationFee));
   }
@@ -203,7 +204,7 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
         Text(serviceState(status?.toString(), widget.ar), style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
         ptext('${data['description'] ?? ''}'),
         if (data['scheduled_at'] != null) ptext(t('الموعد المطلوب: ${ptime(data['scheduled_at'])}', 'Requested time: ${ptime(data['scheduled_at'])}')),
-        if (data['photos'] is List && (data['photos'] as List).isNotEmpty) SizedBox(height: 160, child: ListView(scrollDirection: Axis.horizontal, children: [for (final photo in (data['photos'] as List).whereType<String>()) Padding(padding: const EdgeInsets.all(4), child: InkWell(onTap: () => showDialog<void>(context: context, builder: (_) => Dialog(child: InteractiveViewer(child: Image.network(photo, errorBuilder: (_, __, ___) => Text(t('حدّث الشغلانة لتحميل الصور.', 'Refresh the job to load photos.')))))), child: Image.network(photo, width: 160, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox(width: 160, child: Icon(Icons.broken_image_outlined)))))])),
+        if (data['photos'] is List && (data['photos'] as List).isNotEmpty) SizedBox(height: 160, child: ListView(scrollDirection: Axis.horizontal, children: [for (final photo in (data['photos'] as List).whereType<String>()) Padding(padding: const EdgeInsets.all(4), child: InkWell(onTap: () => showGoDialog<void>(context: context, builder: (_) => Dialog(child: InteractiveViewer(child: Image.network(photo, errorBuilder: (_, __, ___) => Text(t('حدّث الشغلانة لتحميل الصور.', 'Refresh the job to load photos.')))))), child: Image.network(photo, width: 160, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox(width: 160, child: Icon(Icons.broken_image_outlined)))))])),
         if (data['location'] is Map) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ptext('${(data['location'] as Map)['address'] ?? ''}'), if (selected && data['can_contact_customer'] == true && data['phone'] != null) ptext(t('رقم العميل: ${data['phone']}', 'Customer phone: ${data['phone']}')), TextButton(onPressed: () { final p = data['location'] as Map; launchUrl(Uri.https('www.google.com', '/maps', {'q': '${p['lat']},${p['lng']}'}), mode: LaunchMode.externalApplication); }, child: Text(t('افتح موقع التنفيذ', 'Open work location')))])) else ptext(t('العنوان التفصيلي يظهر بعد اختيار عرضك. رقم العميل يظهر بعد قبول عرضك وخصم العمولة.', 'The exact address appears after your quote is selected. Customer contact unlocks after acceptance and commission debit.')),
         if (caps?.enabled == true && serviceCanQuote(data)) button(t('إرسال عرض مصنعية', 'Send labour quote'), quote),
         for (final offer in serviceMaps(data['offers'])) pcard(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [

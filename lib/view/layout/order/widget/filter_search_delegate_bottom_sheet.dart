@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -24,39 +25,12 @@ class _FilterSearchDelegateBottomSheetState extends State<FilterSearchDelegateBo
   int? indexOrderStatus;
   final dateEc = TextEditingController();
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColor.whiteColor(context),
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(36), topRight: Radius.circular(36)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 33, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(AppLocaleKey.theFilter.tr(), style: AppTextStyle.text16BS(context)),
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  child: Card(
-                    elevation: 10,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColor.whiteColor(context),
-                      child: SvgPicture.asset(AppImages.closeIcon),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Divider(thickness: 1, color: AppColor.lightGreyColor(context)),
-            const SizedBox(height: 27),
+  void dispose() { dateEc.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) => GoSheet(title: AppLocaleKey.theFilter.tr(), icon: Icons.filter_list_rounded,
+    includeKeyboardInset: true,
+    child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Text(AppLocaleKey.orderStatus.tr(), style: AppTextStyle.text16MS(context)),
             const SizedBox(height: 17),
             Row(
@@ -146,9 +120,6 @@ class _FilterSearchDelegateBottomSheetState extends State<FilterSearchDelegateBo
               },
             ),
             const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
+
+    ]));
 }

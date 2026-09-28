@@ -1,3 +1,4 @@
+import '../../../custom_widgets/popups/go_popups.dart';
 import 'package:flutter/material.dart';
 import '../../../../helpers/networking/partner_email_auth.dart';
 import '../widget/partner_auth_scaffold.dart';
@@ -44,7 +45,7 @@ class _PartnerPasswordScreenState extends State<PartnerPasswordScreen> {
         confirmation: _confirm.text,
       );
       if (!mounted) return;
-      await showDialog<void>(
+      await showGoDialog<void>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),

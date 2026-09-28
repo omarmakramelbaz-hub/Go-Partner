@@ -21,7 +21,7 @@
 //       margin: const EdgeInsets.only(top: 20),
 //       decoration: BoxDecoration(
 //         color: isDark == true ? AppColor.blackColor(context) : AppColor.whiteColor(context),
-//         borderRadius: const BorderRadius.only(topLeft: Radius.circular(36), topRight: Radius.circular(36)),
+//         borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
 //         border: Border.all(color: showBorder == true ? AppColor.lightDarkColor(context) : AppColor.blackColor(context)),
 //       ),
 //       child: Padding(

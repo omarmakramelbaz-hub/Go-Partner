@@ -396,5 +396,18 @@
   "reviewWalletTransfer": "مراجعة التحويل",
   "walletRecipientName": "اسم المستلم",
   "walletTransferAmount": "المبلغ",
-  "walletTransferFailed": "تعذر التأكد من نتيجة التحويل. اضغط مجددًا لإعادة المحاولة بنفس بيانات التأكيد."
+  "walletTransferFailed": "تعذر التأكد من نتيجة التحويل. اضغط مجددًا لإعادة المحاولة بنفس بيانات التأكيد.",
+  "walletTransferTitle": "تحويل رصيد",
+  "walletTransferIntro": "اختر المحفظة وأدخل بيانات المستلم.",
+  "walletTransferClose": "إغلاق",
+  "walletTransferPhone": "رقم موبايل المستلم",
+  "walletTransferCurrency": "ج.م",
+  "walletTransferLimit": "الحد الأقصى للتحويل 5,000 ج.م",
+  "walletTransferReviewHint": "راجع بيانات المستلم قبل تأكيد التحويل",
+  "walletTransferConfirm": "تأكيد التحويل",
+  "walletTransferEdit": "تعديل البيانات",
+  "walletChargeIntro": "أضف رصيدًا لمحفظتك بخطوات بسيطة.",
+  "walletChargeMinimum": "الحد الأدنى للشحن 50 ج.م",
+  "walletChargeMethod": "طريقة الدفع",
+  "popupChoosePhoto": "إضافة صورة"
 }

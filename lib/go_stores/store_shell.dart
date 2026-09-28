@@ -1,3 +1,4 @@
+import '../view/custom_widgets/popups/go_popups.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +69,7 @@ class _StoreShellState extends State<StoreShell> {
               ListTile(
                 leading: const Icon(Icons.language),
                 title: Text(ar ? 'اللغة' : 'Language'),
-                onTap: () => showModalBottomSheet(
+                onTap: () => showGoModalBottomSheet(
                   context: context,
                   builder: (_) => const ChangeLangBottomSheet(),
                 ),
