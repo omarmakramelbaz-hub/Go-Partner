@@ -27,6 +27,7 @@ import 'package:go_partner/view/layout/order/screen/order_delegate_screen.dart';
 import 'package:go_partner/view/layout/wallet/controller/wallet_controller.dart';
 import 'package:go_partner/view/layout/wallet/model/wallet_model.dart';
 import 'package:go_partner/view/layout/wallet/screen/wallet_screen.dart';
+import 'package:go_partner/view/layout/wallet/bottom_sheet/charge_wallet_bottom_sheet.dart';
 import 'package:go_partner/view/layout/order/controller/partner_orders_controller.dart';
 import 'package:go_partner/view/layout/order/widget/partner_orders_board.dart';
 import 'package:go_partner/view/layout/order/screen/partner_orders_screen.dart';
@@ -100,6 +101,31 @@ class PreviewWallet extends WalletController {
     refreshes++;
     state = ResponseState.complete;
     notifyListeners();
+  }
+}
+
+class TopUpSettings extends MyAccountController {
+  SettingModel current = SettingModel(
+    walletCardActivate: 'true',
+    paymentCardActivate: 'true',
+  );
+  @override
+  SettingModel get setting => current;
+
+  void disableWallets() {
+    current = SettingModel(walletCardActivate: 'false', paymentCardActivate: 'true');
+    notifyListeners();
+  }
+}
+
+class TopUpWallet extends PreviewWallet {
+  final charges = <Map<String, String?>>[];
+  @override
+  Future<void> chargingWallet({
+    required dynamic amount,
+    required Function(String paymentUrl) onSuccess,
+  }) async {
+    charges.add({'amount': amount.toString(), 'payment_method': selectedPayment});
   }
 }
 
@@ -248,6 +274,65 @@ void main() {
   }
 
   for (final language in ['ar', 'en']) {
+    testWidgets('wallet modal uses page settings and submits both payment methods in $language', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final wallet = TopUpWallet();
+      final settings = TopUpSettings();
+      await tester.pumpWidget(harness(
+        page('Wallet', MultiProvider(
+          // These providers deliberately live below the navigator, as they
+          // do on the actual store owner's wallet page.
+          providers: [
+            ChangeNotifierProvider<WalletController>.value(value: wallet),
+            ChangeNotifierProvider<MyAccountController>.value(value: settings),
+          ],
+          child: const WalletContent(embedded: true),
+        )),
+        language: language,
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(ChargeWalletBottomSheet), findsOneWidget);
+      final electronic = find.text(language == 'ar' ? 'محافظ إلكترونية' : 'Electronic wallets');
+      final cards = find.text(language == 'ar' ? 'بطاقات بنكية' : 'Bank cards');
+      final amount = find.byKey(const ValueKey('wallet-charge-amount'));
+      final pay = find.byKey(const ValueKey('wallet-charge-pay'));
+      expect(electronic, findsOneWidget);
+      expect(cards, findsOneWidget);
+      expect(find.text('Apple Pay'), findsNothing);
+      expect(find.text('Google Pay'), findsNothing);
+      await tester.enterText(amount, '50');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.ensureVisible(electronic);
+      await tester.tap(electronic);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(pay);
+      await tester.tap(pay);
+      await tester.pumpAndSettle();
+      expect(wallet.charges, [{'amount': '50', 'payment_method': 'v_cash'}]);
+      await tester.ensureVisible(cards);
+      await tester.tap(cards);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(pay);
+      await tester.tap(pay);
+      await tester.pumpAndSettle();
+      expect(wallet.charges.last, {'amount': '50', 'payment_method': 'online'});
+      expect(wallet.charges.length, 2);
+      settings.disableWallets();
+      await tester.pumpAndSettle();
+      expect(electronic, findsNothing);
+      expect(cards, findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      wallet.dispose();
+      settings.dispose();
+    });
+
     for (final width in [320.0, 390.0]) {
       testWidgets('wallet balance and actions fit $language at $width', (tester) async {
         tester.view.physicalSize = Size(width, 844);

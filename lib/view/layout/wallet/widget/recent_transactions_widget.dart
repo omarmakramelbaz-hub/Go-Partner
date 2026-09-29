@@ -52,8 +52,12 @@ class RecentTransactionsWidget extends StatelessWidget {
         final isFromMe = context.read<AuthController>().profile?.id == transaction.fromUser;
         final isToMe = context.read<AuthController>().profile?.id == transaction.toUser;
         final isIncoming = isToMe || transaction.type == 'charging';
+        final opening = transaction.payment == 'opening_balance';
+        final ar = context.locale.languageCode == 'ar';
 
-        final description =
+        final description = opening
+            ? (ar ? 'رصيد بدء الحساب — يُضاف مرة واحدة' : 'Account opening credit — added once')
+            :
             "${AppLocaleKey.theAmountIs.tr().replaceAll('{}', buildTransaction(transaction: transaction.type ?? ''))} "
             "${AppLocaleKey.pound.tr().replaceAll('{}', transaction.amount.toString())} "
             "${AppLocaleKey.paymentTypeIs.tr().replaceAll('{}', buildPaymentType(paymentType: transaction.payment ?? ''))} "
@@ -80,7 +84,9 @@ class RecentTransactionsWidget extends StatelessWidget {
                   color: isIncoming ? const Color(0xffEAF8F2) : const Color(0xffFFF0E3),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: transaction.payment == 'visa'
+                child: opening
+                    ? const Icon(Icons.card_giftcard_rounded, color: Color(0xff16A36A))
+                    : transaction.payment == 'visa'
                     ? SvgPicture.asset(AppImages.visaIcon)
                     : transaction.payment == 'wallet'
                         ? CustomImage(
@@ -99,7 +105,7 @@ class RecentTransactionsWidget extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            buildTransaction(transaction: transaction.type ?? ''),
+                            opening ? (ar ? 'رصيد افتتاحي' : 'Opening balance') : buildTransaction(transaction: transaction.type ?? ''),
                             style: const TextStyle(color: navy, fontSize: 14.5, fontWeight: FontWeight.w800),
                           ),
                         ),
