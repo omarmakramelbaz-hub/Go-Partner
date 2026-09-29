@@ -9,6 +9,7 @@ import '../view/layout/auth/bottom_sheet/change_lang_bottom_sheet.dart';
 import '../view/layout/wallet/screen/wallet_screen.dart';
 import '../view/layout/my_account/screen/help_screen.dart';
 import 'store_catalog.dart';
+import 'store_orders_screen.dart';
 
 class StoreShell extends StatefulWidget {
   const StoreShell({super.key});
@@ -18,17 +19,18 @@ class StoreShell extends StatefulWidget {
 
 class _StoreShellState extends State<StoreShell> {
   int _index = 0;
+  int _pendingOrders = 0;
   @override
   Widget build(BuildContext context) {
     final ar = context.locale.languageCode == 'ar';
     final profile = context.watch<AuthController>().profile;
     return Scaffold(
       backgroundColor: const Color(0xffF6F7F9),
-      appBar: _index == 0
+      appBar: _index <= 1
           ? null
           : AppBar(
               title: Text(
-                _index == 1
+                _index == 2
                     ? (ar ? 'المحفظة' : 'Wallet')
                     : (ar ? 'حساب المتجر' : 'Store account'),
               ),
@@ -36,6 +38,7 @@ class _StoreShellState extends State<StoreShell> {
       body: IndexedStack(
         index: _index,
         children: [
+          StoreOrdersScreen(alertsEnabled: profile?.delegateStatus == 'active', onPendingCount: (count) { if (mounted && count != _pendingOrders) setState(() => _pendingOrders = count); }),
           const StoreCatalog(),
           const WalletScreen(embedded: true),
           ListView(
@@ -97,6 +100,7 @@ class _StoreShellState extends State<StoreShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         indicatorColor: const Color(0xffFFF0E3),
         destinations: [
+          NavigationDestination(icon: Badge(isLabelVisible: _pendingOrders > 0, label: Text('$_pendingOrders'), child: const Icon(Icons.receipt_long_outlined)), label: ar ? 'الطلبات' : 'Orders'),
           NavigationDestination(
             icon: const Icon(Icons.storefront_outlined),
             selectedIcon: const Icon(Icons.storefront),

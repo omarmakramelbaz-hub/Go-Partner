@@ -1,3 +1,4 @@
+import '../../../../go_stores/store_orders_screen.dart';
 import '../../../../go_stores/store_shell.dart';
 import '../../../../helpers/networking/api_helper.dart';
 
@@ -261,6 +262,11 @@ class _DelegateBottomNavBarScreenState
     SoundNotification.instance.stopSound();
     final msg = json.encode(message.data);
     final body = json.decode(msg);
+    if (body['notification_type']?.toString() == '12') {
+      final id = int.tryParse('${body['go_store_order_id']}');
+      if (id != null) Navigator.of(AppRouters.navigatorKey.currentContext ?? context).push(MaterialPageRoute(builder: (_) => StoreOrderDetailsScreen(orderId: id)));
+      return;
+    }
     final data = NotificationFromFirebaseMode.fromJson(body);
     switch (data.notificationType.toString()) {
       case '1':

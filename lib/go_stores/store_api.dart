@@ -105,6 +105,10 @@ class StoreApi {
     );
   }
 
+  Future<Map<String, dynamic>> orders({bool history = false, int page = 1}) => request('orders', query: {'history': history ? 1 : 0, 'page': page});
+  Future<Map<String, dynamic>> order(int id) => request('orders/$id');
+  Future<Map<String, dynamic>> orderAction(int id, String action, int revision, {String? reason}) => request('orders/$id/action', body: {'action': action, 'revision': revision, if (reason != null) 'reason': reason});
+
   void close() => _dio.close();
 }
 

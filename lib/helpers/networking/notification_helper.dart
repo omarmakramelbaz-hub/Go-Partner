@@ -1,3 +1,4 @@
+import '../../go_stores/store_orders_screen.dart';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -97,6 +98,12 @@ void _onNotificationTapedDelegate(RemoteMessage message) {
 
   final msg = json.encode(message.data);
   var body = json.decode(msg);
+  if (body['notification_type']?.toString() == '12') {
+    final id = int.tryParse('${body['go_store_order_id']}');
+    final context = AppRouters.navigatorKey.currentContext;
+    if (id != null && context != null) Navigator.of(context).push(MaterialPageRoute(builder: (_) => StoreOrderDetailsScreen(orderId: id)));
+    return;
+  }
   final data = NotificationFromFirebaseMode.fromJson(body);
 
   switch (data.notificationType.toString()) {
