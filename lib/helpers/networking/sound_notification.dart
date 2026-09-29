@@ -118,6 +118,10 @@ String? incomingOrderSoundKey(Map<String, dynamic> data) {
     return value == null || value.isEmpty ? null : value;
   }
 
+  if (type == '12' && data['notification_sound'] == 'long') {
+    final order = id('go_store_order_id');
+    return order == null ? null : 'store:$order';
+  }
   if (type == '1' && data['notification_sound'] == 'long') {
     final order = id('order_id');
     return order == null ? null : 'delivery:$order';
