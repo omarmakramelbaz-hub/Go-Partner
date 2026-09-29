@@ -5,9 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../helpers/images/app_images.dart';
-import '../../../../helpers/locale/app_locale_key.dart';
 import '../../../../helpers/theme/app_colors.dart';
-import '../../../../helpers/theme/app_text_style.dart';
 import '../../my_account/controller/my_account_controller.dart';
 import '../controller/wallet_controller.dart';
 
@@ -16,11 +14,17 @@ class ChooseVCashOrVisaWidget extends StatelessWidget {
   final MyAccountController myAccountController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    // The modal is outside WalletScreen's settings provider. Listen to the
+    // supplied controller so both the first build and later updates work.
+    listenable: myAccountController,
+    builder: (context, _) => _buildMethods(context),
+  );
+
+  Widget _buildMethods(BuildContext context) {
     final methods = <Widget>[];
     final ar = context.locale.languageCode == 'ar';
-    final liveSettings = context.watch<MyAccountController>();
-    final settings = liveSettings.setting ?? myAccountController.setting;
+    final settings = myAccountController.setting;
 
     if (settings?.walletCardActivate == 'true') {
       methods.add(PaymentMethodWidget(
