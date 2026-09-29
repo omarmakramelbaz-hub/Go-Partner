@@ -111,19 +111,18 @@ class _StoreOrderDetailsScreenState extends State<StoreOrderDetailsScreen> with 
   }
   Future<void> action(String action) async {
     SoundNotification.instance.acknowledge('store:${widget.orderId}');
-    final reason = TextEditingController();
+    var reasonText = "";
     final form = GlobalKey<FormState>();
     final label = storeActionLabels[action]![ar ? 0 : 1];
     final yes = await showGoDialog<bool>(context: context, builder: (c) => AlertDialog(title: Text(label),
       content: Form(key: form, child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         if (action == 'accept') Text(ar ? 'عمولة التطبيق ${order!['commission']} ج.م (${order!['commission_rate']}%) تُخصم عند القبول.' : 'App commission of ${order!['commission']} EGP (${order!['commission_rate']}%) is charged on acceptance.'),
         if (action == 'complete') Text(order!['payment_method'] == 'cash' ? (ar ? 'تأكد من تسليم الطلب وتحصيل ${order!['total']} ج.م كاش.' : 'Confirm delivery and collection of ${order!['total']} EGP cash.') : (ar ? 'هل تم تسليم الطلب للعميل؟' : 'Has the order been delivered to the customer?')),
-        if (action == 'reject') TextFormField(controller: reason, maxLength: 500, maxLines: 2, decoration: InputDecoration(labelText: ar ? 'سبب الرفض' : 'Reason for declining'),
+        if (action == 'reject') TextFormField(onChanged: (value) => reasonText = value.trim(), maxLength: 500, maxLines: 2, decoration: InputDecoration(labelText: ar ? 'سبب الرفض' : 'Reason for declining'),
           validator: (v) => v == null || v.trim().isEmpty ? (ar ? 'اكتب السبب' : 'Enter a reason') : null),
         if (action == 'ready' || action == 'out_for_delivery') Text(ar ? 'سيظهر تحديث الحالة للعميل فورًا.' : 'The customer will see the updated order status.'),
       ])),
       actions: [TextButton(onPressed: () => Navigator.pop(c, false), child: Text(ar ? 'رجوع' : 'Back')), FilledButton(onPressed: () { if (form.currentState!.validate()) Navigator.pop(c, true); }, child: Text(ar ? 'تأكيد' : 'Confirm'))]));
-    final reasonText = reason.text.trim(); reason.dispose();
     if (yes != true || !mounted) return;
     setState(() { busy = true; error = null; });
     try {

@@ -33,7 +33,7 @@ class FixtureStoreApi extends StoreApi {
   }
 }
 Widget app(Widget child, {bool ar = true}) => MaterialApp(locale: Locale(ar ? 'ar' : 'en'), supportedLocales: const [Locale('ar'), Locale('en')],
-  localizationsDelegates: GlobalMaterialLocalizations.delegates, theme: ThemeData(fontFamily: 'Tajawal'), home: child);
+  localizationsDelegates: GlobalMaterialLocalizations.delegates, theme: ThemeData(useMaterial3: false, fontFamily: 'Tajawal', colorScheme: const ColorScheme.light(primary: Color(0xFFFD7201)), scaffoldBackgroundColor: const Color(0xFFF7F8FA), cardTheme: CardThemeData(color: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: Color(0xFFE6E9EE))))), home: child);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -82,7 +82,7 @@ void main() {
   testWidgets('decline requires a reason before sending action', (tester) async {
     final api = FixtureStoreApi();
     await tester.pumpWidget(app(StoreOrderDetailsScreen(orderId: 24, api: api))); await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const ValueKey('store-order-reject'))); await tester.tap(find.byKey(const ValueKey('store-order-reject'))); await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('store-order-reject')), 250, scrollable: find.byType(Scrollable).first); await tester.tap(find.byKey(const ValueKey('store-order-reject'))); await tester.pumpAndSettle();
     await tester.tap(find.text('تأكيد')); await tester.pumpAndSettle(); expect(api.actions, isEmpty);
     await tester.enterText(find.byType(TextFormField), 'المنتج غير متاح');
     await tester.tap(find.text('تأكيد')); await tester.pumpAndSettle();
