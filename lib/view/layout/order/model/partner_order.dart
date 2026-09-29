@@ -97,6 +97,7 @@ class PartnerOrder {
       return ar ? 'بانتظار تأكيد العميل' : 'Awaiting customer confirmation';
     }
     if (isNew) return ar ? 'طلب جديد' : 'New request';
+    if (status == 'accepted' && delivery?.paymentRequired == true) return ar ? 'بانتظار تأكيد الدفع' : 'Awaiting verified payment';
     if (status == 'accepted') return ar ? 'تم قبول الطلب' : 'Accepted';
     if (status == 'shipped') return ar ? 'جاري التوصيل' : 'Out for delivery';
     if (isCompleted) return ar ? 'مكتمل' : 'Completed';
@@ -122,8 +123,8 @@ class PartnerOrder {
 
   bool allows(PartnerOrderAction action) => switch (action) {
     PartnerOrderAction.accept || PartnerOrderAction.decline => isNew,
-    PartnerOrderAction.pickup => delivery != null && status == 'accepted',
+    PartnerOrderAction.pickup => delivery != null && status == 'accepted' && !delivery!.paymentRequired,
     PartnerOrderAction.complete =>
-      delivery != null ? status == 'shipped' : status == 'accepted',
+      delivery != null ? status == 'shipped' && !delivery!.paymentRequired : status == 'accepted',
   };
 }

@@ -990,6 +990,13 @@ class _OrderDetailsDelegateScreenState extends State<OrderDetailsDelegateScreen>
       );
     }
 
+    if (delegateSingleOrder?.paymentRequired == true && status == 'accepted') {
+      return buildButton(
+        text: context.locale.languageCode == 'ar' ? 'بانتظار تأكيد دفع العميل — تحديث' : 'Awaiting customer payment — refresh',
+        onPressed: () => delegateOrderController.getDelegateSingleOrder(id: delegateSingleOrder?.id ?? 0),
+      );
+    }
+
     // Decision tree logic
     if ((status == 'pending' || status == 'another_delegate') && delegateHasStatus == null) {
       return buildAcceptRejectButtons();

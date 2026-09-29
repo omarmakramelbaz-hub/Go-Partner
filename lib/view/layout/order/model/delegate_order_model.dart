@@ -22,6 +22,8 @@ class DelegateOrdersModel {
   String? type;
   String? scheduleDate;
   String? paymentType;
+  String? paymentStatus;
+  bool paymentRequired = false;
   num? deliveryPrice;
   num? tax;
   num? totalItemPrice;
@@ -85,6 +87,8 @@ class DelegateOrdersModel {
     this.type,
     this.scheduleDate,
     this.paymentType,
+    this.paymentStatus,
+    this.paymentRequired = false,
     this.deliveryPrice,
     this.tax,
     this.totalItemPrice,
@@ -154,6 +158,8 @@ class DelegateOrdersModel {
     type = json['type'];
     scheduleDate = json['schedule_date'];
     paymentType = json['payment_type'];
+    paymentStatus = json['payment_status'];
+    paymentRequired = json['payment_required'] == true;
     deliveryPrice = json['delivery_price'];
     tax = json['tax'];
     totalItemPrice = json['total_item_price'];
@@ -225,6 +231,8 @@ class DelegateOrdersModel {
       ..type = pusherData['type']
       ..scheduleDate = pusherData['schedule_date']
       ..paymentType = pusherData['payment_type']
+      ..paymentStatus = pusherData['payment_status']
+      ..paymentRequired = pusherData['payment_required'] == true
       ..deliveryPrice = pusherData['delivery_price']
       ..tax = pusherData['tax']
       ..totalItemPrice = pusherData['total_item_price']
@@ -293,6 +301,8 @@ class DelegateOrdersModel {
     data['type'] = type;
     data['schedule_date'] = scheduleDate;
     data['payment_type'] = paymentType;
+    data['payment_status'] = paymentStatus;
+    data['payment_required'] = paymentRequired;
     data['delivery_price'] = deliveryPrice;
     data['tax'] = tax;
     data['total_item_price'] = totalItemPrice;

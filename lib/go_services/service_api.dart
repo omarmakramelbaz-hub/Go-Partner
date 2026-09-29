@@ -77,7 +77,7 @@ String serviceState(String? value, bool ar) {
     'accepted': ['تم اختيار عرضك', 'Your quote was selected'], 'rejected': ['العميل رفض العرض', 'Customer rejected quote'],
     'closed': ['مغلق', 'Closed'], 'declined': ['تم التخطي', 'Skipped'],
     'unpaid': ['لم يتم تأكيد الدفع', 'Payment not confirmed'], 'held': ['تم تأكيد الدفع وحجز المبلغ', 'Payment verified; funds held'],
-    'cash_due': ['كاش عند إتمام العمل', 'Cash due on completion'], 'paid': ['تمت التسوية', 'Settled'],
+    'cash_due': ['كاش عند إتمام العمل', 'Cash due on completion'], 'paid': ['تم الدفع', 'Paid'],
     'refund_pending': ['استرداد قيد المعالجة', 'Refund pending'], 'refunded': ['تم رد المبلغ', 'Refunded'], 'review': ['الدفع قيد المراجعة', 'Payment under review'],
   };
   return labels[value]?[ar ? 0 : 1] ?? (ar ? 'حالة قيد التحقق' : 'Status pending verification');
