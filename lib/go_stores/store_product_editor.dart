@@ -211,6 +211,7 @@ class _StoreProductEditorState extends State<StoreProductEditor> {
                       : widget.product != null
                       ? Image.network(
                           '${widget.product!['image_url']}',
+                          webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
                           fit: BoxFit.contain,
                           errorBuilder: (_, __, ___) =>
                               const Icon(Icons.image_outlined, size: 60),

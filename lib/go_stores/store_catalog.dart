@@ -149,6 +149,7 @@ class _StoreCatalogState extends State<StoreCatalog> {
                               borderRadius: BorderRadius.circular(14),
                               child: Image.network(
                                 '${store['logo_url']}',
+                                webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
                                 width: 76,
                                 height: 76,
                                 fit: BoxFit.contain,
@@ -343,6 +344,7 @@ class _StoreCatalogState extends State<StoreCatalog> {
             color: Colors.white,
             child: Image.network(
               '${product['image_url']}',
+              webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const Icon(
                 Icons.image_outlined,
