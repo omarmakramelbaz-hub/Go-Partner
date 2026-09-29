@@ -205,7 +205,7 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
       if (!await confirm(t('الإلغاء بعد القبول يحمّلك خدمة التطبيق بنسبة ${policy['rate']}%، بقيمة $cancellationFee ج.م. العمولة المخصومة من محفظتك لن تُرد ولن تُخصم مرة ثانية. هل تؤكد الإلغاء؟', 'Cancelling after acceptance makes you responsible for the ${policy['rate']}% app service fee (EGP $cancellationFee). Your existing wallet debit will be retained, with no second charge. Confirm cancellation?'))) return;
     }
     if (value == 'cancelled' || value == 'disputed') { reason = await showGoDialog<String>(context: context, builder: (_) => _ReasonForm(ar: widget.ar)); if (reason == null) return; }
-    else if (!await confirm(value == 'in_progress' ? t('تأكيد بدء تنفيذ نطاق العمل المتفق عليه؟', 'Start the agreed work?') : t('سيتم طلب تأكيد الإتمام من العميل. لا تُصرف الأموال قبل تأكيده.', 'The customer will be asked to confirm completion. Funds are not released before their confirmation.'))) return;
+    else if (!await confirm(value == 'in_progress' ? t('تأكيد بدء تنفيذ نطاق العمل المتفق عليه؟', 'Start the agreed work?') : t('سيتم طلب تأكيد إتمام العمل من العميل.', 'The customer will be asked to confirm that the work is complete.'))) return;
     if (mounted) await run(() => widget.api.status(widget.id, value, reason: reason, cancellationFee: cancellationFee));
   }
   Widget button(String label, VoidCallback callback) => Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: FilledButton(onPressed: busy || stale ? null : callback, child: Text(label)));
