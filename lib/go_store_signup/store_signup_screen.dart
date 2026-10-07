@@ -275,7 +275,7 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                             ],
                           ),
                           const Text(
-                            'أضف حتى 60 منتجًا كبداية، وتقدر تكمل وتعدل بعد تفعيل الحساب. صور JPG أو PNG أو WEBP، حتى 1 ميجا للصورة.',
+                            'أضف حتى 60 منتجًا بالاسم والسعر. الذكاء الاصطناعي يبحث عن صور مناسبة بدون براند ويضيفها تلقائيًا بعد إرسال الطلب.',
                             style: TextStyle(
                               color: Color(0xFF707985),
                               height: 1.5,
@@ -292,7 +292,7 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                                     size: 40,
                                   ),
                                   SizedBox(height: 10),
-                                  Text('أضف أول منتج بصورته وسعره'),
+                                  Text('أضف أول منتج باسمه وسعره'),
                                 ],
                               ),
                             ),
@@ -303,8 +303,13 @@ class _StoreSignupScreenState extends State<StoreSignupScreen> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.memory(
-                                      draft.products[i].image.bytes,
+                                    child: draft.products[i].image == null
+                                      ? const SizedBox(
+                                          width: 62, height: 62,
+                                          child: Icon(Icons.auto_awesome, color: _orange),
+                                        )
+                                      : Image.memory(
+                                      draft.products[i].image!.bytes,
                                       cacheWidth: 186,
                                       width: 62,
                                       height: 62,
@@ -427,91 +432,28 @@ class SignupProductScreen extends StatefulWidget {
   State<SignupProductScreen> createState() => _SignupProductScreenState();
 }
 
-class _Option {
-  _Option([Map<String, String>? value])
-    : label = TextEditingController(text: value?['label']),
-      price = TextEditingController(text: value?['price']);
-  final TextEditingController label, price;
-  void dispose() {
-    label.dispose();
-    price.dispose();
-  }
-}
-
 class _SignupProductScreenState extends State<SignupProductScreen> {
   final _form = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.product?.name);
-  late final _unit = TextEditingController(
-    text: widget.product?.unit ?? 'قطعة',
-  );
   late final _price = TextEditingController(text: widget.product?.price);
-  late final _description = TextEditingController(
-    text: widget.product?.description,
-  );
-  late final _options = (widget.product?.options ?? [])
-      .map((o) => _Option(o))
-      .toList();
-  late SignupImage? _image = widget.product?.image;
-  bool _picking = false;
-  String? _error;
+
   @override
   void dispose() {
     _name.dispose();
-    _unit.dispose();
     _price.dispose();
-    _description.dispose();
-    for (final o in _options) {
-      o.dispose();
-    }
     super.dispose();
   }
 
-  Future<void> _pick() async {
-    setState(() => _picking = true);
-    try {
-      final image = await (widget.pickImage ?? _pickImage)();
-      if (image != null && mounted) setState(() => _image = image);
-    } catch (e) {
-      if (mounted) setState(() => _error = '$e');
-    } finally {
-      if (mounted) setState(() => _picking = false);
-    }
-  }
-
-  String? _money(String? v) => signupPrice(v ?? '') == null
-      ? 'اكتب سعرًا صحيحًا من 0.01 إلى 1000000 ج'
-      : null;
   void _save() {
     if (!_form.currentState!.validate()) return;
-    if (_image == null) {
-      setState(() => _error = 'أضف صورة للمنتج.');
-      return;
-    }
-    final labels = _options
-        .map((o) => o.label.text.trim().toLowerCase())
-        .toList();
-    if (labels.toSet().length != labels.length) {
-      setState(() => _error = 'اكتب اسمًا مختلفًا لكل اختيار.');
-      return;
-    }
-    Navigator.pop(
-      context,
-      SignupProduct(
-        name: _name.text.trim(),
-        unit: _unit.text.trim(),
-        price: signupPrice(_price.text)!,
-        image: _image!,
-        description: _description.text.trim(),
-        options: _options
-            .map(
-              (o) => {
-                'label': o.label.text.trim(),
-                'price': signupPrice(o.price.text)!,
-              },
-            )
-            .toList(),
-      ),
-    );
+    Navigator.pop(context, SignupProduct(
+      name: _name.text.trim(),
+      price: signupPrice(_price.text)!,
+      unit: widget.product?.unit ?? 'قطعة',
+      description: widget.product?.description ?? '',
+      options: widget.product?.options ?? const [],
+      image: widget.product?.image,
+    ));
   }
 
   @override
@@ -530,123 +472,41 @@ class _SignupProductScreenState extends State<SignupProductScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_image != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
-                    child: Image.memory(
-                      _image!.bytes,
-                      height: 180,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                OutlinedButton.icon(
-                  onPressed: _picking ? null : _pick,
-                  icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: Text(
-                    _picking
-                        ? 'جارٍ تحميل الصورة…'
-                        : _image == null
-                        ? 'إضافة صورة المنتج'
-                        : 'تغيير الصورة',
-                  ),
-                ),
-                const SizedBox(height: 14),
+                _card(const Column(
+                  children: [
+                    Icon(Icons.auto_awesome, color: _orange, size: 36),
+                    SizedBox(height: 12),
+                    Text('صورة المنتج بالذكاء الاصطناعي',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                    SizedBox(height: 8),
+                    Text('اكتب الاسم والسعر فقط. بعد إرسال الطلب، نبحث عن صورة مناسبة للمنتج بدون اسم براند أو شعار أو علامة مائية ونضيفها تلقائيًا.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0xFF707985), height: 1.5)),
+                  ],
+                )),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _name,
                   decoration: _field('اسم المنتج'),
                   maxLength: 150,
-                  validator: (v) =>
-                      (v ?? '').trim().length < 2 ? 'اكتب اسم المنتج' : null,
-                ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: _unit,
-                  decoration: _field('الوحدة الأساسية: كيلو / عبوة / قطعة'),
-                  maxLength: 40,
-                  validator: (v) =>
-                      (v ?? '').trim().isEmpty ? 'اكتب الوحدة' : null,
+                  textInputAction: TextInputAction.next,
+                  validator: (v) => (v ?? '').trim().length < 2 ? 'اكتب اسم المنتج' : null,
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
                   controller: _price,
                   decoration: _field('السعر بالجنيه'),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  validator: _money,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _save(),
+                  validator: (v) => signupPrice(v ?? '') == null
+                    ? 'اكتب سعرًا صحيحًا من 0.01 إلى 1000000 ج' : null,
                 ),
-                const SizedBox(height: 14),
-                TextFormField(
-                  controller: _description,
-                  decoration: _field('وصف المنتج (اختياري)'),
-                  maxLength: 2000,
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  'خيارات البيع',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                ),
-                const Text(
-                  'مثل نصف كيلو أو ربع كيلو، مع السعر الكامل لكل اختيار.',
-                ),
-                for (final option in _options)
-                  Padding(
-                    key: ObjectKey(option),
-                    padding: const EdgeInsets.only(top: 14),
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: option.label,
-                          decoration: _field('اسم الاختيار'),
-                          maxLength: 60,
-                          validator: (v) => (v ?? '').trim().isEmpty
-                              ? 'اكتب اسم الاختيار'
-                              : null,
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: option.price,
-                                decoration: _field('سعر الاختيار بالجنيه'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                validator: _money,
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: 'حذف الاختيار',
-                              onPressed: () => setState(() {
-                                _options.remove(option);
-                                option.dispose();
-                              }),
-                              icon: const Icon(Icons.delete_outline),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                TextButton.icon(
-                  onPressed: _options.length >= 20
-                      ? null
-                      : () => setState(() => _options.add(_Option())),
-                  icon: const Icon(Icons.add),
-                  label: const Text('إضافة اختيار'),
-                ),
-                if (_error != null)
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 FilledButton(
-                  onPressed: _picking ? null : _save,
+                  onPressed: _save,
                   style: FilledButton.styleFrom(
-                    backgroundColor: _orange,
-                    minimumSize: const Size.fromHeight(52),
-                  ),
+                    backgroundColor: _orange, minimumSize: const Size.fromHeight(52)),
                   child: const Text('حفظ المنتج في الطلب'),
                 ),
               ],

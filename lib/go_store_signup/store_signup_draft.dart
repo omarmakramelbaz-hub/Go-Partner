@@ -52,14 +52,14 @@ class SignupImage {
 class SignupProduct {
   SignupProduct({
     required this.name,
-    required this.unit,
+    this.unit = 'قطعة',
     required this.price,
-    required this.image,
+    this.image,
     this.description = '',
     this.options = const [],
   });
   final String name, unit, price, description;
-  final SignupImage image;
+  final SignupImage? image;
   final List<Map<String, String>> options;
   Map<String, dynamic> toJson() => {
     'name': name,
@@ -92,7 +92,7 @@ class StoreSignupDraft {
 
   int get imageBytes =>
       (logo?.bytes.length ?? 0) +
-      products.fold<int>(0, (total, p) => total + p.image.bytes.length);
+      products.fold<int>(0, (total, p) => total + (p.image?.bytes.length ?? 0));
   String? validate() {
     if (name.trim().length < 2 ||
         address.trim().length < 5 ||
@@ -110,6 +110,7 @@ class StoreSignupDraft {
     'kind': kind,
     'address': address.trim(),
     'products': products.map((p) => p.toJson()).toList(),
+    'auto_images': products.any((p) => p.image == null),
   });
 }
 
@@ -186,7 +187,8 @@ class PartnerApplicationApi {
         final images = <String, SignupImage>{
           'logo': store.logo!,
           for (var i = 0; i < store.products.length; i++)
-            'p$i': store.products[i].image,
+            if (store.products[i].image != null)
+              'p$i': store.products[i].image!,
         };
         final pending = images.entries
             .where((e) => !identical(store._uploaded[e.key], e.value))
