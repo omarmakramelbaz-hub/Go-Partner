@@ -1,0 +1,72 @@
+name: GO Partner Review Web View
+
+on:
+  push:
+    branches: [ "preview/go-partner-20261008" ]
+    paths: [ ".github/workflows/web-preview.yml" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify stable web launch and updates
+        run: |
+          python3 -m unittest discover -s tool -p test_package_partner_web.py
+          node --test tool/test_web_bootstrap.cjs
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.0'
+          channel: stable
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Configure Flutter Web platform
+        run: flutter create . --platforms web --no-pub
+
+      - name: Verify GO Partner packaged identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/verify_partner_identity.py
+          flutter test test/partner_identity_test.dart
+
+      - name: Build Flutter Web
+        shell: bash
+        run: |
+          flutter build web --release --pwa-strategy=none \
+            --base-href "/Go-Partner/releases/${GITHUB_SHA:0:12}/"
+
+      - name: Package versioned web app and assets
+        run: python3 tool/package_partner_web.py
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/pages
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
