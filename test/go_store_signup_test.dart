@@ -122,6 +122,50 @@ void main() {
     expect(store.validate(), isNotNull);
     expect(draft().validate(), isNull);
   });
+  test('name and price products submit without requesting or uploading product photos', () async {
+    final store = draft();
+    store.products.clear();
+    store.products.add(SignupProduct(name: 'كيلو أرز', price: '80.50'));
+    expect(store.validate(), isNull);
+    final adapter = CaptureAdapter();
+    final api = PartnerApplicationApi(client: Dio()..httpClientAdapter = adapter);
+    await api.submit({
+      'mobile': '01012345678', 'email': 'owner@example.com',
+      'email_verification_token': 'proof',
+    }, XFile.fromData(pixel, name: 'portrait.png'), store: store);
+    final uploads = adapter.requests.where((r) => r.path.endsWith('/catalog-images'));
+    expect(uploads.length, 1);
+    expect((uploads.single.data as FormData).files.map((e) => e.key), ['images[logo]']);
+    final body = adapter.requests.last.data as FormData;
+    final catalog = jsonDecode(Map.fromEntries(body.fields)['storefront']!);
+    expect(catalog['auto_images'], isTrue);
+    expect(catalog['products'][0]['name'], 'كيلو أرز');
+    expect(catalog['products'][0]['price'], '80.50');
+    api.close();
+  });
+
+  testWidgets('new product needs only a name and price and no image picker', (tester) async {
+    SignupProduct? saved;
+    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => Scaffold(
+      body: TextButton(onPressed: () async {
+        saved = await Navigator.push<SignupProduct>(context, MaterialPageRoute(
+          builder: (_) => const SignupProductScreen()));
+      }, child: const Text('open')),
+    ))));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextFormField), findsNWidgets(2));
+    expect(find.text('إضافة صورة المنتج'), findsNothing);
+    await tester.enterText(find.widgetWithText(TextFormField, 'اسم المنتج'), 'تفاح أحمر');
+    await tester.enterText(find.widgetWithText(TextFormField, 'السعر بالجنيه'), '٤٥');
+    await revealProductSave(tester);
+    await tester.tap(find.text('حفظ المنتج في الطلب'));
+    await tester.pumpAndSettle();
+    expect(saved!.name, 'تفاح أحمر');
+    expect(saved!.price, '45.00');
+    expect(saved!.image, isNull);
+    expect(tester.takeException(), isNull);
+  });
   test(
     '60 products use small batches and a metadata-only final catalog',
     () async {
