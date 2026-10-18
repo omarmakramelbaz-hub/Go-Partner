@@ -12,8 +12,6 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
 import 'firebase_options.dart';
-import 'helpers/networking/http_overrides_stub.dart'
-    if (dart.library.io) 'helpers/networking/http_overrides_io.dart';
 import 'helpers/networking/notification_helper.dart';
 import 'helpers/theme/app_theme_controller.dart';
 import 'helpers/theme/theme_enum.dart';
@@ -65,7 +63,6 @@ Future<void> initLocalServices() async {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    configureHttpOverrides();
   }
 }
 

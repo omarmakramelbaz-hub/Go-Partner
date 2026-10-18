@@ -41,11 +41,16 @@ class ApiHelper {
   // final String _serverKey = '';
 
   MediaType appMediaType(String path) {
-    List<String> list = '${lookupMimeType(path)}'.split('/');
-    return MediaType('${list.firstOrNull}', '${list.lastOrNull}');
+    return MediaType.parse(lookupMimeType(path) ?? 'application/octet-stream');
   }
 
-  final Dio _dio = Dio()
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 40),
+    ),
+  )
     ..interceptors.addAll(
       kDebugMode
           ? [
@@ -419,13 +424,9 @@ class ApiHelper {
       body: jsonEncode(message),
     );
     if (response.statusCode == 200) {
-      log('notification sent"$deviceToken ${response.body}');
-      log(data.toString());
-      log(body.toString());
+      log('Notification sent');
     } else {
-      log('notification not sent ${response.statusCode} -----> $deviceToken ${response.body}');
-      log(data.toString());
-      log(body.toString());
+      log('Notification not sent: ${response.statusCode}');
     }
   }
 
