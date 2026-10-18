@@ -40,6 +40,7 @@ flutter analyze --no-fatal-infos --no-fatal-warnings
 GO_STORE_SCREENSHOTS=test-output/go-stores flutter test
 python3 tool/verify_partner_identity.py
 python3 -m unittest discover -s tool -p test_package_partner_web.py
+python3 -m unittest discover -s tool -p test_prepare_partner_web.py
 node --test tool/test_web_bootstrap.cjs
 ```
 
@@ -52,6 +53,12 @@ and then use `flutter run -d <device-id>`. Android and iOS release build setup i
 documented by `.github/workflows/android-apk.yml` and `ios-build.yml`, including
 their platform toolchains and compatibility steps. Web packaging and preview
 checks are defined in `partner-checks.yml` and `web-build.yml`.
+
+Those workflows use `bash tool/prepare_partner_web.sh` from a committed checkout
+to generate web support, restore scaffolded lockfile changes, and enforce the
+committed dependencies once. Subsequent analyze, test, and build commands use
+`--no-pub`. Existing widget tests are preserved; only a newly generated counter
+test is removed. Application source or manifest changes fail preparation.
 
 ## Test boundaries
 
