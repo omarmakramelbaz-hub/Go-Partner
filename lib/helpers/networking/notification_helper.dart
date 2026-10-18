@@ -77,8 +77,6 @@ class NotificationHelper {
 void _handleNotificationTap(NotificationResponse notificationResponse) {
   final String? payload = notificationResponse.payload;
   if (payload != null) {
-    log('Notification tapped with payload: $payload');
-
     final data = json.decode(payload);
     _onNotificationTapedDelegate(RemoteMessage(data: data));
   }

@@ -9,7 +9,6 @@ class PusherController with ChangeNotifier {
   late PusherChannelsFlutter _pusher;
   final String appId = '2002846';
   final String apiKEY = '0f818db2b7622218a22a';
-  final String secret = '804b44dfbb09822e5245';
   final String apiCLUSTER = 'mt1';
   final Map<String, List<void Function(PusherEvent event)>> _eventListeners = {};
 
@@ -44,7 +43,7 @@ class PusherController with ChangeNotifier {
         onDecryptionFailure: onDecryptionFailure,
         onMemberAdded: onMemberAdded,
         onMemberRemoved: onMemberRemoved,
-        logToConsole: true,
+        logToConsole: false,
         onAuthorizer: (channelName, socketId, options) async {
           return await _authenticatePrivateChannel(channelName, userId, socketId, token);
         },
@@ -60,7 +59,6 @@ class PusherController with ChangeNotifier {
 
   void _handleEvent(PusherEvent event) {
     log('Event received: ${event.eventName}');
-    log('Event data: ${event.data}');
     if (event.eventName == 'delegate.updated') {
       notifyListeners(); // Notify all listeners of `PusherController`
     }
@@ -151,7 +149,7 @@ class PusherController with ChangeNotifier {
         final responseJson = json.decode(response.body);
         return responseJson.containsKey('auth') ? {'auth': responseJson['auth']} : null;
       } else {
-        log('Authentication failed. Status: ${response.statusCode}, Body: ${response.body}');
+        log('Authentication failed. Status: ${response.statusCode}');
         return null;
       }
     } catch (e) {
@@ -186,7 +184,7 @@ class PusherController with ChangeNotifier {
   }
 
   void onSubscriptionSucceeded(String channelName, dynamic data) {
-    log('Successfully subscribed to channel: $channelName with data: $data');
+    log('Successfully subscribed to channel: $channelName');
   }
 
   void onSubscriptionError(String message, dynamic e) {

@@ -12,15 +12,17 @@ jobs:
       - name: Verify stable web launch and updates
         run: |
           python3 -m unittest discover -s tool -p test_package_partner_web.py
+          python3 -m unittest discover -s tool -p test_prepare_partner_web.py
           node --test tool/test_web_bootstrap.cjs
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.0'
           channel: stable
           cache: true
-      - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
-      - run: flutter test
+      - name: Prepare web platform with committed dependencies
+        run: bash tool/prepare_partner_web.sh
+      - run: flutter analyze --no-pub --no-fatal-infos --no-fatal-warnings
+      - run: flutter test --no-pub
         env:
           GO_STORE_SCREENSHOTS: test-output/go-stores
       - uses: actions/upload-artifact@v4
@@ -28,10 +30,9 @@ jobs:
           name: go-store-screenshots
           path: test-output/go-stores
           if-no-files-found: error
-      - run: flutter create . --platforms web --no-pub
       - name: Build versioned web preview
         shell: bash
         run: |
-          flutter build web --release --pwa-strategy=none \
+          flutter build web --no-pub --release --pwa-strategy=none \
             --base-href "/Go-Partner/releases/${GITHUB_SHA:0:12}/"
       - run: python3 tool/package_partner_web.py

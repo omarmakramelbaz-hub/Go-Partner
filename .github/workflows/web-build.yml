@@ -25,6 +25,7 @@ jobs:
       - name: Verify stable web launch and updates
         run: |
           python3 -m unittest discover -s tool -p test_package_partner_web.py
+          python3 -m unittest discover -s tool -p test_prepare_partner_web.py
           node --test tool/test_web_bootstrap.cjs
 
       - name: Setup Flutter
@@ -34,23 +35,20 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Configure Flutter Web platform
-        run: flutter create . --platforms web --no-pub
+      - name: Prepare web platform with committed dependencies
+        run: bash tool/prepare_partner_web.sh
 
       - name: Verify GO Partner packaged identity
         shell: bash
         run: |
           set -euo pipefail
           python3 tool/verify_partner_identity.py
-          flutter test test/partner_identity_test.dart
+          flutter test --no-pub test/partner_identity_test.dart
 
       - name: Build Flutter Web
         shell: bash
         run: |
-          flutter build web --release --pwa-strategy=none \
+          flutter build web --no-pub --release --pwa-strategy=none \
             --base-href "/Go-Partner/releases/${GITHUB_SHA:0:12}/"
 
       - name: Package versioned web app and assets

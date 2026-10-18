@@ -21,12 +21,11 @@ jobs:
           flutter-version: '3.47.0'
           channel: stable
           cache: true
-      - run: flutter pub get
+      - name: Prepare web platform with committed dependencies
+        run: bash tool/prepare_partner_web.sh
       - name: Analyze new client code and integration
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings lib/go_services lib/view/layout/order/widget/partner_orders_board.dart test/go_services_test.dart
+        run: flutter analyze --no-pub --no-fatal-infos --no-fatal-warnings lib/go_services lib/view/layout/order/widget/partner_orders_board.dart test/go_services_test.dart test/service_refresh_test.dart
       - name: Run contract and widget checks
-        run: flutter test test/go_services_test.dart
-      - name: Prepare web scaffold in disposable runner
-        run: flutter create . --platforms web --no-pub
+        run: flutter test --no-pub test/go_services_test.dart test/service_refresh_test.dart
       - name: Compile without deploying
-        run: flutter build web --release --no-web-resources-cdn
+        run: flutter build web --no-pub --release --no-web-resources-cdn
