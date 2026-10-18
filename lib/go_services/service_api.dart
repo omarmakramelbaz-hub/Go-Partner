@@ -19,6 +19,37 @@ class ServiceCapabilities {
   factory ServiceCapabilities.fromMap(Map<String, dynamic> data) => ServiceCapabilities(ready: data['schema_ready'] == true && data['version'] == 1, enabled: data['enabled'] == true);
 }
 
+/// Each refresh reads both endpoints anew and retains successful partial data.
+class ServiceJobRefresh {
+  const ServiceJobRefresh({
+    this.job,
+    this.capabilities,
+    this.jobError,
+    this.capabilitiesError,
+  });
+
+  final Map<String, dynamic>? job;
+  final ServiceCapabilities? capabilities;
+  final Object? jobError;
+  final Object? capabilitiesError;
+
+  bool get complete =>
+      job != null &&
+      capabilities != null &&
+      jobError == null &&
+      capabilitiesError == null;
+
+  Object? get error => jobError ?? capabilitiesError;
+}
+
+Future<({T? value, Object? error})> _serviceResult<T>(Future<T> request) async {
+  try {
+    return (value: await request, error: null);
+  } catch (error) {
+    return (value: null, error: error);
+  }
+}
+
 /// Uses the same authentication scope as Go Partner, with no client-side
 /// wallet mutations. Commission, availability and assignment remain server-owned.
 class ServiceApi {
@@ -36,6 +67,9 @@ class ServiceApi {
       final response = await _dio.request<dynamic>('$_base/go-services/$path', data: body, queryParameters: query,
         options: Options(method: body == null ? 'GET' : 'POST', followRedirects: false, validateStatus: (_) => true, contentType: 'application/json',
           headers: {'Accept': 'application/json', 'X-App-Scope': 'go_partner', if (!public) 'Authorization': 'Bearer $token'}));
+      if (!public && token != _token()) {
+        throw const ServiceFailure('سجل الدخول للمتابعة / Please sign in.', 401);
+      }
       final raw = response.data;
       if (response.statusCode != 200 && response.statusCode != 201) throw ServiceFailure(raw is Map ? raw['message']?.toString() ?? 'تعذر تنفيذ الطلب / Request failed.' : 'تعذر تنفيذ الطلب / Request failed.', response.statusCode);
       if (raw is! Map || raw['data'] is! Map || raw['status'] != 'Success') throw const ServiceFailure('استجابة غير متوقعة / Invalid response.');
@@ -50,6 +84,27 @@ class ServiceApi {
   Future<Map<String, dynamic>> walletStatus() => request('wallet-status');
   Future<Map<String, dynamic>> jobs({String scope = 'open', int page = 1}) => request('jobs', query: {'scope': scope, 'page': page});
   Future<Map<String, dynamic>> job(int id) => request('jobs/$id');
+  Future<ServiceJobRefresh> refreshJob(int id) async {
+    final token = _token();
+    // Start both independent reads before awaiting either network response.
+    final jobRead = _serviceResult(job(id));
+    final capabilitiesRead = _serviceResult(capabilities());
+    final data = await jobRead;
+    final availability = await capabilitiesRead;
+    // The job can finish before an account switch while capabilities is still
+    // pending. Never display the previous account's combined refresh.
+    if (token != _token()) {
+      return const ServiceJobRefresh(
+        jobError: ServiceFailure('سجل الدخول للمتابعة / Please sign in.', 401),
+      );
+    }
+    return ServiceJobRefresh(
+      job: data.value,
+      capabilities: availability.value,
+      jobError: data.error,
+      capabilitiesError: availability.error,
+    );
+  }
   Future<Map<String, dynamic>> quote(int id, Map<String, dynamic> data) => request('jobs/$id/offers', body: data);
   Future<Map<String, dynamic>> skip(int id) => request('jobs/$id/skip', body: <String, dynamic>{});
   Future<Map<String, dynamic>> status(int id, String state, {String? reason, String? cancellationFee}) => request('jobs/$id/status', body: {'status': state, if (reason != null) 'reason': reason, if (cancellationFee != null) 'cancellation_fee': cancellationFee});

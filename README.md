@@ -26,6 +26,10 @@ Native Firebase and messaging initialization runs after `runApp`, with errors
 handled separately from local startup. Native HTTPS uses platform certificate
 validation.
 
+Job details read current job data and capabilities concurrently on every
+refresh. Successful partial job data remains visible with actions disabled
+until both reads succeed. Responses from a previous login session are discarded.
+
 ## Development checks
 
 Run these commands from the repository root with the CI Flutter version:
@@ -41,7 +45,7 @@ node --test tool/test_web_bootstrap.cjs
 
 The analyzer flags match CI and still report warnings and informational issues;
 new findings should be reviewed. The focused network regression checks can be
-run with `flutter test test/networking_safety_test.dart`.
+run with `flutter test test/networking_safety_test.dart test/service_refresh_test.dart`.
 
 For interactive development, select a configured device with `flutter devices`
 and then use `flutter run -d <device-id>`. Android and iOS release build setup is

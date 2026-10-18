@@ -173,18 +173,67 @@ class _PartnerServiceJobScreenState extends State<PartnerServiceJobScreen> with 
   void didChangeAppLifecycleState(AppLifecycleState state) { foreground = state == AppLifecycleState.resumed; if (foreground) load(); }
   Future<void> load() async {
     if (reading || busy) return;
-    reading = true; final epoch = revision;
-    try { final data = await widget.api.job(widget.id); final capabilities = await widget.api.capabilities(); if (mounted && epoch == revision && !busy) setState(() { job = data; caps = capabilities; stale = false; error = null; }); }
-    catch (e) { if (mounted && epoch == revision) setState(() { error = '$e'; stale = true; }); }
-    finally { reading = false; }
+    reading = true;
+    final epoch = revision;
+    try {
+      final refresh = await widget.api.refreshJob(widget.id);
+      if (!mounted || epoch != revision || busy) return;
+      setState(() {
+        final failure = refresh.error;
+        final jobFailure = refresh.jobError;
+        if (jobFailure is ServiceFailure && jobFailure.status == 401) {
+          job = null;
+        } else if (refresh.job != null) {
+          job = refresh.job;
+        }
+        caps = refresh.capabilities;
+        stale = !refresh.complete;
+        error = failure?.toString();
+      });
+    } catch (failure) {
+      if (mounted && epoch == revision) {
+        setState(() {
+          if (failure is ServiceFailure && failure.status == 401) {
+            job = null;
+          }
+          error = '$failure';
+          stale = true;
+        });
+      }
+    } finally {
+      reading = false;
+    }
   }
   Future<void> run(Future<Map<String, dynamic>> Function() action) async {
     if (busy || stale) return;
     SoundNotification.instance.acknowledge('job:${widget.id}');
-    revision++; setState(() { busy = true; error = null; });
-    try { final data = await action(); if (mounted) setState(() { job = data; stale = false; }); }
-    catch (e) { if (mounted) setState(() { error = '$e'; stale = true; }); }
-    finally { if (mounted) setState(() => busy = false); }
+    revision++;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final data = await action();
+      if (mounted) {
+        setState(() {
+          job = data;
+          stale = false;
+        });
+      }
+    } catch (failure) {
+      if (mounted) {
+        setState(() {
+          if (failure is ServiceFailure && failure.status == 401) {
+            job = null;
+            caps = null;
+          }
+          error = '$failure';
+          stale = true;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
   }
   @override
   void dispose() { timer?.cancel(); WidgetsBinding.instance.removeObserver(this); super.dispose(); }
