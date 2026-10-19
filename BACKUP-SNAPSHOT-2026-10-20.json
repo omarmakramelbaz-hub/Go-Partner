@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "user_local_snapshot_date": "2026-10-20",
+  "capture_recorded_at": "2026-10-19T23:41:21.815Z",
+  "repository": "omarmakramelbaz-hub/Go-Partner",
+  "backup_branch": "backup/2026-10-20-all-apps",
+  "default_branch": "main",
+  "default_branch_commit": "4116f6b68ca5feda75e22376c61e787ab3e18ebf",
+  "default_tree_sha": "844b9d349c9b593f5319f11b6e32559d2e9fb9b4",
+  "branches": [
+    {
+      "ref": "refs/heads/backup/pre-rollback-20261003-0303",
+      "commit_sha": "bbd440a748f6b4d5c278fabd62e2b8f64e64f899"
+    },
+    {
+      "ref": "refs/heads/codex/code-quality-review-20261018",
+      "commit_sha": "02cc2ed14e88125cf5ee1d466bb6508486ef4597"
+    },
+    {
+      "ref": "refs/heads/codex/customer-partner-fixes-20260929",
+      "commit_sha": "ae7a08f697a963c5e92634f7cca330c2a46e4125"
+    },
+    {
+      "ref": "refs/heads/codex/fix-partner-static-identity",
+      "commit_sha": "7f796aefd73c86cc79c610bd6c751949b0367de8"
+    },
+    {
+      "ref": "refs/heads/codex/go-order-payments-20260929",
+      "commit_sha": "e075cfb3433bc8ddcf0003ac3b9a8eafa52e53a5"
+    },
+    {
+      "ref": "refs/heads/codex/go-paid-confirmation-copy-20260929",
+      "commit_sha": "41dfdeae4b29bfc9aa8c8c48695926009c749af8"
+    },
+    {
+      "ref": "refs/heads/codex/go-partner-brand-email",
+      "commit_sha": "61553636079fe929fa7d8a97ded8e603412424f8"
+    },
+    {
+      "ref": "refs/heads/codex/go-partner-fees-cancellation-20260927",
+      "commit_sha": "f92fb75b63356fddf1105f37af97ae83892c5247"
+    },
+    {
+      "ref": "refs/heads/codex/go-partner-inner-identity",
+      "commit_sha": "a9ed3a616465c2f40a37dbfb6336fddb1b956acf"
+    },
+    {
+      "ref": "refs/heads/codex/go-partner-web-refresh",
+      "commit_sha": "e348ed868af189cefc069c7b78611f987dc0ea98"
+    },
+    {
+      "ref": "refs/heads/codex/go-request-contact-privacy-20260927",
+      "commit_sha": "ce3dcb898d44d6499c2be01f56a5c79dfe369c72"
+    },
+    {
+      "ref": "refs/heads/codex/go-store-ai-images-20261007",
+      "commit_sha": "b9bc9a499c41c68789f7c86bc193f00deff829f9"
+    },
+    {
+      "ref": "refs/heads/codex/go-store-catalog",
+      "commit_sha": "7bb60f4a6f479e3c34823192ce0cf242505a4463"
+    },
+    {
+      "ref": "refs/heads/codex/go-store-orders-20260930",
+      "commit_sha": "c1b36bad981a582cf4682c0d6e560f448552c1b1"
+    },
+    {
+      "ref": "refs/heads/codex/live-partner-orders",
+      "commit_sha": "89c2b6ad0e9a6f0c031b8e41c779d8ea92a3ef93"
+    },
+    {
+      "ref": "refs/heads/codex/partner-order-alert-20260928",
+      "commit_sha": "427fc79d5edae65bebd83250f69f297bddbd9b82"
+    },
+    {
+      "ref": "refs/heads/codex/service-quotes-review-20260927",
+      "commit_sha": "9722711853556c8aceaedf035bb9175926908dc9"
+    },
+    {
+      "ref": "refs/heads/codex/shared-go-ui-20260927",
+      "commit_sha": "946dea56738d7f769ab332b5bc3c322cef3153da"
+    },
+    {
+      "ref": "refs/heads/codex/stable-home-screen-updates",
+      "commit_sha": "1adf960bbd9d505956b2960662685b678dab93e1"
+    },
+    {
+      "ref": "refs/heads/codex/store-onboarding-20260927",
+      "commit_sha": "33052d011c514d5dd48b7f312ec110b26dbfe0d1"
+    },
+    {
+      "ref": "refs/heads/codex/store-signup-60-products",
+      "commit_sha": "18ce3c7699d04eaa8059efb7388936ac96228e9a"
+    },
+    {
+      "ref": "refs/heads/codex/store-wallet-sheet-20260929",
+      "commit_sha": "b834ab73b13f1b9e3f995ac8ad06dd8579b5647f"
+    },
+    {
+      "ref": "refs/heads/codex/store-web-images-20260929",
+      "commit_sha": "55533981c6aed259fc5e1dc62b6211322fc759ae"
+    },
+    {
+      "ref": "refs/heads/codex/unified-partner-orders",
+      "commit_sha": "503e59f23070c8cdb66d2709010678b9262c05ba"
+    },
+    {
+      "ref": "refs/heads/codex/wallet-destination-20260928",
+      "commit_sha": "7567da4f25a6631573c9efef50c87ef84cc3c61d"
+    },
+    {
+      "ref": "refs/heads/codex/wallet-transfer-ui-20260928",
+      "commit_sha": "7be0569b7149b38a3cdad55aeed9365a54cf6f6c"
+    },
+    {
+      "ref": "refs/heads/feat/go-service-marketplace-20260926",
+      "commit_sha": "b46e550923acbfd50e229f39a56a43340295761d"
+    },
+    {
+      "ref": "refs/heads/main",
+      "commit_sha": "4116f6b68ca5feda75e22376c61e787ab3e18ebf"
+    },
+    {
+      "ref": "refs/heads/preview/go-partner-20261008",
+      "commit_sha": "5a415fb93817536827badf56fb9d8f73d4f4c626"
+    },
+    {
+      "ref": "refs/heads/release/go-product-images-20261008",
+      "commit_sha": "429a7a5a020234b904db0d7c73249529f47d1c53"
+    }
+  ],
+  "tags": [],
+  "scope": {
+    "source_commit_histories": true,
+    "unmerged_branch_tips": true,
+    "live_server_working_tree": false,
+    "live_database": false,
+    "server_environment_secrets": false,
+    "server_uploads": false,
+    "external_lfs_payloads": false,
+    "external_submodule_repositories": false,
+    "github_release_assets": false
+  },
+  "preservation_method": "Archival ancestry anchor. The snapshot tree equals the captured default tree plus this manifest. Other branch tips are retained as parents, directly or through grouped archival commits. This is not a merge of their file contents. Do not merge this archival branch into development. Restore a specific source version by checking out its original commit from the branches/tags map.",
+  "verification": "Parent objects, archive tree, manifest and final branch ref are read back after creation. No production deployment or database restore performed."
+}
